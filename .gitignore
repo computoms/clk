@@ -1,0 +1,4 @@
+bin/
+bin/Debug
+clocknet.unittests/obj/**
+clocknet/obj/**

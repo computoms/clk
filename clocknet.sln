@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 25.0.1703.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clocknet", "clocknet\clocknet.csproj", "{2E55743D-08EC-4F13-B252-ED10AC155C20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clocknet.unittests", "clocknet.unittests\clocknet.unittests.csproj", "{96607FFE-23A5-40FB-B2E6-148C79A76B81}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2E55743D-08EC-4F13-B252-ED10AC155C20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E55743D-08EC-4F13-B252-ED10AC155C20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E55743D-08EC-4F13-B252-ED10AC155C20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E55743D-08EC-4F13-B252-ED10AC155C20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96607FFE-23A5-40FB-B2E6-148C79A76B81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96607FFE-23A5-40FB-B2E6-148C79A76B81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96607FFE-23A5-40FB-B2E6-148C79A76B81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96607FFE-23A5-40FB-B2E6-148C79A76B81}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1BB1E9C3-10CB-4682-96A8-C4E261ACEA3B}
+	EndGlobalSection
+EndGlobal
