@@ -6,33 +6,37 @@ public class DetailsReport : IReport
 {
     private readonly IDisplay _display;
 
-    public DetailsReport(IDisplay display)
+    public DetailsReport()
     {
-        _display = display;
+        _display = new ConsoleDisplay();
     }
 
     public void Print(IEnumerable<Activity> activities)
     {
-        _display.Print(activities.SelectMany(LayoutActivity));
+        _display.Print(
+            activities
+                .SelectMany(LayoutActivity)
+                .Append(TotalTime(activities)));
     }
+
+    private string TotalTime(IEnumerable<Activity> activities)
+        => _display.Layout($"{Utilities.PrintDuration(activities.Aggregate<Activity, TimeSpan>(TimeSpan.Zero, (curr, act) => curr + act.Duration))} Total");
 
     private IEnumerable<string> LayoutActivity(Activity activity)
     {
-        var duration = PrintDuration(activity.Duration);
+        var duration = Utilities.PrintDuration(activity.Duration);
 	    var tags = string.Join('+', activity.Task.Tags.Select(x => $"+{x}"));
 
         return activity.Records.Select(LayoutRecords)
-	        .Prepend(_display.Layout($"{duration} {activity.Task.Title} {tags} .{activity.Task.Number}"));
+            .Prepend(_display.Layout($"{duration} {activity.Task.Title} {tags} .{activity.Task.Number}"));
     }
 
     private string LayoutRecords(Record record)
     {
-        var recordDuration = PrintDuration(record.Duration);
+        var recordDuration = Utilities.PrintDuration(record.Duration);
         var recordStart = record.StartTime.ToString("HH:mm");
         var recordEnd = record.EndTime?.ToString("HH:mm");
         return _display.Layout($"{recordDuration} ({recordStart} -> {recordEnd})", 2);
     }
-
-    private static string PrintDuration(TimeSpan duration) => duration.ToString(@"hh\:mm");
 }
 

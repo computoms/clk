@@ -24,6 +24,8 @@ public class RecordRepository
             .Where(x => tags.All(y => x.Task.Tags.Contains(y)));
     }
 
+    public IEnumerable<Activity> GetAll() => storage.GetActivities();
+
     public IEnumerable<Activity> FilterByDate(DateTime date) => FilterByDate(date, date);
 
     public IEnumerable<Activity> FilterByDate(DateTime startDate, DateTime endDate) 
