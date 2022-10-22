@@ -1,4 +1,4 @@
-﻿namespace clocknet;
+﻿namespace clocknet.Storage;
 
 public interface IStream
 {
@@ -9,8 +9,7 @@ public interface IStream
 
 public interface IStorage
 {
-    void AddEntry(Activity activity, Record record);
+    void AddEntry(Task activity, Record record);
     List<Activity> GetActivities();
-    List<Record> GetRecords();
 }
 

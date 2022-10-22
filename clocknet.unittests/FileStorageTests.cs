@@ -10,7 +10,7 @@ public class FileStorageTests
     private readonly AutoMocker _mocker = new();
     private readonly FileStorage _storage;
     private readonly Mock<IStream> _stream;
-    private readonly Activity _activity;
+    private readonly Task _activity;
     private readonly Record _record;
     private readonly DateTime _baseTime = new DateTime(2022, 10, 10, 11, 12, 0);
     private const string _today = "[2022-10-10]";
@@ -21,8 +21,8 @@ public class FileStorageTests
         _storage = _mocker.CreateInstance<FileStorage>();
         _stream = _mocker.GetMock<IStream>();
         _mocker.GetMock<ITimeProvider>().Setup(x => x.Now).Returns(_baseTime);
-        _activity = new Activity(0, "Test", new string[] { "feature" }, "123");
-        _record = new Record(0, _baseTime, null);
+        _activity = new Task("Test", new string[] { "feature" }, "123");
+        _record = new Record(_baseTime, null);
     }
 
     [Theory]
@@ -80,10 +80,10 @@ public class FileStorageTests
 
         // Assert
         activities.Should().HaveCount(1);
-        activities[0].Title.Should().Be("This is a test");
-        activities[0].Tags.Should().HaveCount(1);
-        activities[0].Tags[0].Should().Be("feature");
-        activities[0].Number.Should().Be("123");
+        activities[0].Task.Title.Should().Be("This is a test");
+        activities[0].Task.Tags.Should().HaveCount(1);
+        activities[0].Task.Tags[0].Should().Be("feature");
+        activities[0].Task.Number.Should().Be("123");
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class FileStorageTests
 
         // Assert
         activities.Should().HaveCount(1);
-        activities[0].Title.Should().Be("test");
+        activities[0].Task.Title.Should().Be("test");
     }
 
     [Fact]
@@ -108,16 +108,16 @@ public class FileStorageTests
         _mocker.GetMock<ITimeProvider>().Setup(x => x.Now).Returns(_baseTime.AddMinutes(2));
 
         // Act
-        var records = _storage.GetRecords();
+        var activities = _storage.GetActivities();
 
         // Assert
-        records.Should().HaveCount(1);
-        records[0].ActivityId.Should().Be(1);
-        records[0].StartTime.Hour.Should().Be(11);
-        records[0].StartTime.Minute.Should().Be(12);
-        records[0].EndTime.Should().NotBeNull();
-        records[0].EndTime?.Hour.Should().Be(11);
-        records[0].EndTime?.Minute.Should().Be(14);
+        activities.Should().HaveCount(1);
+        activities[0].Records.Should().HaveCount(1);
+        activities[0].Records.First().StartTime.Hour.Should().Be(11);
+        activities[0].Records.First().StartTime.Minute.Should().Be(12);
+        activities[0].Records.First().EndTime.Should().NotBeNull();
+        activities[0].Records.First().EndTime?.Hour.Should().Be(11);
+        activities[0].Records.First().EndTime?.Minute.Should().Be(14);
     }
 
     [Fact]
@@ -127,13 +127,13 @@ public class FileStorageTests
         SetupLines(_today, "11:12 test1 +feature .123", "11:15 test2 +feature .456");
 
         // Act
-        var records = _storage.GetRecords();
+        var activities = _storage.GetActivities();
 
         // Assert
-        records.Should().HaveCount(2);
-        records[0].EndTime.Should().NotBeNull();
-        records[0].EndTime?.Hour.Should().Be(11);
-        records[0].EndTime?.Minute.Should().Be(15);
+        activities.Should().HaveCount(2);
+        activities.First().Records.First().EndTime.Should().NotBeNull();
+        activities.First().Records.First().EndTime?.Hour.Should().Be(11);
+        activities.First().Records.First().EndTime?.Minute.Should().Be(15);
     }
 
     [Fact]
@@ -144,13 +144,14 @@ public class FileStorageTests
         _mocker.GetMock<ITimeProvider>().Setup(x => x.Now).Returns(_baseTime.AddMinutes(5));
 
         // Act
-        var records = _storage.GetRecords();
+        var activities = _storage.GetActivities();
 
         // Assert
-        records.Should().HaveCount(1);
-        records[0].EndTime.Should().NotBeNull();
-        records[0].EndTime?.Hour.Should().Be(11);
-        records[0].EndTime?.Minute.Should().Be(12);
+        activities.Should().HaveCount(1);
+        activities.First().Records.Should().HaveCount(1);
+        activities.First().Records.First().EndTime.Should().NotBeNull();
+        activities.First().Records.First().EndTime?.Hour.Should().Be(11);
+        activities.First().Records.First().EndTime?.Minute.Should().Be(12);
     }
 
     [Fact]
@@ -161,16 +162,17 @@ public class FileStorageTests
         _mocker.GetMock<ITimeProvider>().Setup(x => x.Now).Returns(_baseTime.AddMinutes(5));
 
         // Act
-        var records = _storage.GetRecords();
+        var activities = _storage.GetActivities();
 
         // Assert
-        records.Should().HaveCount(2);
-        records[0].EndTime?.Hour.Should().Be(11);
-        records[0].EndTime?.Minute.Should().Be(11);
-        records[1].StartTime.Hour.Should().Be(11);
-        records[1].StartTime.Minute.Should().Be(15);
-        records[1].EndTime?.Hour.Should().Be(11);
-        records[1].EndTime?.Minute.Should().Be(17);
+        activities.Should().HaveCount(1);
+        activities.First().Records.Should().HaveCount(2);
+        activities.First().Records.First().EndTime?.Hour.Should().Be(11);
+        activities.First().Records.First().EndTime?.Minute.Should().Be(11);
+        activities.First().Records.Skip(1).First().StartTime.Hour.Should().Be(11);
+        activities.First().Records.Skip(1).First().StartTime.Minute.Should().Be(15);
+        activities.First().Records.Skip(1).First().EndTime?.Hour.Should().Be(11);
+        activities.First().Records.Skip(1).First().EndTime?.Minute.Should().Be(17);
     }
 
     [Fact]
@@ -184,7 +186,7 @@ public class FileStorageTests
 
         // Assert
         activities.Should().HaveCount(1);
-        activities[0].Title.Should().Be("test with .dot");
+        activities[0].Task.Title.Should().Be("test with .dot");
     }
 
     [Fact]
@@ -194,12 +196,12 @@ public class FileStorageTests
         SetupLines(_today, "xx:1x test with invalid hour");
 
         // Act
-        var records = _storage.GetRecords();
+        var activities = _storage.GetActivities();
 
         // Assert
-        records.Should().HaveCount(1);
-        records[0].StartTime.Hour.Should().Be(0);
-        records[0].StartTime.Minute.Should().Be(0);
+        activities[0].Records.Should().HaveCount(1);
+        activities[0].Records.First().StartTime.Hour.Should().Be(0);
+        activities[0].Records.First().StartTime.Minute.Should().Be(0);
     }
 
     [Fact]
@@ -209,13 +211,14 @@ public class FileStorageTests
         SetupLines("11:00 test");
 
         // Act
-        var records = _storage.GetRecords();
+        var activities = _storage.GetActivities();
 
         // Assert
-        records.Should().HaveCount(1);
-        records[0].StartTime.Year.Should().Be(DateTime.MinValue.Year);
-        records[0].StartTime.Month.Should().Be(DateTime.MinValue.Month);
-        records[0].StartTime.Day.Should().Be(DateTime.MinValue.Day);
+        activities.Should().HaveCount(1);
+        activities[0].Records.Should().HaveCount(1);
+        activities[0].Records.First().StartTime.Year.Should().Be(DateTime.MinValue.Year);
+        activities[0].Records.First().StartTime.Month.Should().Be(DateTime.MinValue.Month);
+        activities[0].Records.First().StartTime.Day.Should().Be(DateTime.MinValue.Day);
     }
 
     private void SetupLines(params string[] lines)
