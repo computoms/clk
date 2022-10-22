@@ -3,7 +3,7 @@
 public interface IStream
 {
     void AddLine(string line);
-    void Write(string text);
+    void WriteAllLines(string[] lines);
     List<string> ReadAllLines();
 }
 
