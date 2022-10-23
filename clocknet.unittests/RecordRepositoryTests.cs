@@ -2,6 +2,7 @@
 using FluentAssertions;
 using Moq;
 using Moq.AutoMock;
+using YamlDotNet.Serialization;
 
 namespace clocknet.unittests;
 
