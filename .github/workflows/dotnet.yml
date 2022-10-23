@@ -12,7 +12,7 @@ on:
 jobs:
 
   # Ubuntu build
-  build:
+  build: "Ubuntu"
 
     runs-on: ubuntu-latest
 
@@ -35,5 +35,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: publish
-        path: clocknet/clocknet/publish/**
+        path: publish/**
         if-no-files-found: error
