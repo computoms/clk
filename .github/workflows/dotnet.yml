@@ -10,6 +10,8 @@ on:
     branches: [ "main" ]
 
 jobs:
+
+  # Ubuntu build
   build:
 
     runs-on: ubuntu-latest
@@ -26,3 +28,12 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+
+    - name: Publish
+      run: dotnet publish clocknet/clocknet.csproj -c Release -o publish
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: publish
+        path: clocknet/publish/**
+        if-no-files-found: error
