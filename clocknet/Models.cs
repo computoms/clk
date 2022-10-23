@@ -27,17 +27,17 @@ public class Activity
     }
 }
 
-public record Task(string Title, string[] Tags, string Number)
+public record Task(string Title, string[] Tags, string Id)
 { 
     public bool IsSameAs(string title, string[] tags, string number)
     { 
-        return title == Title && number == Number
+        return title == Title && number == Id
             && Tags.All(x => tags.Contains(x))
             && tags.All(x => Tags.Contains(x));
     }
 }
 
-public record Record(DateTime StartTime, DateTime? EndTime)
+public record Record(DateTime StartTime, DateTime? EndTime = null)
 {
     public TimeSpan Duration => EndTime != null ? (TimeSpan)(EndTime - StartTime) : (DateTime.Now - StartTime);
 }

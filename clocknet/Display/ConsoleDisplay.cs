@@ -15,5 +15,7 @@ public class ConsoleDisplay : IDisplay
     {
         lines.ToList().ForEach(Console.WriteLine);
     }
+
+    public void Error(string errorMessage) => Console.WriteLine($"Error: {errorMessage}");
 }
 

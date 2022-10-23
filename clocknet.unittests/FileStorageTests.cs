@@ -2,6 +2,7 @@
 using Moq;
 using Moq.AutoMock;
 using FluentAssertions;
+using clocknet.Utils;
 
 namespace clocknet.unittests;
 
@@ -24,6 +25,8 @@ public class FileStorageTests
         _activity = new Task("Test", new string[] { "feature" }, "123");
         _record = new Record(_baseTime, null);
     }
+
+    #region AddEntry
 
     [Theory]
     [InlineData("", true)]
@@ -57,6 +60,92 @@ public class FileStorageTests
     }
 
     [Fact]
+    public void WithNonUniqueId_WhenAddingEntry_ThenThrowsException()
+    {
+        // Arrange
+        SetupLines(_today, "09:00 Activity1 .123");
+
+        // Act
+        var act = () => _storage.AddEntry(new Task("Activity2", new string[0], "123"), new Record(DateTime.Now, null));
+
+        // Assert
+        act.Should().Throw<InvalidDataException>("Id 123 already exists");
+    }
+
+    [Fact]
+    public void WithNonUniqueId_WhenAddingSameEntry_ThenDoesNotThrow()
+    {
+        // Arrange
+        SetupLines(_today, "09:00 Activity1 .123");
+
+        // Act
+        var act = () => _storage.AddEntry(new Task("Activity1", new string[0], "123"), new Record(DateTime.Now, null));
+
+        // Assert
+        act.Should().NotThrow<InvalidDataException>();
+    }
+
+    #endregion AddEntry
+
+    #region AddRawEntry
+
+    [Fact]
+    public void WithStandardEntry_WhenAddingRawEntry_ThenAddsEntry()
+    {
+        // Arrange
+        SetupLines(_today);
+
+        // Act
+        _storage.AddEntryRaw("This is a new entry +tag1 +tag2 .123");
+
+        // Assert
+        _stream.Verify(x => x.AddLine("11:12 This is a new entry +tag1 +tag2 .123"));
+    }
+
+    [Fact]
+    public void WithOnlyId_WhenAddingRawEntry_ThenAddsCorrespondingActivityEntry()
+    {
+        // Arrange
+        SetupLines(_today, "09:00 Activity1 +tag .123");
+
+        // Act
+        _storage.AddEntryRaw(".123");
+
+        // Assert
+        _stream.Verify(x => x.AddLine("11:12 Activity1 +tag .123"));
+    }
+
+    [Fact]
+    public void WithEmptyId_WhenAddingRawEntry_ThenAddsNewEntry()
+    {
+        // Arrange
+        SetupLines(_today, "09:00 Activity1 +tag .123");
+
+        // Act
+        _storage.AddEntryRaw("Test .");
+
+        // Assert
+        _stream.Verify(x => x.AddLine("11:12 Test"));
+    }
+
+    [Fact]
+    public void WithNonMatchingTitleWithId_WhenAddingRawEntry_ThenThrowsException()
+    {
+        // Arrange
+        SetupLines(_today, "09:00 Activity1 +tag .123");
+
+        // Act
+        var act = () => _storage.AddEntryRaw("Activity2 .123");
+
+        // Assert
+        act.Should().Throw<InvalidDataException>("Id 123 already exists");
+    }
+
+    #endregion AddRawEntry
+
+    #region GetActivities
+
+    [Fact]
     public void WithEmptyFile_WhenGetAllActivities_ThenReturnsEmtpyCollection()
     {
         // Arrange
@@ -83,7 +172,20 @@ public class FileStorageTests
         activities[0].Task.Title.Should().Be("This is a test");
         activities[0].Task.Tags.Should().HaveCount(1);
         activities[0].Task.Tags[0].Should().Be("feature");
-        activities[0].Task.Number.Should().Be("123");
+        activities[0].Task.Id.Should().Be("123");
+    }
+
+    [Fact]
+    public void WithWhiteSpacesBeforeAfter_WhenGetActivites_ThenTrimsWhiteSpaces()
+    {
+        // Arrange
+        SetupLines(_today, "   11:11 Test activity +feature .123   ");
+
+        // Act
+        var activities = _storage.GetActivities();
+
+        // Assert
+        activities[0].Task.Title.Should().Be("Test activity");
     }
 
     [Fact]
@@ -220,6 +322,8 @@ public class FileStorageTests
         activities[0].Records.First().StartTime.Month.Should().Be(DateTime.MinValue.Month);
         activities[0].Records.First().StartTime.Day.Should().Be(DateTime.MinValue.Day);
     }
+
+    #endregion GetActivities
 
     private void SetupLines(params string[] lines)
     {

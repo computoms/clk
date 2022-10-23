@@ -18,6 +18,45 @@ public class RecordRepositoryTests
     }
 
     [Fact]
+    public void WhenAddingRawEntry_ThenEntryIsAddedToStorage()
+    {
+        // Arrange
+        var testRawEntry = "This is an entry .123";
+
+        // Act
+        _repository.AddRaw(testRawEntry);
+
+        // Assert
+        _storage.Verify(x => x.AddEntryRaw("This is an entry .123"), Times.Once);
+    }
+
+    [Fact]
+    public void WithThrowingStorage_WhenAddingEntry_ThenDoesNotThrow()
+    {
+        // Arrange
+        _storage.Setup(x => x.AddEntry(It.IsAny<Task>(), It.IsAny<Record>())).Throws<InvalidDataException>();
+
+        // Act
+        var act = () => _repository.AddRecord(new Task("Test", new string[0], ""), new Record(DateTime.Now, null));
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void WithThrowingStorage_WhenAddingEntryRaw_ThenDoesNotThrow()
+    {
+        // Arrange
+        _storage.Setup(x => x.AddEntryRaw(It.IsAny<string>())).Throws<InvalidDataException>();
+
+        // Act
+        var act = () => _repository.AddRaw("test");
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
     public void WhenAddingEntry_ThenEntryIsAddedToStorage()
     {
         // Arrange
@@ -43,7 +82,7 @@ public class RecordRepositoryTests
         // Assert
         result.Should().HaveCount(1);
         result.First().Task.Title.Should().Be("Entry");
-        result.First().Task.Number.Should().Be("123");
+        result.First().Task.Id.Should().Be("123");
     }
 
     [Fact]
@@ -58,7 +97,7 @@ public class RecordRepositoryTests
         // Assert
         result.Should().HaveCount(1);
         result.First().Task.Title.Should().Be("Entry");
-        result.First().Task.Number.Should().Be("123");
+        result.First().Task.Id.Should().Be("123");
     }
 
     [Fact]
@@ -78,7 +117,7 @@ public class RecordRepositoryTests
         // Assert
         result.Should().HaveCount(1);
         result.First().Task.Title.Should().Be("Entry1");
-        result.First().Task.Number.Should().Be("123");
+        result.First().Task.Id.Should().Be("123");
     }
 
     [Fact]

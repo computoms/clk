@@ -1,21 +1,44 @@
-﻿using clocknet.Storage;
+﻿using clocknet.Display;
+using clocknet.Storage;
+using clocknet.Utils;
 
 namespace clocknet;
 
-public class RecordRepository
+public class RecordRepository : IRecordRepository
 {
     private readonly IStorage storage;
     private readonly ITimeProvider timeProvider;
+    private readonly IDisplay display;
 
     public RecordRepository(IStorage storage, ITimeProvider timeProvider)
     {
         this.storage = storage;
         this.timeProvider = timeProvider;
+        this.display = new ConsoleDisplay();
+    }
+
+    public void AddRaw(string recordRaw)
+    { 
+        try
+        { 
+            storage.AddEntryRaw(recordRaw);
+	    }
+        catch (Exception e)
+        {
+            display.Error(e.Message);
+	    }
     }
 
     public void AddRecord(Task activity, Record record)
     {
-        storage.AddEntry(activity, record);
+        try
+        { 
+            storage.AddEntry(activity, record);
+	    }
+        catch (Exception e)
+        {
+            display.Error(e.Message);
+	    }
     }
 
     public IEnumerable<Activity> FilterByTag(IList<string> tags)

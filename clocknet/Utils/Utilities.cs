@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace clocknet;
+namespace clocknet.Utils;
 
 public static class Utilities
 {
@@ -9,9 +9,9 @@ public static class Utilities
 
     public static int GetWeekNumber(DateTime date) => CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
 
-    public static DateTime DayOfSameWeek(this DateTime dt, DayOfWeek startOfWeek)
+    public static DateTime MondayOfTheWeek(this DateTime dt)
     {
-        int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
+        int diff = (7 + (dt.DayOfWeek - DayOfWeek.Monday)) % 7;
         return dt.AddDays(-1 * diff).Date;
     }
 

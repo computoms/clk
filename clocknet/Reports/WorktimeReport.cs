@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using clocknet.Display;
+using clocknet.Utils;
 
 namespace clocknet.Reports;
 
@@ -8,9 +9,9 @@ public class WorktimeReport : IReport
     private readonly IDisplay display;
     private readonly bool perDay;
 
-    public WorktimeReport(bool perDay = true)
+    public WorktimeReport(IDisplay display, bool perDay = true)
     {
-        this.display = new ConsoleDisplay();
+        this.display = display;
         this.perDay = perDay;
     }
 

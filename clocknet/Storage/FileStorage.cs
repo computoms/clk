@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using clocknet.Storage;
+using clocknet.Utils;
 
 namespace clocknet;
 
@@ -18,7 +19,15 @@ public class FileStorage : IStorage
         this.timeProvider = timeProvider;
     }
 
-    public void AddEntry(Task activity, Record record)
+    public void AddEntryRaw(string rawEntry)
+    {
+        var line = ParseLine(rawEntry, timeProvider.Now, false);
+        var record = new Record(timeProvider.Now, null);
+        var task = FindPartiallyMatchingTask(line);
+        AddEntry(task, record);
+    }
+
+    public void AddEntry(Task task, Record record)
     {
         if (!isInitialized)
             GetLastDate();
@@ -29,9 +38,12 @@ public class FileStorage : IStorage
             _lastDate = timeProvider.Now.Date;
         }
 
+        AssertUniqueId(task);
+
         var startTime = record.StartTime.ToString("HH:mm");
-        var tags = string.Join(" ", activity.Tags.Select(x => $"+{x}"));
-        stream.AddLine($"{startTime} {activity.Title} {tags} .{activity.Number}");
+        var tags = string.Join(" ", task.Tags.Select(x => $"+{x}"));
+        var id = string.IsNullOrWhiteSpace(task.Id) ? "" : $".{task.Id}";
+        stream.AddLine($"{startTime} {task.Title} {tags} {id}".Trim());
     }
 
     public List<Activity> GetActivities()
@@ -73,28 +85,56 @@ public class FileStorage : IStorage
         if (parsedLine.Title == SpecialActivities.Stop)
             return null;
 
-        var activity = activities.FirstOrDefault(x => x.Task.IsSameAs(parsedLine.Title, parsedLine.Tags, parsedLine.Number));
+        var activity = activities.FirstOrDefault(x => x.Task.IsSameAs(parsedLine.Title, parsedLine.Tags, parsedLine.Id));
         if (activity == null)
         {
-            activity = new Activity(new Task(parsedLine.Title, parsedLine.Tags, parsedLine.Number));
+            activity = new Activity(new Task(parsedLine.Title, parsedLine.Tags, parsedLine.Id));
             activities.Add(activity);
         }
         return activity;
     }
 
-    private ParsedLine ParseLine(string line, DateTime currentDate)
+    private Task FindPartiallyMatchingTask(ParsedLine line)
+    {
+        var defaultTask = new Task(line.Title, line.Tags, line.Id);
+        if (string.IsNullOrWhiteSpace(line.Id))
+            return defaultTask;
+
+        var correspondingActivity = ReadAll().FirstOrDefault(x => x.Task.Id == line.Id);
+        if (correspondingActivity == null)
+            return defaultTask;
+
+        if (!string.IsNullOrWhiteSpace(line.Title) && line.Title != correspondingActivity.Task.Title)
+            throw new InvalidDataException($"Id {line.Id} already exists");
+
+        return correspondingActivity.Task;
+    }
+
+    private ParsedLine ParseLine(string line, DateTime currentDate, bool parseHour = true)
     {
         line = Sanitize(line);
         var words = line.Split(' ');
-        var time = GetStartTime(words.FirstOrDefault() ?? string.Empty);
+        var time = currentDate;
+        if (parseHour)
+            time = GetStartTime(words.FirstOrDefault() ?? string.Empty);
+
         var tags = words.Where(x => x.StartsWith('+')).Select(x => x[1..]).ToArray();
         var number = words.FirstOrDefault(x => x.StartsWith('.') && x.Skip(1).All(char.IsDigit))?[1..];
-        var title = string.Join(' ', words.Skip(1).Where(x => !x.StartsWith('+') && x != $".{number}"));
-        return new ParsedLine(new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, time.Hour, time.Minute, 0),
+        var title = string.Join(' ', (parseHour ? words.Skip(1) : words).Where(x => !x.StartsWith('+') && x != $".{number}")).Trim();
+        return new ParsedLine(
+	        ConcatDateAndTime(currentDate, time),
             title, tags, number ?? string.Empty);
     }
 
-    private record ParsedLine(DateTime StartTime, string Title, string[] Tags, string Number);
+    private void AssertUniqueId(Task task)
+    {
+        if (GetActivities().Any(x => x.Task.Id == task.Id && x.Task.Title != task.Title))
+            throw new InvalidDataException($"Id {task.Id} already exists");
+    }
+
+    private DateTime ConcatDateAndTime(DateTime date, DateTime time) => new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, 0);
+
+    private record ParsedLine(DateTime StartTime, string Title, string[] Tags, string Id);
 
     private void GetLastDate()
     {
@@ -123,13 +163,7 @@ public class FileStorage : IStorage
                    CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
             ? date : DateTime.MinValue;
 
-    private string Sanitize(string line) => line.Replace("\r", "").Replace("\n", "");
-
-    private static class Ids
-    {
-        public static long None => -1;
-        public static long Stop => -2;
-    }
+    private string Sanitize(string line) => line.Replace("\r", "").Replace("\n", "").Trim();
 
     private static class SpecialActivities
     {

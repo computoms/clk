@@ -1,4 +1,5 @@
 ﻿using clocknet.Display;
+using clocknet.Utils;
 
 namespace clocknet.Reports;
 
@@ -6,9 +7,9 @@ public class DetailsReport : IReport
 {
     private readonly IDisplay _display;
 
-    public DetailsReport()
+    public DetailsReport(IDisplay display)
     {
-        _display = new ConsoleDisplay();
+        _display = display;
     }
 
     public void Print(IEnumerable<Activity> activities)
@@ -16,6 +17,7 @@ public class DetailsReport : IReport
         _display.Print(
             activities
                 .SelectMany(LayoutActivity)
+                .Append(" ")
                 .Append(TotalTime(activities)));
     }
 
@@ -25,10 +27,10 @@ public class DetailsReport : IReport
     private IEnumerable<string> LayoutActivity(Activity activity)
     {
         var duration = Utilities.PrintDuration(activity.Duration);
-	    var tags = string.Join('+', activity.Task.Tags.Select(x => $"+{x}"));
+	    var tags = string.Join(' ', activity.Task.Tags.Select(x => $"+{x}"));
 
         return activity.Records.Select(LayoutRecords)
-            .Prepend(_display.Layout($"{duration} {activity.Task.Title} {tags} .{activity.Task.Number}"));
+            .Prepend(_display.Layout($"{duration} {activity.Task.Title} {tags} .{activity.Task.Id}"));
     }
 
     private string LayoutRecords(Record record)

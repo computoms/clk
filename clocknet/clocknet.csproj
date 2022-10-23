@@ -11,10 +11,12 @@
     <None Remove="Storage\" />
     <None Remove="Display\" />
     <None Remove="Reports\" />
+    <None Remove="Utils\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Storage\" />
     <Folder Include="Display\" />
     <Folder Include="Reports\" />
+    <Folder Include="Utils\" />
   </ItemGroup>
 </Project>

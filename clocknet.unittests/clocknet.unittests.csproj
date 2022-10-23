@@ -29,5 +29,9 @@
   <ItemGroup>
     <None Remove="Moq.AutoMock" />
     <None Remove="FluentAssertions" />
+    <None Remove="Reports\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Reports\" />
   </ItemGroup>
 </Project>
