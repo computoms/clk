@@ -32,10 +32,10 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
     - name: Publish
-      run: dotnet publish clocknet/clocknet.csproj -c Release -o publish
+      run: dotnet publish clocknet/clocknet.csproj -c Release -o publish-${{ matrix.os }}
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3
       with:
         name: publish
-        path: publish/**
+        path: publish-${{ matrix.os }}/**
         if-no-files-found: error
