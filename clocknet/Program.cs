@@ -5,8 +5,9 @@ using clocknet.Storage;
 using clocknet.Utils;
 using FileStream = clocknet.Storage.FileStream;
 
+var settings = Settings.Read();
 var timeProvider = new TimeProvider();
-var file = new FileStream("/Users/thomas/clock.txt");
+var file = new FileStream(settings.File);
 var storage = new FileStorage(file, timeProvider);
 var repository = new RecordRepository(storage, timeProvider);
 var display = new ConsoleDisplay();
