@@ -6,6 +6,7 @@ namespace clocknet;
 public record Settings
 {
 	public string File { get; set; } = "~/clock.txt";
+	public string DefaultTask { get; set; } = "Started empty task";
 
     public static Settings Read()
     { 

@@ -10,13 +10,15 @@ public class CommandProcessor
     private readonly IRecordRepository recordRepository;
     private readonly IDisplay display;
     private readonly ITimeProvider timeProvider;
+    private readonly Settings settings;
 
-    public CommandProcessor(string[] arguments, IRecordRepository recordRepository, IDisplay display, ITimeProvider timeProvider)
+    public CommandProcessor(string[] arguments, IRecordRepository recordRepository, IDisplay display, ITimeProvider timeProvider, Settings settings)
     {
         this.arguments = arguments;
         this.recordRepository = recordRepository;
         this.display = display;
         this.timeProvider = timeProvider;
+        this.settings = settings;
     }
 
     public void Execute()
@@ -29,7 +31,10 @@ public class CommandProcessor
 			    break;
 
             case Commands.Add:
-                recordRepository.AddRaw(string.Join(' ', arguments.Skip(1)));
+                if (arguments.Count() == 1) // Empty line after command
+                    recordRepository.AddRaw(settings.DefaultTask);
+                else
+                    recordRepository.AddRaw(string.Join(' ', arguments.Skip(1)));
                 break;
 
             case Commands.Stop:

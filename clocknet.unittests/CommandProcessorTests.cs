@@ -16,6 +16,7 @@ public class CommandProcessorTests
 
     [Theory]
     [InlineData(new string[4] { "add", "bla", "bli", "blou" }, "bla bli blou")]
+    [InlineData(new string[1] { "add" }, "Started empty task")]
     [InlineData(new string[1] { "stop" }, "[Stop]")]
     public void WithBasicCommand_WhenExecute_ThenAddsRawEntry(string[] arugments, string expectedRawEntry)
     {
@@ -123,7 +124,7 @@ public class CommandProcessorTests
 
     private CommandProcessor SetupProcessor(params string[] arguments)
     {
-        return new CommandProcessor(arguments, _repository.Object, _display.Object, _timeProvider.Object);
+        return new CommandProcessor(arguments, _repository.Object, _display.Object, _timeProvider.Object, new Settings());
     }
 }
 

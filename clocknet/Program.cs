@@ -12,5 +12,5 @@ var storage = new FileStorage(file, timeProvider);
 var repository = new RecordRepository(storage, timeProvider);
 var display = new ConsoleDisplay();
 
-var commandProcessor = new CommandProcessor(args, repository, display, timeProvider);
+var commandProcessor = new CommandProcessor(args, repository, display, timeProvider, settings);
 commandProcessor.Execute();

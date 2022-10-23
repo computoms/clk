@@ -128,7 +128,7 @@ public class FileStorage : IStorage
 
     private void AssertUniqueId(Task task)
     {
-        if (GetActivities().Any(x => x.Task.Id == task.Id && x.Task.Title != task.Title))
+        if (GetActivities().Any(x => !string.IsNullOrWhiteSpace(x.Task.Id) && x.Task.Id == task.Id && x.Task.Title != task.Title))
             throw new InvalidDataException($"Id {task.Id} already exists");
     }
 
