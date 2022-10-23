@@ -30,8 +30,14 @@
     <None Remove="Moq.AutoMock" />
     <None Remove="FluentAssertions" />
     <None Remove="Reports\" />
+    <None Remove="Display\" />
+    <None Remove="Storage\" />
+    <None Remove="Utils\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Reports\" />
+    <Folder Include="Display\" />
+    <Folder Include="Storage\" />
+    <Folder Include="Utils\" />
   </ItemGroup>
 </Project>
