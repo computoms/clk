@@ -12,9 +12,12 @@ on:
 jobs:
 
   # Ubuntu build
-  build: "Ubuntu"
+  build:
+    runs-on: ${{ matrix.os }}
 
-    runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                os: [ubuntu-latest, windows-latest]
 
     steps:
     - uses: actions/checkout@v3
