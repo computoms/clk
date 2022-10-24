@@ -31,6 +31,7 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: System tests
+      if: ${{ matrix.os }} == ubuntu-latest
       run: docker build -f Dockerfile -t systemtests .;docker run systemtests
 
     - name: Publish
