@@ -1,4 +1,6 @@
-﻿namespace clocknet.Storage;
+﻿using System.IO;
+
+namespace clocknet.Storage;
 
 public class FileStream : IStream
 {
@@ -11,17 +13,27 @@ public class FileStream : IStream
 
     public void AddLine(string line)
     {
-        System.IO.File.AppendAllLines(_filename, new List<string>() { line });
+        EnsureFileExists();
+        File.AppendAllLines(_filename, new List<string>() { line });
     }
 
     public List<string> ReadAllLines()
     {
-        return System.IO.File.ReadAllLines(_filename).ToList();
+        EnsureFileExists();
+        return File.ReadAllLines(_filename).ToList();
     }
 
     public void WriteAllLines(string[] lines)
     {
-        System.IO.File.WriteAllLines(_filename, lines);
+        File.WriteAllLines(_filename, lines);
+    }
+
+    private void EnsureFileExists()
+    { 
+        if (!File.Exists(_filename))
+        {
+            File.WriteAllText(_filename, "");
+	    }
     }
 }
 
