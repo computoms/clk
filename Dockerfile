@@ -1,0 +1,23 @@
+FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim
+
+# Add user to run the tests with a home directory
+RUN useradd -ms /bin/bash systemtest
+USER systemtest
+
+# Copy program and systemtests sources
+WORKDIR /home/systemtest/src
+COPY --chown=systemtest clocknet               ./clocknet/
+COPY --chown=systemtest clocknet.systemtests   ./clocknet.systemtests/
+
+# Build both projects and publish program
+RUN dotnet restore clocknet/clocknet.csproj
+RUN dotnet restore clocknet.systemtests/clocknet.systemtests.csproj
+RUN dotnet build clocknet/clocknet.csproj -c Release -o /home/systemtest/build/clocknet
+RUN dotnet build clocknet.systemtests/clocknet.systemtests.csproj -c Release -o /home/systemtest/build/clocknet.systemtests
+RUN dotnet publish "clocknet/clocknet.csproj" -c Release -o /home/systemtest/bin/
+
+# Copy settings file
+COPY --chown=systemtest ./clocknet.systemtests/resources/settings.yml.disabled /home/systemtest/.clock/
+# Run system tests
+CMD [ "dotnet", "/home/systemtest/build/clocknet.systemtests/clocknet.systemtests.dll" ]
+

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clocknet", "clocknet\clockn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clocknet.unittests", "clocknet.unittests\clocknet.unittests.csproj", "{96607FFE-23A5-40FB-B2E6-148C79A76B81}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clocknet.systemtests", "clocknet.systemtests\clocknet.systemtests.csproj", "{663FCBA7-5E26-4D14-AB56-44B1E84CA9BC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{96607FFE-23A5-40FB-B2E6-148C79A76B81}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96607FFE-23A5-40FB-B2E6-148C79A76B81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96607FFE-23A5-40FB-B2E6-148C79A76B81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{663FCBA7-5E26-4D14-AB56-44B1E84CA9BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{663FCBA7-5E26-4D14-AB56-44B1E84CA9BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{663FCBA7-5E26-4D14-AB56-44B1E84CA9BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{663FCBA7-5E26-4D14-AB56-44B1E84CA9BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

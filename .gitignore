@@ -1,5 +1,6 @@
 bin/
 bin/Debug
-clocknet.unittests/obj/**
-clocknet/obj/**
 .vs/
+**.DS_STORE
+**/obj/Debug
+**/obj
