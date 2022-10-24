@@ -30,6 +30,8 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: System tests
+      run: docker build -f Dockerfile -t systemtests .;docker run systemtests
 
     - name: Publish
       run: dotnet publish clocknet/clocknet.csproj -c Release -o publish-${{ matrix.os }}
