@@ -18,6 +18,8 @@ public class CommandProcessorTests
     [InlineData(new string[4] { "add", "bla", "bli", "blou" }, "bla bli blou")]
     [InlineData(new string[1] { "add" }, "Started empty task")]
     [InlineData(new string[1] { "stop" }, "[Stop]")]
+    [InlineData(new string[5] { "add", "--at", "10:00", "Test", "+tag" }, "10:00 Test +tag")]
+    [InlineData(new string[5] { "add", "Test", "--at", "10:00", "+tag" }, "10:00 Test +tag")]
     public void WithBasicCommand_WhenExecute_ThenAddsRawEntry(string[] arugments, string expectedRawEntry)
     {
         // Arrange

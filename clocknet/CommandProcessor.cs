@@ -31,10 +31,7 @@ public class CommandProcessor
 			    break;
 
             case Commands.Add:
-                if (arguments.Count() == 1) // Empty line after command
-                    recordRepository.AddRaw(settings.DefaultTask);
-                else
-                    recordRepository.AddRaw(string.Join(' ', arguments.Skip(1)));
+                ExecuteAdd();
                 break;
 
             case Commands.Stop:
@@ -45,6 +42,22 @@ public class CommandProcessor
                 Restart();
                 break;
         }
+    }
+
+    private void ExecuteAdd()
+    {
+        var rawLine = string.Join(' ', arguments.Skip(1));
+        if (arguments.Count() == 1)
+        {
+            rawLine = settings.DefaultTask;
+	    }
+        else if (arguments.Contains("--at"))
+        {
+			int index = arguments.ToList().IndexOf("--at");
+			var time =  arguments.Skip(index + 1).FirstOrDefault();
+            rawLine = string.Join(' ', arguments.Skip(1).Where(x => x != "--at" && x != time).Prepend(time));
+	    }
+        recordRepository.AddRaw(rawLine);
     }
 
     private void Restart()
