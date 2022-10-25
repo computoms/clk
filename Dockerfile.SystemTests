@@ -1,3 +1,5 @@
+# Dockerfile used for system tests
+
 FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim
 
 # Add user to run the tests with a home directory

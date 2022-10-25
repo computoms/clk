@@ -32,7 +32,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: System tests
       if: matrix.os == 'ubuntu-latest'
-      run: docker build -f Dockerfile -t systemtests .;docker run systemtests
+      run: docker build -f Dockerfile.SystemTests -t systemtests .;docker run systemtests
 
     - name: Publish
       run: dotnet publish clocknet/clocknet.csproj -c Release -o publish-${{ matrix.os }}
