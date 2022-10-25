@@ -79,6 +79,12 @@ This will automatically stop the last task and start a new one. When you have fi
 $ clock stop
 ```
 
+If you forgot to add a task, you can add it later using the `--at` option:
+
+```
+$ clock add --at 10:00 Forgot to add a task
+```
+
 ### Restarting last entry
 
 After you took a break by using the `clock stop` command, you can restart the latest task using the `restart` command.
