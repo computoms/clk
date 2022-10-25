@@ -51,7 +51,7 @@ public class CommandProcessor
         {
             rawLine = settings.DefaultTask;
 	    }
-        else if (arguments.Contains("--at"))
+        else if (HasOption(Args.At))
         {
 			int index = arguments.ToList().IndexOf("--at");
 			var time =  arguments.Skip(index + 1).FirstOrDefault();
@@ -110,7 +110,7 @@ public class CommandProcessor
     private bool HasOption(Option opt)
     {
         return arguments.Contains($"--{opt.Long}")
-            || arguments.Where(x => x.StartsWith("-") && !x.StartsWith("--") && x.Contains(opt.Short)).Any();
+            || (!string.IsNullOrEmpty(opt.Short) && arguments.Where(x => x.StartsWith("-") && !x.StartsWith("--") && x.Contains(opt.Short)).Any());
     }
 
     private static class Args
@@ -119,6 +119,7 @@ public class CommandProcessor
         public readonly static Option Week = new Option("week", "w");
         public readonly static Option Yesterday = new Option("yesterday", "y");
         public readonly static Option WorkTimes = new Option("worktimes", "w");
+        public readonly static Option At = new Option("at", string.Empty);
     }
 
     private static class Commands
