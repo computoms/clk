@@ -18,17 +18,17 @@ public class RecordRepositoryTests
         _storage = _mocker.GetMock<IStorage>();
     }
 
-    [Fact]
-    public void WhenAddingRawEntry_ThenEntryIsAddedToStorage()
+    [Theory]
+    [InlineData("New Entry .123", false)]
+    [InlineData("11:00 New Entry .123", true)]
+    [InlineData("11:00 .123", true)]
+    public void WhenAddingRawEntry_ThenEntryIsAddedToStorage(string entry, bool parseTime)
     {
-        // Arrange
-        var testRawEntry = "This is an entry .123";
-
         // Act
-        _repository.AddRaw(testRawEntry);
+        _repository.AddRaw(entry, parseTime);
 
         // Assert
-        _storage.Verify(x => x.AddEntryRaw("This is an entry .123", false), Times.Once);
+        _storage.Verify(x => x.AddEntryRaw(entry, parseTime), Times.Once);
     }
 
     [Fact]

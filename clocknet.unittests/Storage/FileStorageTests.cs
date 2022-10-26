@@ -46,43 +46,24 @@ public class FileStorageTests
         _stream.Verify(x => x.AddLine("11:12 Test +feature .123"), Times.Once);
     }
 
-    [Fact]
-    public void WithMultipleTags_WhenAddingEntry_ThenAddsMultipleTags()
+    [Theory]
+    [InlineData("Test", new string[1] { "tag" }, "123", "11:12 Test +tag .123")]
+    [InlineData("Test", new string[2] { "tag1", "tag2" }, "123", "11:12 Test +tag1 +tag2 .123")]
+    [InlineData("Test", new string[0] { }, "123", "11:12 Test .123")]
+    [InlineData("Test", new string[1] { "tag" }, "", "11:12 Test +tag")]
+    [InlineData("Test", new string[0] { }, "", "11:12 Test")]
+    [InlineData("", new string[1] { "tag" }, "", "11:12 +tag")]
+    public void WithGivenActivityAndRecord_WhenAdd_ThenAddsCorrectLine(string title, string[] tags, string id, string expectedLine)
     {
         // Arrange
         SetupLines(_today);
+        var task = new Task(title, tags, id);
 
         // Act
-        _storage.AddEntry(_activity with { Tags = new string[] { "feature", "test" } }, _record);
+        _storage.AddEntry(task, _record);
 
         // Assert
-        _stream.Verify(x => x.AddLine("11:12 Test +feature +test .123"), Times.Once);
-    }
-
-    [Fact]
-    public void WithNoTags_WhenAddingEntry_ThenAddsEntryWithoutExtraSpaces()
-    {
-        // Arrange
-        SetupLines(_today);
-
-        // Act
-        _storage.AddEntry(_activity with { Tags = new string[0] }, _record);
-
-        // Assert
-        _stream.Verify(x => x.AddLine("11:12 Test .123"), Times.Once);
-    }
-
-    [Fact]
-    public void WithNoId_WhenAddingEntry_ThenAddsEntryWithoutExtraSpaces()
-    {
-        // Arrange
-        SetupLines(_today);
-
-        // Act
-        _storage.AddEntry(_activity with { Id = "" }, _record);
-
-        // Assert
-        _stream.Verify(x => x.AddLine("11:12 Test +feature"), Times.Once);
+        _stream.Verify(x => x.AddLine(expectedLine), Times.Once);
     }
 
     [Fact]
@@ -115,43 +96,38 @@ public class FileStorageTests
 
     #region AddRawEntry
 
-    [Fact]
-    public void WithStandardEntry_WhenAddingRawEntry_ThenAddsEntry()
+    [Theory]
+    [InlineData("", "New entry +tag1 +tag2 .123", "11:12 New entry +tag1 +tag2 .123")]
+    [InlineData("09:00 Activity1 +tag .123", ".123", "11:12 Activity1 +tag .123")]
+    [InlineData("09:00 Activity1 +tag .123", "Test .", "11:12 Test")]
+    public void WhenAddingRawEntry_ThenAddsEntry(string existingLine, string rawEntry, string expectedLine)
+    {
+        // Arrange
+        SetupLines(_today, existingLine);
+
+        // Act
+        _storage.AddEntryRaw(rawEntry);
+
+        // Assert
+        _stream.Verify(x => x.AddLine(expectedLine));
+    }
+
+    [Theory]
+    [InlineData("11:00 Test +tag .12")]
+    [InlineData("11:00 +tag .12")]
+    [InlineData("11:00 Test .12")]
+    [InlineData("11:00 Test +tag")]
+    [InlineData("11:00 Test")]
+    public void WithParseTime_WhenAddRawEntry_ThenAddsEntryWithCorrectTime(string input)
     {
         // Arrange
         SetupLines(_today);
 
         // Act
-        _storage.AddEntryRaw("This is a new entry +tag1 +tag2 .123");
+        _storage.AddEntryRaw(input, true);
 
         // Assert
-        _stream.Verify(x => x.AddLine("11:12 This is a new entry +tag1 +tag2 .123"));
-    }
-
-    [Fact]
-    public void WithOnlyId_WhenAddingRawEntry_ThenAddsCorrespondingActivityEntry()
-    {
-        // Arrange
-        SetupLines(_today, "09:00 Activity1 +tag .123");
-
-        // Act
-        _storage.AddEntryRaw(".123");
-
-        // Assert
-        _stream.Verify(x => x.AddLine("11:12 Activity1 +tag .123"));
-    }
-
-    [Fact]
-    public void WithEmptyId_WhenAddingRawEntry_ThenAddsNewEntry()
-    {
-        // Arrange
-        SetupLines(_today, "09:00 Activity1 +tag .123");
-
-        // Act
-        _storage.AddEntryRaw("Test .");
-
-        // Assert
-        _stream.Verify(x => x.AddLine("11:12 Test"));
+        _stream.Verify(x => x.AddLine(input));
     }
 
     [Fact]
@@ -165,6 +141,21 @@ public class FileStorageTests
 
         // Assert
         act.Should().Throw<InvalidDataException>("Id 123 already exists");
+    }
+
+    [Theory]
+    [InlineData(".123", false, "11:12 Activity1 +tag .123")]
+    [InlineData("10:00 .123", true, "10:00 Activity1 +tag .123")]
+    public void WithExistingActivity_WhenAddingWithId_ThenAddsActivity(string rawEntry, bool parseTime, string expectedLine)
+    {
+        // Arrange
+        SetupLines(_today, "09:00 Activity1 +tag .123");
+
+        // Act
+        _storage.AddEntryRaw(rawEntry, parseTime);
+
+        // Assert
+        _stream.Verify(x => x.AddLine(expectedLine));
     }
 
     #endregion AddRawEntry
@@ -184,48 +175,29 @@ public class FileStorageTests
         activities.Should().BeEmpty();
     }
 
-    [Fact]
-    public void WithOneEntry_WhenGetAllActivities_ThenReturnsOneActivity()
+    [Theory]
+    [InlineData("11:11 This is a test +feature .123", "This is a test", new string[1] { "feature" }, "123")]
+    [InlineData("   11:11 This is a test +feature .123   ", "This is a test", new string[1] { "feature" }, "123")]
+    [InlineData("11:11 Activity .123", "Activity", new string[0] { }, "123")]
+    [InlineData("11:11 Activity +tag", "Activity", new string[1] { "tag" }, "")]
+    [InlineData("11:11 Activity +tag1 +tag2", "Activity", new string[2] { "tag1", "tag2" }, "")]
+    [InlineData("11:11 +tag1 +tag2 .124", "", new string[2] { "tag1", "tag2" }, "124")]
+    [InlineData("11:11 Activity", "Activity", new string[0] { }, "")]
+    public void WithOneEntry_WhenGetAllActivities_ThenReturnsOneActivity(string existingLine, string expectedTitle, string[] expectedTags, string expectedId)
     {
         // Arrange
-        SetupLines(_today, "11:11 This is a test +feature .123");
+        SetupLines(_today, existingLine);
 
         // Act
         var activities = _storage.GetActivities();
 
         // Assert
         activities.Should().HaveCount(1);
-        activities[0].Task.Title.Should().Be("This is a test");
-        activities[0].Task.Tags.Should().HaveCount(1);
-        activities[0].Task.Tags[0].Should().Be("feature");
-        activities[0].Task.Id.Should().Be("123");
-    }
-
-    [Fact]
-    public void WithWhiteSpacesBeforeAfter_WhenGetActivites_ThenTrimsWhiteSpaces()
-    {
-        // Arrange
-        SetupLines(_today, "   11:11 Test activity +feature .123   ");
-
-        // Act
-        var activities = _storage.GetActivities();
-
-        // Assert
-        activities[0].Task.Title.Should().Be("Test activity");
-    }
-
-    [Fact]
-    public void WithOnlyId_WhenGetActivities_ThenFormatsCorrectly()
-    {
-        // Arrange
-        SetupLines(_today, "11:11 Test activity .123");
-
-        // Act
-        var activities = _storage.GetActivities();
-
-        // Assert
-        activities[0].Task.Title.Should().Be("Test activity");
-        activities[0].Task.Id.Should().Be("123");
+        activities[0].Task.Title.Should().Be(expectedTitle);
+        activities[0].Task.Tags.Should().HaveCount(expectedTags.Count());
+        foreach (var tag in expectedTags.Zip(activities[0].Task.Tags))
+			tag.Second.Should().Be(tag.First);
+        activities[0].Task.Id.Should().Be(expectedId);
     }
 
     [Fact]
@@ -367,7 +339,7 @@ public class FileStorageTests
 
     private void SetupLines(params string[] lines)
     {
-        var linesList = lines.ToList();
+        var linesList = lines.Where(x => !string.IsNullOrEmpty(x)).ToList();
         _stream.Setup(x => x.ReadAllLines()).Returns(lines.ToList());
     }
 }

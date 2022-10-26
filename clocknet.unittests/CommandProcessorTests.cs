@@ -20,6 +20,7 @@ public class CommandProcessorTests
     [InlineData(new string[1] { "stop" }, "[Stop]", false)]
     [InlineData(new string[5] { "add", "--at", "10:00", "Test", "+tag" }, "10:00 Test +tag", true)]
     [InlineData(new string[5] { "add", "Test", "--at", "10:00", "+tag" }, "10:00 Test +tag", true)]
+    [InlineData(new string[4] { "add", "--at", "10:00", ".123" }, "10:00 .123", true)]
     public void WithBasicCommand_WhenExecute_ThenAddsRawEntry(string[] arugments, string expectedRawEntry, bool expectIncludeTime)
     {
         // Arrange
