@@ -9,12 +9,14 @@ public static class BasicTests
 		Runner _runner = new();
 		_ = _runner.Run("add Test1 +tag .123");
 		_ = _runner.Run($"add --at {currentTime} Test2 .345");
+		_ = _runner.Run($"add --at {currentTime} .123");
 		_ = _runner.Run("stop");
 		var output = _runner.Run("show");
 
 		var expected = new List<string>()
 		{
 			"00:00 Test1 +tag .123",
+			$"     00:00 ({currentTime} -> {currentTime})",
 			$"     00:00 ({currentTime} -> {currentTime})",
 			"00:00 Test2 .345",
 			$"     00:00 ({currentTime} -> {currentTime})",
