@@ -26,5 +26,8 @@ public static class Utilities
         var duration = activities.Aggregate<Activity, TimeSpan>(TimeSpan.Zero, (aggr, rec) => aggr + rec.Duration);
         return PrintDuration(duration);
     }
+
+    public static string PrependSpaceIfNotNull(this string str)
+        => string.IsNullOrEmpty(str) ? "" : $" {str}";
 }
 

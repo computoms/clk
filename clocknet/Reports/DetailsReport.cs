@@ -29,7 +29,10 @@ public class DetailsReport : IReport
         var duration = Utilities.PrintDuration(activity.Duration);
 	    var tags = string.Join(' ', activity.Task.Tags.Select(x => $"+{x}"));
         var id = string.IsNullOrWhiteSpace(activity.Task.Id) ? "" : $".{activity.Task.Id}";
-        var line = $"{duration} {activity.Task.Title}" + (string.IsNullOrEmpty(tags) ? "" : $" {tags}") + (string.IsNullOrEmpty(id) ? "" : $" {id}");
+        var line = $"{duration}"
+            + activity.Task.Title.PrependSpaceIfNotNull()
+            + tags.PrependSpaceIfNotNull()
+            + id.PrependSpaceIfNotNull();
 
         return activity.Records.Select(LayoutRecords).Prepend(_display.Layout(line.Trim()));
     }

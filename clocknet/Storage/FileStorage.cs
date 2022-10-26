@@ -21,7 +21,6 @@ public class FileStorage : IStorage
 
     public void AddEntryRaw(string rawEntry, bool parseTime = false)
     {
-        Console.WriteLine($"Adding raw entry: {rawEntry}");
         var line = ParseLine(rawEntry, timeProvider.Now, parseTime);
         var record = new Record(parseTime ? line.StartTime : timeProvider.Now, null);
         var task = FindPartiallyMatchingTask(line);
@@ -44,7 +43,10 @@ public class FileStorage : IStorage
         var startTime = record.StartTime.ToString("HH:mm");
         var tags = string.Join(" ", task.Tags.Select(x => $"+{x}"));
         var id = string.IsNullOrWhiteSpace(task.Id) ? "" : $".{task.Id}";
-        var line = $"{startTime} {task.Title}" + (string.IsNullOrEmpty(tags) ? "" : $" {tags}") + (string.IsNullOrEmpty(id) ? "" : $" {id}");
+        var line = $"{startTime}"
+            + task.Title.PrependSpaceIfNotNull()
+            + tags.PrependSpaceIfNotNull()
+            + id.PrependSpaceIfNotNull();
         stream.AddLine(line);
     }
 
