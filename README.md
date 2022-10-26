@@ -59,6 +59,15 @@ IDs allow to track time of tasks from an external tool, such as Jira. Entries wi
 
 The `[Stop]` task is used to stop the last task. It is not required if you switch tasks without taking a break.
 
+## Settings
+
+Some settings can be configured, in `~/.clock/settings.yml`:
+
+```yml
+File: /Users/thomas/clock.txt # Path to the file we use to store our tasks 
+DefaultTask: Admin +internal # Default task using when using command add without any other parameters
+```
+
 ## Adding new entries
 
 You can add a new entry by using the `add` command:
