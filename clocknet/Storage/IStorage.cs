@@ -10,7 +10,7 @@ public interface IStream
 public interface IStorage
 {
     void AddEntry(Task activity, Record record);
-    void AddEntryRaw(string rawEntry);
+    void AddEntryRaw(string rawEntry, bool parseTime = false);
     List<Activity> GetActivities();
 }
 

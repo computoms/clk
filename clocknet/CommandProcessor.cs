@@ -47,6 +47,7 @@ public class CommandProcessor
     private void ExecuteAdd()
     {
         var rawLine = string.Join(' ', arguments.Skip(1));
+        bool parseTime = false;
         if (arguments.Count() == 1)
         {
             rawLine = settings.DefaultTask;
@@ -56,8 +57,9 @@ public class CommandProcessor
 			int index = arguments.ToList().IndexOf("--at");
 			var time =  arguments.Skip(index + 1).FirstOrDefault();
             rawLine = string.Join(' ', arguments.Skip(1).Where(x => x != "--at" && x != time).Prepend(time));
+            parseTime = true;
 	    }
-        recordRepository.AddRaw(rawLine);
+        recordRepository.AddRaw(rawLine, parseTime);
     }
 
     private void Restart()

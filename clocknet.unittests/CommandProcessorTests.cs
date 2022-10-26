@@ -15,12 +15,12 @@ public class CommandProcessorTests
     }
 
     [Theory]
-    [InlineData(new string[4] { "add", "bla", "bli", "blou" }, "bla bli blou")]
-    [InlineData(new string[1] { "add" }, "Started empty task")]
-    [InlineData(new string[1] { "stop" }, "[Stop]")]
-    [InlineData(new string[5] { "add", "--at", "10:00", "Test", "+tag" }, "10:00 Test +tag")]
-    [InlineData(new string[5] { "add", "Test", "--at", "10:00", "+tag" }, "10:00 Test +tag")]
-    public void WithBasicCommand_WhenExecute_ThenAddsRawEntry(string[] arugments, string expectedRawEntry)
+    [InlineData(new string[4] { "add", "bla", "bli", "blou" }, "bla bli blou", false)]
+    [InlineData(new string[1] { "add" }, "Started empty task", false)]
+    [InlineData(new string[1] { "stop" }, "[Stop]", false)]
+    [InlineData(new string[5] { "add", "--at", "10:00", "Test", "+tag" }, "10:00 Test +tag", true)]
+    [InlineData(new string[5] { "add", "Test", "--at", "10:00", "+tag" }, "10:00 Test +tag", true)]
+    public void WithBasicCommand_WhenExecute_ThenAddsRawEntry(string[] arugments, string expectedRawEntry, bool expectIncludeTime)
     {
         // Arrange
         var processor = SetupProcessor(arugments);
@@ -29,7 +29,7 @@ public class CommandProcessorTests
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.AddRaw(expectedRawEntry));
+        _repository.Verify(x => x.AddRaw(expectedRawEntry, expectIncludeTime));
     }
 
     [Fact]

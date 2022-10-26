@@ -60,6 +60,32 @@ public class FileStorageTests
     }
 
     [Fact]
+    public void WithNoTags_WhenAddingEntry_ThenAddsEntryWithoutExtraSpaces()
+    {
+        // Arrange
+        SetupLines(_today);
+
+        // Act
+        _storage.AddEntry(_activity with { Tags = new string[0] }, _record);
+
+        // Assert
+        _stream.Verify(x => x.AddLine("11:12 Test .123"), Times.Once);
+    }
+
+    [Fact]
+    public void WithNoId_WhenAddingEntry_ThenAddsEntryWithoutExtraSpaces()
+    {
+        // Arrange
+        SetupLines(_today);
+
+        // Act
+        _storage.AddEntry(_activity with { Id = "" }, _record);
+
+        // Assert
+        _stream.Verify(x => x.AddLine("11:12 Test +feature"), Times.Once);
+    }
+
+    [Fact]
     public void WithNonUniqueId_WhenAddingEntry_ThenThrowsException()
     {
         // Arrange
@@ -186,6 +212,20 @@ public class FileStorageTests
 
         // Assert
         activities[0].Task.Title.Should().Be("Test activity");
+    }
+
+    [Fact]
+    public void WithOnlyId_WhenGetActivities_ThenFormatsCorrectly()
+    {
+        // Arrange
+        SetupLines(_today, "11:11 Test activity .123");
+
+        // Act
+        var activities = _storage.GetActivities();
+
+        // Assert
+        activities[0].Task.Title.Should().Be("Test activity");
+        activities[0].Task.Id.Should().Be("123");
     }
 
     [Fact]

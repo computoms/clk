@@ -29,9 +29,9 @@ public class DetailsReport : IReport
         var duration = Utilities.PrintDuration(activity.Duration);
 	    var tags = string.Join(' ', activity.Task.Tags.Select(x => $"+{x}"));
         var id = string.IsNullOrWhiteSpace(activity.Task.Id) ? "" : $".{activity.Task.Id}";
+        var line = $"{duration} {activity.Task.Title}" + (string.IsNullOrEmpty(tags) ? "" : $" {tags}") + (string.IsNullOrEmpty(id) ? "" : $" {id}");
 
-        return activity.Records.Select(LayoutRecords)
-            .Prepend(_display.Layout($"{duration} {activity.Task.Title} {tags} {id}".Trim()));
+        return activity.Records.Select(LayoutRecords).Prepend(_display.Layout(line.Trim()));
     }
 
     private string LayoutRecords(Record record)

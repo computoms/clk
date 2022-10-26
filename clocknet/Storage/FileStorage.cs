@@ -19,10 +19,11 @@ public class FileStorage : IStorage
         this.timeProvider = timeProvider;
     }
 
-    public void AddEntryRaw(string rawEntry)
+    public void AddEntryRaw(string rawEntry, bool parseTime = false)
     {
-        var line = ParseLine(rawEntry, timeProvider.Now, false);
-        var record = new Record(timeProvider.Now, null);
+        Console.WriteLine($"Adding raw entry: {rawEntry}");
+        var line = ParseLine(rawEntry, timeProvider.Now, parseTime);
+        var record = new Record(parseTime ? line.StartTime : timeProvider.Now, null);
         var task = FindPartiallyMatchingTask(line);
         AddEntry(task, record);
     }
@@ -43,7 +44,8 @@ public class FileStorage : IStorage
         var startTime = record.StartTime.ToString("HH:mm");
         var tags = string.Join(" ", task.Tags.Select(x => $"+{x}"));
         var id = string.IsNullOrWhiteSpace(task.Id) ? "" : $".{task.Id}";
-        stream.AddLine($"{startTime} {task.Title} {tags} {id}".Trim());
+        var line = $"{startTime} {task.Title}" + (string.IsNullOrEmpty(tags) ? "" : $" {tags}") + (string.IsNullOrEmpty(id) ? "" : $" {id}");
+        stream.AddLine(line);
     }
 
     public List<Activity> GetActivities()

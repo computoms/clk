@@ -28,7 +28,7 @@ public class RecordRepositoryTests
         _repository.AddRaw(testRawEntry);
 
         // Assert
-        _storage.Verify(x => x.AddEntryRaw("This is an entry .123"), Times.Once);
+        _storage.Verify(x => x.AddEntryRaw("This is an entry .123", false), Times.Once);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class RecordRepositoryTests
     public void WithThrowingStorage_WhenAddingEntryRaw_ThenDoesNotThrow()
     {
         // Arrange
-        _storage.Setup(x => x.AddEntryRaw(It.IsAny<string>())).Throws<InvalidDataException>();
+        _storage.Setup(x => x.AddEntryRaw(It.IsAny<string>(), It.IsAny<bool>())).Throws<InvalidDataException>();
 
         // Act
         var act = () => _repository.AddRaw("test");

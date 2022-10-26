@@ -17,11 +17,11 @@ public class RecordRepository : IRecordRepository
         this.display = new ConsoleDisplay();
     }
 
-    public void AddRaw(string recordRaw)
+    public void AddRaw(string recordRaw, bool parseTime = false)
     { 
         try
         { 
-            storage.AddEntryRaw(recordRaw);
+            storage.AddEntryRaw(recordRaw, parseTime);
 	    }
         catch (Exception e)
         {

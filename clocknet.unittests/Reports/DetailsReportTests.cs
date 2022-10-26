@@ -25,7 +25,7 @@ public class DetailsReportTests
         var activities = new List<Activity>()
         {
             new Activity(
-                new Task("Activity1", new string[] { "tag1" }, "001"),
+                new Task("Activity1", new string[] { }, "001"),
                 new List<Record>()
                 {
                     new Record(Date(9), Date(10)),
@@ -41,7 +41,7 @@ public class DetailsReportTests
         };
         var expectedOutput = new List<string>()
         {
-            "01:30 Activity1 +tag1 .001",
+            "01:30 Activity1 .001",
             "     01:00 (09:00 -> 10:00)",
             "     00:30 (11:00 -> 11:30)",
             "00:35 Activity2 +tag2 +tag3 .002",
