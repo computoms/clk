@@ -25,7 +25,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 9.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -39,7 +39,7 @@ jobs:
     - name: Publish
       run: dotnet publish clocknet/clocknet.csproj -c Release -o publish-${{ matrix.os }}
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: publish-${{ matrix.os }}
         path: publish-${{ matrix.os }}/**
