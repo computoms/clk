@@ -1,5 +1,5 @@
-﻿using clocknet.Display;
-using clocknet.Reports;
+﻿using clocknet.Domain;
+using clocknet.Domain.Reports;
 using FluentAssertions;
 using Moq;
 using Moq.AutoMock;
@@ -25,18 +25,18 @@ public class DetailsReportTests
         var activities = new List<Activity>()
         {
             new Activity(
-                new Task("Activity1", new string[] { }, "001"),
-                new List<Record>()
+                new Domain.Task("Activity1", new string[] { }, "001"),
+                new List<Domain.Record>()
                 {
-                    new Record(Date(9), Date(10)),
-                    new Record(Date(11), Date(11, 30)),
+                    new Domain.Record(Date(9), Date(10)),
+                    new Domain.Record(Date(11), Date(11, 30)),
                 }),
             new Activity(
-                new Task("Activity2", new string[] { "tag2", "tag3" }, "002"),
-                new List<Record>()
+                new Domain.Task("Activity2", new string[] { "tag2", "tag3" }, "002"),
+                new List<Domain.Record>()
                 {
-                    new Record(Date(13), Date(13, 8)),
-                    new Record(Date(14), Date(14, 27)),
+                    new Domain.Record(Date(13), Date(13, 8)),
+                    new Domain.Record(Date(14), Date(14, 27)),
                 }),
         };
         var expectedOutput = new List<string>()

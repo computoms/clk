@@ -1,3 +1,5 @@
+using clocknet.Domain;
+
 namespace clocknet.Commands;
 
 public class StopCommand(ProgramArguments pArgs, IRecordRepository recordRepository) : ICommand

@@ -1,5 +1,4 @@
 ﻿using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace clocknet;
 

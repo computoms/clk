@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
-using clocknet.Storage;
+using clocknet.Domain;
 using clocknet.Utils;
 
-namespace clocknet;
+namespace clocknet.Infra;
 
 public class FileStorage : IStorage
 {
@@ -27,7 +27,7 @@ public class FileStorage : IStorage
         AddEntry(task, record);
     }
 
-    public void AddEntry(Task task, Record record)
+    public void AddEntry(Domain.Task task, Record record)
     {
         if (!isInitialized)
             GetLastDate();
@@ -92,15 +92,15 @@ public class FileStorage : IStorage
         var activity = activities.FirstOrDefault(x => x.Task.IsSameAs(parsedLine.Title, parsedLine.Tags, parsedLine.Id));
         if (activity == null)
         {
-            activity = new Activity(new Task(parsedLine.Title, parsedLine.Tags, parsedLine.Id));
+            activity = new Activity(new Domain.Task(parsedLine.Title, parsedLine.Tags, parsedLine.Id));
             activities.Add(activity);
         }
         return activity;
     }
 
-    private Task FindPartiallyMatchingTask(ParsedLine line)
+    private Domain.Task FindPartiallyMatchingTask(ParsedLine line)
     {
-        var defaultTask = new Task(line.Title, line.Tags, line.Id);
+        var defaultTask = new Domain.Task(line.Title, line.Tags, line.Id);
         if (string.IsNullOrWhiteSpace(line.Id))
             return defaultTask;
 
@@ -130,7 +130,7 @@ public class FileStorage : IStorage
             title, tags, number ?? string.Empty);
     }
 
-    private void AssertUniqueId(Task task)
+    private void AssertUniqueId(Domain.Task task)
     {
         if (GetActivities().Any(x => !string.IsNullOrWhiteSpace(x.Task.Id) && x.Task.Id == task.Id && x.Task.Title != task.Title))
             throw new InvalidDataException($"Id {task.Id} already exists");

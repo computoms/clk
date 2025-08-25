@@ -1,4 +1,4 @@
-﻿namespace clocknet;
+﻿namespace clocknet.Domain;
 
 public interface IRecordRepository
 {

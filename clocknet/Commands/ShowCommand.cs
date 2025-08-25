@@ -1,4 +1,5 @@
-using clocknet.Reports;
+using clocknet.Domain;
+using clocknet.Domain.Reports;
 using clocknet.Utils;
 
 namespace clocknet.Commands;

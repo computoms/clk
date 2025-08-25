@@ -1,4 +1,5 @@
-﻿using clocknet.Utils;
+﻿using clocknet.Domain;
+using clocknet.Utils;
 using FluentAssertions;
 
 namespace clocknet.unittests;
@@ -35,7 +36,7 @@ public class UtilitiesTests
     public void WithSingleDigitTime_WhenDisplay_ThenPadsWithZero()
     {
         // Arrange
-        var records = Enumerable.Range(0, 1).Select(x => new Record(new DateTime(2022, 10, 10, 9, 8, 0), new DateTime(2022, 10, 10, 10, 9, 0)));
+        var records = Enumerable.Range(0, 1).Select(x => new Domain.Record(new DateTime(2022, 10, 10, 9, 8, 0), new DateTime(2022, 10, 10, 10, 9, 0)));
 
         // Act
         var result = records.Duration();
@@ -50,8 +51,8 @@ public class UtilitiesTests
         // Arrange
         var records = Enumerable.Range(0, 1)
 	        .Select(x => new Activity(
-		        new Task("Test", new string[0], ""), 
-		        new List<Record>() { new Record(new DateTime(2022, 10, 10, 9, 8, 0), new DateTime(2022, 10, 10, 10, 9, 0)) }));
+		        new Domain.Task("Test", new string[0], ""), 
+		        new List<Domain.Record>() { new Domain.Record(new DateTime(2022, 10, 10, 9, 8, 0), new DateTime(2022, 10, 10, 10, 9, 0)) }));
 
         // Act
         var result = records.Duration();
@@ -64,7 +65,7 @@ public class UtilitiesTests
     public void WithMoreThanOneDayDuration_WhenDisplay_ThenDisplaysTotalHours()
     {
         // Arrange
-        var records = Enumerable.Range(0, 1).Select(x => new Record(new DateTime(2022, 01, 01, 10, 0, 0), new DateTime(2022, 01, 02, 12, 0, 0)));
+        var records = Enumerable.Range(0, 1).Select(x => new Domain.Record(new DateTime(2022, 01, 01, 10, 0, 0), new DateTime(2022, 01, 02, 12, 0, 0)));
 
         // Act
         var result = records.Duration();
@@ -77,10 +78,10 @@ public class UtilitiesTests
     public void WithMultipleNonOverlappingRecords_WhenGettingDuration_ThenComputesDurationCorrectly()
     {
         // Arrange
-        var records = new List<Record>()
+        var records = new List<Domain.Record>()
         {
-            new Record(new DateTime(2022, 1, 1, 9, 0, 0), new DateTime(2022, 1, 1, 10, 0, 0)),
-            new Record(new DateTime(2022, 1, 1, 11, 0, 0), new DateTime(2022, 1, 1, 12, 0, 0)),
+            new Domain.Record(new DateTime(2022, 1, 1, 9, 0, 0), new DateTime(2022, 1, 1, 10, 0, 0)),
+            new Domain.Record(new DateTime(2022, 1, 1, 11, 0, 0), new DateTime(2022, 1, 1, 12, 0, 0)),
         };
 
         // Act

@@ -1,4 +1,6 @@
-﻿namespace clocknet.Display;
+﻿using clocknet.Domain;
+
+namespace clocknet.Infra;
 
 public class ConsoleDisplay : IDisplay
 {

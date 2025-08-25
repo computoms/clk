@@ -1,4 +1,4 @@
-﻿namespace clocknet.Display;
+﻿namespace clocknet.Domain;
 
 public class FormattedText
 {

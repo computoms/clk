@@ -1,4 +1,4 @@
-﻿namespace clocknet.Storage;
+﻿namespace clocknet.Domain;
 
 public interface IStream
 {

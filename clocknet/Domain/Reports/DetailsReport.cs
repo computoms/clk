@@ -1,7 +1,6 @@
-﻿using clocknet.Display;
-using clocknet.Utils;
+﻿using clocknet.Utils;
 
-namespace clocknet.Reports;
+namespace clocknet.Domain.Reports;
 
 public class DetailsReport : IReport
 {

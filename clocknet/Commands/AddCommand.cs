@@ -1,3 +1,5 @@
+using clocknet.Domain;
+
 namespace clocknet.Commands;
 
 public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordRepository recordRepository) : ICommand

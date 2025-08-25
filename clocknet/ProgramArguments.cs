@@ -1,4 +1,4 @@
-
+namespace clocknet;
 
 public record ProgramArguments(string[] Args)
 {

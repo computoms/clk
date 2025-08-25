@@ -1,8 +1,9 @@
-﻿using clocknet.Storage;
-using Moq;
+﻿using Moq;
 using Moq.AutoMock;
 using FluentAssertions;
 using clocknet.Utils;
+using clocknet.Domain;
+using clocknet.Infra;
 
 namespace clocknet.unittests;
 
@@ -11,8 +12,8 @@ public class FileStorageTests
     private readonly AutoMocker _mocker = new();
     private readonly FileStorage _storage;
     private readonly Mock<IStream> _stream;
-    private readonly Task _activity;
-    private readonly Record _record;
+    private readonly Domain.Task _activity;
+    private readonly Domain.Record _record;
     private readonly DateTime _baseTime = new DateTime(2022, 10, 10, 11, 12, 0);
     private const string _today = "[2022-10-10]";
     private const string _yesterday = "[2022-10-09]";
@@ -22,8 +23,8 @@ public class FileStorageTests
         _storage = _mocker.CreateInstance<FileStorage>();
         _stream = _mocker.GetMock<IStream>();
         _mocker.GetMock<ITimeProvider>().Setup(x => x.Now).Returns(_baseTime);
-        _activity = new Task("Test", new string[] { "feature" }, "123");
-        _record = new Record(_baseTime, null);
+        _activity = new Domain.Task("Test", new string[] { "feature" }, "123");
+        _record = new Domain.Record(_baseTime, null);
     }
 
     #region AddEntry
@@ -57,7 +58,7 @@ public class FileStorageTests
     {
         // Arrange
         SetupLines(_today);
-        var task = new Task(title, tags, id);
+        var task = new Domain.Task(title, tags, id);
 
         // Act
         _storage.AddEntry(task, _record);
@@ -73,7 +74,7 @@ public class FileStorageTests
         SetupLines(_today, "09:00 Activity1 .123");
 
         // Act
-        var act = () => _storage.AddEntry(new Task("Activity2", new string[0], "123"), new Record(DateTime.Now, null));
+        var act = () => _storage.AddEntry(new Domain.Task("Activity2", new string[0], "123"), new Domain.Record(DateTime.Now, null));
 
         // Assert
         act.Should().Throw<InvalidDataException>("Id 123 already exists");
@@ -86,7 +87,7 @@ public class FileStorageTests
         SetupLines(_today, "09:00 Activity1 .123");
 
         // Act
-        var act = () => _storage.AddEntry(new Task("Activity1", new string[0], "123"), new Record(DateTime.Now, null));
+        var act = () => _storage.AddEntry(new Domain.Task("Activity1", new string[0], "123"), new Domain.Record(DateTime.Now, null));
 
         // Assert
         act.Should().NotThrow<InvalidDataException>();

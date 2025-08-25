@@ -1,5 +1,5 @@
-﻿using clocknet.Display;
-using clocknet.Reports;
+﻿using clocknet.Domain;
+using clocknet.Domain.Reports;
 using clocknet.Utils;
 using Moq;
 
@@ -66,16 +66,16 @@ public class CommandProcessorTests
     {
         // Arrange
         var processor = new CommandProcessor(new Commands.RestartCommand(_repository.Object, _display.Object, _timeProvider.Object));
-        var task = new Task("Activity", new string[] { "tag" }, "123");
-        var record = new Record(new DateTime(2022, 1, 1), null);
-        var activity = new Activity(task, new List<Record>() { record });
+        var task = new Domain.Task("Activity", new string[] { "tag" }, "123");
+        var record = new Domain.Record(new DateTime(2022, 1, 1), null);
+        var activity = new Activity(task, new List<Domain.Record>() { record });
         _repository.Setup(x => x.GetAll()).Returns(new List<Activity>() { activity });
 
         // Act
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.AddRecord(task, It.IsAny<Record>()), Times.Once);
+        _repository.Verify(x => x.AddRecord(task, It.IsAny<Domain.Record>()), Times.Once);
     }
 
     [Theory]

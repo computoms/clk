@@ -1,8 +1,7 @@
-﻿using clocknet.Display;
-using clocknet.Storage;
-using clocknet.Utils;
+﻿using clocknet.Utils;
+using clocknet.Domain;
 
-namespace clocknet;
+namespace clocknet.Infra;
 
 public class RecordRepository : IRecordRepository
 {
@@ -29,7 +28,7 @@ public class RecordRepository : IRecordRepository
 	    }
     }
 
-    public void AddRecord(Task activity, Record record)
+    public void AddRecord(Domain.Task activity, Record record)
     {
         try
         { 

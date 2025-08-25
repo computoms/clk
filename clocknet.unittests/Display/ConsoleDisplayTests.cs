@@ -1,4 +1,5 @@
-﻿using clocknet.Display;
+﻿using clocknet.Domain;
+using clocknet.Infra;
 using FluentAssertions;
 
 namespace clocknet.unittests;

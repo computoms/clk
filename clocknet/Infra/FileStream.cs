@@ -1,6 +1,6 @@
-﻿using System.IO;
+﻿using clocknet.Domain;
 
-namespace clocknet.Storage;
+namespace clocknet.Infra;
 
 public class FileStream : IStream
 {

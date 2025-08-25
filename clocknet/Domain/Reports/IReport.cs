@@ -1,4 +1,4 @@
-﻿namespace clocknet.Reports;
+﻿namespace clocknet.Domain.Reports;
 
 public interface IReport
 {

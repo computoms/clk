@@ -1,4 +1,4 @@
-using clocknet.Display;
+using clocknet.Domain;
 
 namespace clocknet.Commands;
 

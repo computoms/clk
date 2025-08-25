@@ -1,8 +1,5 @@
-using System.ComponentModel;
-using clocknet.Display;
-using clocknet.Utils;
 
-namespace clocknet.Reports;
+namespace clocknet.Domain.Reports;
 
 public class BarGraphReport : IReport
 {
