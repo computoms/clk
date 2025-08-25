@@ -1,4 +1,6 @@
-﻿namespace clocknet.Domain;
+﻿using clocknet.Domain;
+
+namespace clocknet.Infra;
 
 public interface IStream
 {
@@ -9,7 +11,7 @@ public interface IStream
 
 public interface IStorage
 {
-    void AddEntry(Task activity, Record record);
+    void AddEntry(Domain.Task activity, Record record);
     void AddEntryRaw(string rawEntry, bool parseTime = false);
     List<Activity> GetActivities();
 }
