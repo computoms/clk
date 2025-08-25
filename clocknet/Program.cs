@@ -10,7 +10,7 @@ var timeProvider = new TimeProvider();
 var file = new FileStream(settings.File);
 var storage = new FileStorage(file, timeProvider);
 var repository = new RecordRepository(storage, timeProvider);
-var display = new ConsoleDisplay();
+var display = new ConsoleDisplay(true);
 
 var commandProcessor = new CommandProcessor(args, repository, display, timeProvider, settings);
 commandProcessor.Execute();

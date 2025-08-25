@@ -19,19 +19,19 @@ public class DetailsReport : IReport
                 .Select(a => new {Date = a.Records.OrderBy(r => r.StartTime.Date).FirstOrDefault()?.StartTime.Date, Activity = a})
                 .GroupBy(x => x.Date)
                 .SelectMany(g => LayoutActivitiesOfTheDay(g.Key, g.Select(x => x.Activity)))
-                .Append(" ")
+                .Append(" ".FormatLine())
                 .Append(TotalTime(activities)));
     }
 
-    private string TotalTime(IEnumerable<Activity> activities)
+    private FormattedLine TotalTime(IEnumerable<Activity> activities)
         => _display.Layout($"{Utilities.PrintDuration(activities.Aggregate<Activity, TimeSpan>(TimeSpan.Zero, (curr, act) => curr + act.Duration))} Total");
 
-    private IEnumerable<string> LayoutActivitiesOfTheDay(DateTime? date, IEnumerable<Activity> activities)
+    private IEnumerable<FormattedLine> LayoutActivitiesOfTheDay(DateTime? date, IEnumerable<Activity> activities)
     {
-        return activities.SelectMany(LayoutActivity).Prepend(date?.ToString("yyyy-MM-dd") ?? "");
+        return activities.SelectMany(LayoutActivity).Prepend((date?.ToString("yyyy-MM-dd") ?? "").FormatLine());
     }
 
-    private IEnumerable<string> LayoutActivity(Activity activity)
+    private IEnumerable<FormattedLine> LayoutActivity(Activity activity)
     {
         var duration = Utilities.PrintDuration(activity.Duration);
         var tags = string.Join(' ', activity.Task.Tags.Select(x => $"+{x}"));
@@ -44,7 +44,7 @@ public class DetailsReport : IReport
         return activity.Records.Select(LayoutRecords).Prepend(_display.Layout(line.Trim(), 1));
     }
 
-    private string LayoutRecords(Record record)
+    private FormattedLine LayoutRecords(Record record)
     {
         var recordDuration = Utilities.PrintDuration(record.Duration);
         var recordStart = record.StartTime.ToString("HH:mm");

@@ -21,9 +21,9 @@ public class WorktimeReport : IReport
             .SelectMany(x => x.Records)
             .GroupBy(x => x.StartTime.Date)
             .Select(x => PrintDay(x.Key, x))
-            .Append(" ")
+            .Select(x => x.Append(" "))
             .Append(TotalTime(activities))
-            .Prepend("Daily Worktime Report");
+            .Prepend("Daily Worktime Report".FormatLine());
 
         if (!perDay)
         {
@@ -31,18 +31,18 @@ public class WorktimeReport : IReport
                 .SelectMany(x => x.Records)
                 .GroupBy(x => Utilities.GetWeekNumber(x.StartTime))
                 .Select(x => PrintWeek(x.Key, x.ToList()))
-                .Append(" ")
+                .Select(x => x.Append(" "))
                 .Append(TotalTime(activities))
-                .Prepend("Weekly Report");
+                .Prepend("Weekly Report".FormatLine());
 	    }
 
         display.Print(lines);
     }
 
-    private string TotalTime(IEnumerable<Activity> activities) => display.Layout($"{activities.Duration()} Total");
+    private FormattedLine TotalTime(IEnumerable<Activity> activities) => display.Layout($"{activities.Duration()} Total");
 
-    private string PrintWeek(int weekNumber, IEnumerable<Record> records) => display.Layout($"{records.Duration()} Week {weekNumber}");
+    private FormattedLine PrintWeek(int weekNumber, IEnumerable<Record> records) => display.Layout($"{records.Duration()} Week {weekNumber}");
 
-    private string PrintDay(DateTime day, IEnumerable<Record> records) => display.Layout($"{records.Duration()} {day:yyyy-MM-dd}");
+    private FormattedLine PrintDay(DateTime day, IEnumerable<Record> records) => display.Layout($"{records.Duration()} {day:yyyy-MM-dd}");
 }
 

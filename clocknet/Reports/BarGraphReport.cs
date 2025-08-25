@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using clocknet.Display;
 using clocknet.Utils;
 
@@ -6,6 +7,8 @@ namespace clocknet.Reports;
 public class BarGraphReport : IReport
 {
     private readonly IDisplay _display;
+    private readonly ConsoleColor[] _colors = { ConsoleColor.Blue, ConsoleColor.DarkGreen, ConsoleColor.DarkMagenta, ConsoleColor.Gray, ConsoleColor.DarkGray, ConsoleColor.Green, ConsoleColor.DarkCyan, ConsoleColor.DarkBlue };
+    private int _colorIndex = 0;
 
     public BarGraphReport(IDisplay display)
     {
@@ -32,10 +35,17 @@ public class BarGraphReport : IReport
         _display.Print(activities.Select(a => DisplayBarGraph(a, maxActivityDuration, textAlignment, maxBarLength)));
     }
 
-    private string DisplayBarGraph(Activity activity, TimeSpan maxDuration, int textAlignment, int maxBarLength)
+    private FormattedLine DisplayBarGraph(Activity activity, TimeSpan maxDuration, int textAlignment, int maxBarLength)
     {
         var length = (int)(activity.Duration.Ticks * maxBarLength / maxDuration.Ticks);
-        return AlignText(activity.Task.Title, textAlignment) + BarGraph(length);
+        return new FormattedLine
+        {
+            Chunks = new List<FormattedText>
+            {
+                new FormattedText { RawText = AlignText(activity.Task.Title, textAlignment), Color = Console.ForegroundColor },
+                new FormattedText { RawText = BarGraph(length), Color = GetColor() }
+            }
+        };
     }
 
     private string BarGraph(int length) => length == 0 ? "" : Enumerable.Range(0, length).Select(i => "\u2588").Aggregate((a, b) => $"{a}{b}");
@@ -43,5 +53,10 @@ public class BarGraphReport : IReport
     private string AlignText(string text, int textAlignment) => text.Length >= textAlignment
             ? string.Concat(text.AsSpan(0, textAlignment - 8), "...").PadRight(textAlignment)
             : text.PadRight(textAlignment);
+
+    private ConsoleColor GetColor()
+    {
+        return _colors[_colorIndex++ % _colors.Length];
+    }
 }
  

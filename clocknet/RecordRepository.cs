@@ -14,7 +14,7 @@ public class RecordRepository : IRecordRepository
     {
         this.storage = storage;
         this.timeProvider = timeProvider;
-        this.display = new ConsoleDisplay();
+        this.display = new ConsoleDisplay(true);
     }
 
     public void AddRaw(string recordRaw, bool parseTime = false)
