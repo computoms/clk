@@ -82,10 +82,14 @@ public class CommandProcessor
     }
 
     private IReport GetReport(bool isAll)
-    { 
+    {
         if (HasOption(Args.WorkTimes))
         {
             return new WorktimeReport(display, !isAll);
+        }
+        else if (HasOption(Args.BarGraphs))
+        {
+            return new BarGraphReport(display);
         }
         return new DetailsReport(display);
     }
@@ -121,6 +125,7 @@ public class CommandProcessor
         public readonly static Option Week = new Option("week", "w");
         public readonly static Option Yesterday = new Option("yesterday", "y");
         public readonly static Option WorkTimes = new Option("worktimes", "w");
+        public readonly static Option BarGraphs = new Option("bar", "b");
         public readonly static Option At = new Option("at", string.Empty);
     }
 
