@@ -132,3 +132,13 @@ You can also show the time worked per day for the entire week using the `--week`
 ## Opening file
 
 The command `open` allows to open the `clock.txt` source file with the default editor (configured in settings as `EditorCommand`, default is `code`).
+
+## Listing tasks
+
+All task names (with tags and ids) can be found using the `list` command. This is useful to be used with [fzf](https://github.com/junegunn/fzf/blob/master/README.md):
+
+```bash
+TASK_NAME=$(clock list | fzf); clock add $TASK_NAME
+```
+
+The above line allows to find an existing task by fuzzy finding its name, then adding it as current task.
