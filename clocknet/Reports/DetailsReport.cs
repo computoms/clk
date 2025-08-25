@@ -30,7 +30,8 @@ public class DetailsReport : IReport
 
     private IEnumerable<FormattedLine> LayoutActivitiesOfTheDay(DateTime? date, IEnumerable<Activity> activities)
     {
-        return activities.SelectMany(LayoutActivity).Prepend((date?.ToString("yyyy-MM-dd") ?? "").FormatLine());
+        return activities.OrderBy(a => a.Records.FirstOrDefault()?.StartTime ?? DateTime.Now)
+            .SelectMany(LayoutActivity).Prepend((date?.ToString("yyyy-MM-dd") ?? "").FormatLine());
     }
 
     private IEnumerable<FormattedLine> LayoutActivity(Activity activity)
