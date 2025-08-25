@@ -28,7 +28,8 @@ public class Activity
 }
 
 public record Task(string Title, string[] Tags, string Id)
-{ 
+{
+    public string Raw => (Title + Tags.Aggregate("", (r, t) => $"{r} +{t}") + (Id != string.Empty ? $" .{Id}" : "")).Trim();
     public bool IsSameAs(string title, string[] tags, string number)
     { 
         return title == Title && number == Id
