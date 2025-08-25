@@ -128,3 +128,7 @@ To show the details of all tasks in the file, use the `--all` (or `-a`) switch.
 #### Time worked
 
 You can also show the time worked per day for the entire week using the `--week` option (or `-w`) or the time worked per week for the entire period using the `--all` in combination with the `--worktimes` switches (equivalent to `-aw`).
+
+## Opening file
+
+The command `open` allows to open the `clock.txt` source file with the default editor (configured in settings as `EditorCommand`, default is `code`).

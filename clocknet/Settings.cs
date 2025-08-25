@@ -7,6 +7,7 @@ public record Settings
 {
 	public string File { get; set; } = "~/clock.txt";
 	public string DefaultTask { get; set; } = "Started empty task";
+	public string EditorCommand { get; set; } = "code";
 
     public static Settings Read()
     { 

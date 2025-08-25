@@ -1,4 +1,5 @@
-﻿using clocknet.Display;
+﻿using System.Diagnostics;
+using clocknet.Display;
 using clocknet.Reports;
 using clocknet.Utils;
 
@@ -27,8 +28,8 @@ public class CommandProcessor
         switch (command)
         {
             case Commands.Show:
-			    ExecuteShow();
-			    break;
+                ExecuteShow();
+                break;
 
             case Commands.Add:
                 ExecuteAdd();
@@ -40,6 +41,17 @@ public class CommandProcessor
 
             case Commands.Restart:
                 Restart();
+                break;
+
+            case Commands.Open:
+                using (var p = new Process())
+                {
+                    p.StartInfo.UseShellExecute = false;
+                    p.StartInfo.FileName = settings.EditorCommand;
+                    p.StartInfo.Arguments = settings.File;
+                    p.StartInfo.CreateNoWindow = true;
+                    p.Start();
+                }
                 break;
         }
     }
@@ -135,6 +147,7 @@ public class CommandProcessor
         public const string Add = "add";
         public const string Stop = "stop";
         public const string Restart = "restart";
+        public const string Open = "open";
     }
 
     private record Option(string Long, string Short);
