@@ -1,6 +1,6 @@
 # Dockerfile used for system tests
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim
+FROM mcr.microsoft.com/dotnet/sdk:9.0
 
 # Add user to run the tests with a home directory
 RUN useradd -ms /bin/bash systemtest

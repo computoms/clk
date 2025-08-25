@@ -15,11 +15,12 @@ public static class BasicTests
 
 		var expected = new List<string>()
 		{
-			"00:00 Test1 +tag .123",
-			$"     00:00 ({currentTime} -> {currentTime})",
-			$"     00:00 ({currentTime} -> {currentTime})",
-			"00:00 Test2 .345",
-			$"     00:00 ({currentTime} -> {currentTime})",
+			DateTime.Now.Date.ToString("yyyy-MM-dd"),
+			" 00:00 Test1 +tag .123",
+			$"   00:00 ({currentTime} -> {currentTime})",
+			$"   00:00 ({currentTime} -> {currentTime})",
+			" 00:00 Test2 .345",
+			$"   00:00 ({currentTime} -> {currentTime})",
 			" ",
 			"00:00 Total",
 		};
@@ -42,10 +43,11 @@ public static class BasicTests
 		var currentTime = DateTime.Now.ToString("HH:mm");
 		var expected = new List<string>()
 		{
-			"00:00 Test1 +tag .123",
-			$"     00:00 ({currentTime} -> {currentTime})",
-			"00:00 none",
-			$"     00:00 ({currentTime} -> {currentTime})",
+			DateTime.Now.Date.ToString("yyyy-MM-dd"),
+			" 00:00 Test1 +tag .123",
+			$"   00:00 ({currentTime} -> {currentTime})",
+			" 00:00 none",
+			$"   00:00 ({currentTime} -> {currentTime})",
 			" ",
 			"00:00 Total",
 		};
