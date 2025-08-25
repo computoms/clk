@@ -5,7 +5,7 @@ namespace clocknet.unittests;
 
 public class ConsoleDisplayTests
 {
-    private readonly ConsoleDisplay _display = new();
+    private readonly ConsoleDisplay _display = new(true);
 
     public ConsoleDisplayTests()
     {
@@ -15,20 +15,20 @@ public class ConsoleDisplayTests
     public void WithNoTabs_WhenLayout_ThenReturnsStringAsIs()
     {
         // Act
-        var result = _display.Layout("test");
+        var result = _display.Layout(new List<FormattedText>() { "test".FormatChunk() });
 
         // Assert
-        result.Should().Be("test");
+        result.Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be("test");
     }
 
     [Fact]
     public void WithOneTab_WhenLayout_ThenAddsTwoSpaces()
     {
         // Act
-        var result = _display.Layout("test", 1);
+        var result = _display.Layout(new List<FormattedText>() { "test".FormatChunk() }, 1);
 
         // Assert
-        result.Should().Be("  test");
+        result.Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(" test");
     }
 }
 

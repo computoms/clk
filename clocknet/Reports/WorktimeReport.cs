@@ -23,7 +23,7 @@ public class WorktimeReport : IReport
             .SelectMany(x => x.Records)
             .GroupBy(x => x.StartTime.Date)
             .Select(x => PrintDay(x.Key, x))
-            .Select(x => x.Append(" "))
+            .Append(" ".FormatLine())
             .Append(TotalTime(activities))
             .Prepend("Daily Worktime Report".FormatLine());
 
@@ -33,9 +33,9 @@ public class WorktimeReport : IReport
                 .SelectMany(x => x.Records)
                 .GroupBy(x => Utilities.GetWeekNumber(x.StartTime))
                 .Select(x => PrintWeek(x.Key, x.ToList()))
-                .Select(x => x.Append(" "))
+                .Append(" ".FormatLine())
                 .Append(TotalTime(activities))
-                .Prepend("Weekly Report\n".FormatLine());
+                .Prepend("Weekly Report".FormatLine());
         }
 
         display.Print(lines);

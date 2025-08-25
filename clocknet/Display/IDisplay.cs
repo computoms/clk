@@ -51,9 +51,7 @@ public static class FormattedTextExtensions
 public interface IDisplay
 {
     FormattedLine Layout(IEnumerable<FormattedText> chunks, int tabs = 0);
-    FormattedLine Layout(string line, int tabs = 0, ConsoleColor? color = null);
     void Print(IEnumerable<FormattedLine> lines);
-    void Print(IEnumerable<string> lines);
     void Error(string errorMessage);
 }
 

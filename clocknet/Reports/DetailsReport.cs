@@ -26,7 +26,7 @@ public class DetailsReport : IReport
     }
 
     private FormattedLine TotalTime(IEnumerable<Activity> activities)
-        => _display.Layout($"{Utilities.PrintDuration(activities.Aggregate(TimeSpan.Zero, (curr, act) => curr + act.Duration))} Total");
+        => $"{Utilities.PrintDuration(activities.Aggregate(TimeSpan.Zero, (curr, act) => curr + act.Duration))} Total".FormatLine();
 
     private IEnumerable<FormattedLine> LayoutActivitiesOfTheDay(DateTime? date, IEnumerable<Activity> activities)
     {

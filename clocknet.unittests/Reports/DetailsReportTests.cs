@@ -41,27 +41,46 @@ public class DetailsReportTests
         };
         var expectedOutput = new List<string>()
         {
-            "01:30 Activity1 .001",
+            "2022-01-01",
+            "  01:30 Activity1 .001",
             "     01:00 (09:00 -> 10:00)",
             "     00:30 (11:00 -> 11:30)",
-            "00:35 Activity2 +tag2 +tag3 .002",
+            "  00:35 Activity2 +tag2 +tag3 .002",
             "     00:08 (13:00 -> 13:08)",
             "     00:27 (14:00 -> 14:27)",
             " ",
             "02:05 Total",
         };
-        var calledStrings = new List<string>();
-        _display.Setup(x => x.Print(It.IsAny<IEnumerable<string>>()))
-            .Callback((IEnumerable<string> strings) => calledStrings = strings.ToList());
-        _display.Setup(x => x.Layout(It.IsAny<string>(), It.IsAny<int>()))
-            .Returns((string str, int tabs) => string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  ")) + str);
+        var calledStrings = new List<FormattedLine>();
+        _display.Setup(x => x.Print(It.IsAny<IEnumerable<FormattedLine>>()))
+            .Callback((IEnumerable<FormattedLine> strings) => calledStrings = strings.ToList());
+        _display.Setup(x => x.Layout(It.IsAny<IEnumerable<FormattedText>>(), It.IsAny<int>()))
+            .Returns((IEnumerable<FormattedText> str, int tabs) =>
+                new FormattedLine
+                {
+                    Chunks = str.Prepend(new()
+                    {
+                        RawText = string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  ")),
+                        Color = Console.ForegroundColor
+                    })
+                });
+
 
         // Act
         _report.Print(activities);
 
         // Assert
-        _display.Verify(x => x.Print(It.IsAny<IEnumerable<string>>()));
-        calledStrings.Should().BeEquivalentTo(expectedOutput);
+        _display.Verify(x => x.Print(It.IsAny<IEnumerable<FormattedLine>>()));
+        calledStrings.Count.Should().Be(expectedOutput.Count);
+        calledStrings.First().Chunks.First().RawText.Should().Be(expectedOutput.First());
+        calledStrings.Skip(1).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutput.Skip(1).First());
+        calledStrings.Skip(2).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutput.Skip(2).First());
+        calledStrings.Skip(3).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutput.Skip(3).First());
+        calledStrings.Skip(4).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutput.Skip(4).First());
+        calledStrings.Skip(5).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutput.Skip(5).First());
+        calledStrings.Skip(6).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutput.Skip(6).First());
+        calledStrings.Skip(7).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutput.Skip(7).First());
+
     }
 
     private DateTime Date(int hours, int minutes = 0) => new DateTime(2022, 1, 1, hours, minutes, 0);

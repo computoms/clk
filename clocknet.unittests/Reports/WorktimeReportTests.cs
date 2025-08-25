@@ -70,21 +70,34 @@ public class WorktimeReportTests
             " ",
             "11:02 Total",
         };
-        var calledStrings = new List<string>();
-        _display.Setup(x => x.Print(It.IsAny<IEnumerable<string>>()))
-            .Callback((IEnumerable<string> strings) => calledStrings = strings.ToList());
-        _display.Setup(x => x.Layout(It.IsAny<string>(), It.IsAny<int>()))
-            .Returns((string str, int tabs) => string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  ")) + str);
+        var calledStrings = new List<FormattedLine>();
+        _display.Setup(x => x.Print(It.IsAny<IEnumerable<FormattedLine>>()))
+            .Callback((IEnumerable<FormattedLine> strings) => calledStrings = strings.ToList());
+        _display.Setup(x => x.Layout(It.IsAny<IEnumerable<FormattedText>>(), It.IsAny<int>()))
+            .Returns((string str, int tabs) => (string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  ")) + str).FormatLine());
 
         // Act
         report.Print(activities);
 
         // Assert
-        _display.Verify(x => x.Print(It.IsAny<IEnumerable<string>>()));
+        _display.Verify(x => x.Print(It.IsAny<IEnumerable<FormattedLine>>()));
         if (perDay)
-            calledStrings.Should().BeEquivalentTo(expectedOutputPerDay);
+        {
+            calledStrings.Count.Should().Be(expectedOutputPerDay.Count);
+            calledStrings.First().Chunks.First().RawText.Should().Be(expectedOutputPerDay.First());
+            calledStrings.Skip(1).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutputPerDay.Skip(1).First());
+            calledStrings.Skip(2).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutputPerDay.Skip(2).First());
+            calledStrings.Skip(3).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutputPerDay.Skip(3).First());
+            calledStrings.Skip(4).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutputPerDay.Skip(4).First());
+        }
         else
-            calledStrings.Should().BeEquivalentTo(expectedOutputTotal);
+        {
+            calledStrings.Count.Should().Be(expectedOutputTotal.Count);
+            calledStrings.First().Chunks.First().RawText.Should().Be(expectedOutputTotal.First());
+            calledStrings.Skip(1).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutputTotal.Skip(1).First());
+            calledStrings.Skip(2).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutputTotal.Skip(2).First());
+            calledStrings.Skip(3).First().Chunks.Aggregate("", (a, b) => $"{a}{b.RawText}").Should().Be(expectedOutputTotal.Skip(3).First());
+        }
     }
 
     private DateTime Date(int hours, int minutes = 0, int day = 1) => new DateTime(2022, 1, day, hours, minutes, 0);
