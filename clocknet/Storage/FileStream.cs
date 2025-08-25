@@ -6,9 +6,9 @@ public class FileStream : IStream
 {
     private readonly string _filename;
 
-    public FileStream(string filename)
+    public FileStream(Settings settings)
     {
-        _filename = filename;
+        _filename = settings.File;
     }
 
     public void AddLine(string line)

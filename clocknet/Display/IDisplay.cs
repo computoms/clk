@@ -40,6 +40,12 @@ public static class FormattedTextExtensions
         line.Chunks = line.Chunks.Append(chunk.FormatChunk());
         return line;
     }
+
+    public static FormattedLine Append(this FormattedLine line, FormattedText chunk)
+    {
+        line.Chunks = line.Chunks.Append(chunk);
+        return line;
+    }
 }
 
 public interface IDisplay

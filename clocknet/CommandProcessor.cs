@@ -2,6 +2,7 @@
 using clocknet.Display;
 using clocknet.Reports;
 using clocknet.Utils;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace clocknet;
 
@@ -13,13 +14,22 @@ public class CommandProcessor
     private readonly ITimeProvider timeProvider;
     private readonly Settings settings;
 
-    public CommandProcessor(string[] arguments, IRecordRepository recordRepository, IDisplay display, ITimeProvider timeProvider, Settings settings)
+    private readonly IServiceProvider sp;
+
+    public CommandProcessor(
+        ProgramArguments pArgs,
+        IRecordRepository recordRepository,
+        IDisplay display,
+        ITimeProvider timeProvider,
+        Settings settings,
+        IServiceProvider sp)
     {
-        this.arguments = arguments;
+        this.arguments = pArgs.Args;
         this.recordRepository = recordRepository;
         this.display = display;
         this.timeProvider = timeProvider;
         this.settings = settings;
+        this.sp = sp;
     }
 
     public void Execute()
@@ -97,13 +107,13 @@ public class CommandProcessor
     {
         if (HasOption(Args.WorkTimes))
         {
-            return new WorktimeReport(display, !isAll);
+            return sp.GetRequiredKeyedService<IReport>(Args.WorkTimes);
         }
         else if (HasOption(Args.BarGraphs))
         {
-            return new BarGraphReport(display);
+            return sp.GetRequiredKeyedService<IReport>(Args.BarGraphs);
         }
-        return new DetailsReport(display);
+        return sp.GetRequiredKeyedService<IReport>(Args.Details);
     }
 
     private IEnumerable<Activity> GetActivities(out bool isAll)
@@ -131,17 +141,21 @@ public class CommandProcessor
             || (!string.IsNullOrEmpty(opt.Short) && arguments.Where(x => x.StartsWith("-") && !x.StartsWith("--") && x.Contains(opt.Short)).Any());
     }
 
-    private static class Args
+    public static class Args
     {
+        // Filters
         public readonly static Option All = new Option("all", "a");
         public readonly static Option Week = new Option("week", "w");
         public readonly static Option Yesterday = new Option("yesterday", "y");
+        // Reports
         public readonly static Option WorkTimes = new Option("worktimes", "w");
         public readonly static Option BarGraphs = new Option("bar", "b");
+        public readonly static Option Details = new Option("details", "d");
+        // Others
         public readonly static Option At = new Option("at", string.Empty);
     }
 
-    private static class Commands
+    public static class Commands
     {
         public const string Show = "show";
         public const string Add = "add";
@@ -150,6 +164,6 @@ public class CommandProcessor
         public const string Open = "open";
     }
 
-    private record Option(string Long, string Short);
+    public record Option(string Long, string Short);
 }
 

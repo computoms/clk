@@ -1,16 +1,26 @@
 ﻿using clocknet;
 using clocknet.Display;
-using clocknet.Reports;
 using clocknet.Storage;
 using clocknet.Utils;
 using FileStream = clocknet.Storage.FileStream;
+using Microsoft.Extensions.DependencyInjection;
+using clocknet.Reports;
 
 var settings = Settings.Read();
-var timeProvider = new TimeProvider();
-var file = new FileStream(settings.File);
-var storage = new FileStorage(file, timeProvider);
-var repository = new RecordRepository(storage, timeProvider);
-var display = new ConsoleDisplay(true);
+var serviceProvider = new ServiceCollection()
+    .AddSingleton<IRecordRepository, RecordRepository>()
+    .AddSingleton<IStorage, FileStorage>()
+    .AddSingleton<IStream, FileStream>()
+    .AddSingleton<ITimeProvider, clocknet.Utils.TimeProvider>()
+    .AddSingleton(sp => Settings.Read())
+    .AddSingleton<IDisplay, ConsoleDisplay>(sp => new ConsoleDisplay(true))
+    .AddSingleton(sp => new ProgramArguments(args))
+    .AddSingleton<CommandProcessor>();
 
-var commandProcessor = new CommandProcessor(args, repository, display, timeProvider, settings);
+serviceProvider.AddKeyedSingleton<IReport, BarGraphReport>(CommandProcessor.Args.BarGraphs);
+serviceProvider.AddKeyedSingleton<IReport, WorktimeReport>(CommandProcessor.Args.WorkTimes);
+serviceProvider.AddKeyedSingleton<IReport, DetailsReport>(CommandProcessor.Args.Details);
+
+var services = serviceProvider.BuildServiceProvider();
+var commandProcessor = services.GetRequiredService<CommandProcessor>();
 commandProcessor.Execute();

@@ -24,7 +24,7 @@ public class BarGraphReport : IReport
         var maxActivityDuration = activities.Max(a => a.Duration);
         var maxTitle = activities.Max(a => a.Task.Title.Length);
 
-        // Align text on max title length, but do not overflow 80% of display width
+        // Align text on max title length, but do not overflow 70% of display width
         var textAlignment = maxTitle + 5;
         if (textAlignment > maxTextAlignmentRatio * displayFullWidth)
         {
@@ -38,14 +38,8 @@ public class BarGraphReport : IReport
     private FormattedLine DisplayBarGraph(Activity activity, TimeSpan maxDuration, int textAlignment, int maxBarLength)
     {
         var length = (int)(activity.Duration.Ticks * maxBarLength / maxDuration.Ticks);
-        return new FormattedLine
-        {
-            Chunks = new List<FormattedText>
-            {
-                new FormattedText { RawText = AlignText(activity.Task.Title, textAlignment), Color = Console.ForegroundColor },
-                new FormattedText { RawText = BarGraph(length), Color = GetColor() }
-            }
-        };
+        return AlignText(activity.Task.Title, textAlignment).FormatLine()
+            .Append(BarGraph(length).FormatChunk(GetColor()));
     }
 
     private string BarGraph(int length) => length == 0 ? "" : Enumerable.Range(0, length).Select(i => "\u2588").Aggregate((a, b) => $"{a}{b}");
