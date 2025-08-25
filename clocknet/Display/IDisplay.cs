@@ -18,15 +18,26 @@ public static class FormattedTextExtensions
         Chunks = new List<FormattedText> { new() { RawText = text, Color = Console.ForegroundColor } }
     };
 
+    public static FormattedLine FormatLine(this string text, ConsoleColor color) => new()
+    {
+        Chunks = new List<FormattedText> { new() { RawText = text, Color = color } }
+    };
+
     public static FormattedText FormatChunk(this string chunk) => new()
     {
         RawText = chunk,
         Color = Console.ForegroundColor
     };
 
+    public static FormattedText FormatChunk(this string chunk, ConsoleColor color) => new()
+    {
+        RawText = chunk,
+        Color = color
+    };
+
     public static FormattedLine Append(this FormattedLine line, string chunk)
     {
-        line.Chunks.Append(chunk.FormatChunk());
+        line.Chunks = line.Chunks.Append(chunk.FormatChunk());
         return line;
     }
 }
