@@ -5,6 +5,7 @@ using clocknet.Utils;
 using FileStream = clocknet.Storage.FileStream;
 using Microsoft.Extensions.DependencyInjection;
 using clocknet.Reports;
+using clocknet.Commands;
 
 var settings = Settings.Read();
 var serviceProvider = new ServiceCollection();

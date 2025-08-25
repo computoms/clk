@@ -1,4 +1,6 @@
-﻿namespace clocknet;
+﻿using clocknet.Commands;
+
+namespace clocknet;
 
 public class CommandProcessor(ICommand command)
 {

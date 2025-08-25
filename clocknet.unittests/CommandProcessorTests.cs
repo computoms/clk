@@ -24,7 +24,7 @@ public class CommandProcessorTests
     public void WithAddCommand_WhenExecute_ThenAddsRawEntry(string[] arguments, string expectedRawEntry, bool expectIncludeTime)
     {
         // Arrange
-        var processor = new CommandProcessor(new AddCommand(new ProgramArguments(arguments), new Settings(), _repository.Object));
+        var processor = new CommandProcessor(new Commands.AddCommand(new ProgramArguments(arguments), new Settings(), _repository.Object));
 
         // Act
         processor.Execute();
@@ -38,7 +38,7 @@ public class CommandProcessorTests
     public void WithStopCommand_WhenExecute_ThenAddsRawEntry(string expectedRawEntry, bool expectIncludeTime)
     {
         // Arrange
-        var processor = new CommandProcessor(new StopCommand(new ProgramArguments(["stop"]), _repository.Object));
+        var processor = new CommandProcessor(new Commands.StopCommand(new ProgramArguments(["stop"]), _repository.Object));
 
         // Act
         processor.Execute();
@@ -52,7 +52,7 @@ public class CommandProcessorTests
     {
         // Arrange
         _repository.Setup(x => x.GetAll()).Returns(new List<Activity>());
-        var processor = new CommandProcessor(new RestartCommand(new ProgramArguments(["restart"]), _repository.Object, _display.Object, _timeProvider.Object));
+        var processor = new CommandProcessor(new Commands.RestartCommand(_repository.Object, _display.Object, _timeProvider.Object));
 
         // Act
         processor.Execute();
@@ -65,7 +65,7 @@ public class CommandProcessorTests
     public void WithOneActivity_WithRestart_WhenExecute_ThenRestartsLastActivity()
     {
         // Arrange
-        var processor = new CommandProcessor(new RestartCommand(new ProgramArguments(["restart"]), _repository.Object, _display.Object, _timeProvider.Object));
+        var processor = new CommandProcessor(new Commands.RestartCommand(_repository.Object, _display.Object, _timeProvider.Object));
         var task = new Task("Activity", new string[] { "tag" }, "123");
         var record = new Record(new DateTime(2022, 1, 1), null);
         var activity = new Activity(task, new List<Record>() { record });
@@ -84,7 +84,7 @@ public class CommandProcessorTests
     public void WithAllOption_WhenShowing_ThenGetsAllActivities(string option)
     {
         // Arrange
-        var processor = new CommandProcessor(new ShowCommand(
+        var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show", option]), _repository.Object,
             _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object) }));
 
@@ -101,7 +101,7 @@ public class CommandProcessorTests
     public void WithWeekOption_WhenShowing_ThenGetsActivitiesOfTheWeek(string option)
     {
         // Arrange
-        var processor = new CommandProcessor(new ShowCommand(
+        var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show", option]), _repository.Object,
             _timeProvider.Object, new List<IReport>() { new WorktimeReport(_display.Object), new DetailsReport(_display.Object) }));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
@@ -119,7 +119,7 @@ public class CommandProcessorTests
     public void WithYesterdayOption_WhenShowing_ThenGetsActivitiesOfYesterday(string option)
     {
         // Arrange
-        var processor = new CommandProcessor(new ShowCommand(
+        var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show", option]), _repository.Object,
             _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object) }));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
@@ -135,7 +135,7 @@ public class CommandProcessorTests
     public void WithoutOptions_WhenShowing_ThenGetsActivitiesFromToday()
     {
         // Arrange
-        var processor = new CommandProcessor(new ShowCommand(
+        var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show"]), _repository.Object,
             _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object) }));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));

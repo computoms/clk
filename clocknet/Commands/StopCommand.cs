@@ -1,18 +1,19 @@
-using clocknet;
+namespace clocknet.Commands;
 
-public class StopCommand : BaseCommand
+public class StopCommand(ProgramArguments pArgs, IRecordRepository recordRepository) : ICommand
 {
-    private readonly IRecordRepository recordRepository;
-
-    public StopCommand(ProgramArguments pArgs, IRecordRepository recordRepository) : base(pArgs)
-    {
-        this.recordRepository = recordRepository;
-    }
-
     public static string Name { get; } = "stop";
 
-    public override void Execute()
+    public void Execute()
     {
-        recordRepository.AddRaw("[Stop]");
+        if (!pArgs.HasOption(Args.At))
+        {
+            recordRepository.AddRaw("[Stop]");
+            return;
+        }
+
+        int index = pArgs.Args.ToList().IndexOf("--at");
+        var time = pArgs.Args.Skip(index + 1).FirstOrDefault();
+        recordRepository.AddRaw(time + " [Stop]", true);
     }
 }
