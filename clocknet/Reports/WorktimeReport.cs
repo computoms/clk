@@ -33,16 +33,19 @@ public class WorktimeReport : IReport
                 .Select(x => PrintWeek(x.Key, x.ToList()))
                 .Select(x => x.Append(" "))
                 .Append(TotalTime(activities))
-                .Prepend("Weekly Report".FormatLine());
-	    }
+                .Prepend("Weekly Report\n".FormatLine());
+        }
 
         display.Print(lines);
     }
 
-    private FormattedLine TotalTime(IEnumerable<Activity> activities) => display.Layout($"{activities.Duration()} Total");
+    private FormattedLine TotalTime(IEnumerable<Activity> activities) =>
+        $"{activities.Duration()}".FormatLine(ConsoleColor.DarkBlue).Append(" Total");
 
-    private FormattedLine PrintWeek(int weekNumber, IEnumerable<Record> records) => display.Layout($"{records.Duration()} Week {weekNumber}");
+    private FormattedLine PrintWeek(int weekNumber, IEnumerable<Record> records) =>
+        $"{records.Duration()}".FormatLine(ConsoleColor.DarkGreen).Append($" Week {weekNumber}");
 
-    private FormattedLine PrintDay(DateTime day, IEnumerable<Record> records) => display.Layout($"{records.Duration()} {day:yyyy-MM-dd}");
+    private FormattedLine PrintDay(DateTime day, IEnumerable<Record> records) =>
+        $"{records.Duration()}".FormatLine(ConsoleColor.DarkGreen).Append($" {day:yyyy-MM-dd}");
 }
 
