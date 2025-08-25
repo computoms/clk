@@ -15,6 +15,8 @@ public class BarGraphReport : IReport
         _display = display;
     }
 
+    public Option Name { get; } = Args.BarGraphs;
+
     public void Print(IEnumerable<Activity> activities)
     {
         const int maxTotalWidth = 150;

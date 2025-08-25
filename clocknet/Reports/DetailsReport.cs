@@ -12,6 +12,8 @@ public class DetailsReport : IReport
         _display = display;
     }
 
+    public Option Name { get; } = Args.Details;
+
     public void Print(IEnumerable<Activity> activities)
     {
         _display.Print(

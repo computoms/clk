@@ -7,7 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using clocknet.Reports;
 
 var settings = Settings.Read();
-var serviceProvider = new ServiceCollection()
+var serviceProvider = new ServiceCollection();
+serviceProvider
     .AddSingleton<IRecordRepository, RecordRepository>()
     .AddSingleton<IStorage, FileStorage>()
     .AddSingleton<IStream, FileStream>()
@@ -15,11 +16,17 @@ var serviceProvider = new ServiceCollection()
     .AddSingleton(sp => Settings.Read())
     .AddSingleton<IDisplay, ConsoleDisplay>(sp => new ConsoleDisplay(true))
     .AddSingleton(sp => new ProgramArguments(args))
-    .AddSingleton<CommandProcessor>();
+    .AddSingleton(sp => new CommandProcessor(sp.GetRequiredKeyedService<ICommand>(args.FirstOrDefault())));
 
-serviceProvider.AddKeyedSingleton<IReport, BarGraphReport>(CommandProcessor.Args.BarGraphs);
-serviceProvider.AddKeyedSingleton<IReport, WorktimeReport>(CommandProcessor.Args.WorkTimes);
-serviceProvider.AddKeyedSingleton<IReport, DetailsReport>(CommandProcessor.Args.Details);
+serviceProvider.AddSingleton<IReport, BarGraphReport>();
+serviceProvider.AddSingleton<IReport, WorktimeReport>();
+serviceProvider.AddSingleton<IReport, DetailsReport>();
+
+serviceProvider.AddKeyedSingleton<ICommand, AddCommand>(AddCommand.Name);
+serviceProvider.AddKeyedSingleton<ICommand, ShowCommand>(ShowCommand.Name);
+serviceProvider.AddKeyedSingleton<ICommand, StopCommand>(StopCommand.Name);
+serviceProvider.AddKeyedSingleton<ICommand, RestartCommand>(RestartCommand.Name);
+serviceProvider.AddKeyedSingleton<ICommand, OpenCommand>(OpenCommand.Name);
 
 var services = serviceProvider.BuildServiceProvider();
 var commandProcessor = services.GetRequiredService<CommandProcessor>();
