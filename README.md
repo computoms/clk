@@ -155,7 +155,7 @@ Filters:
 - `--all` / `-a` : select all tasks without filtering
 - `--week` / `-t` : selects tasks from the current week
 - `--yesterday` / `-y` : selects tasks from yesterday
-- `--group-by` : only used for bar graphs, for filtering. Allowed values are `tags` to filter on the first tags of the tasks or `+tag` to filter tasks based on tag `tag` and display the bars according to the second level tag.
+- `--group-by` : only used for bar graphs, for filtering. Allowed values are `tags` to filter on the first tags of the tasks or `+tag` to filter tasks based on tag `tag` and display the bars according to the second level tag, or `+tag1,+tag2` to filter tasks based on multiple tags (and display bars according to the nth level tag).
 
 Reports:
 
@@ -173,3 +173,7 @@ Other options:
 ## Examples
 
 ![Examples](./docs/img/examples.png)
+
+Filtering by multiple tags:
+
+![Multi-tag filtering](./docs/img/example-multi-tags.png)
