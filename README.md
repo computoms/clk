@@ -146,6 +146,30 @@ TASK_NAME=$(clk list | fzf); clk add $TASK_NAME
 
 The above line allows to find an existing task by fuzzy finding its name, then adding it as current task.
 
+## Arguments and options
+
+Here is a list of arguments and a short description to each one:
+
+Filters:
+
+- `--all` / `-a` : select all tasks without filtering
+- `--week` / `-t` : selects tasks from the current week
+- `--yesterday` / `-y` : selects tasks from yesterday
+- `--group-by` : only used for bar graphs, for filtering. Allowed values are `tags` to filter on the first tags of the tasks or `+tag` to filter tasks based on tag `tag` and display the bars according to the second level tag.
+
+Reports:
+
+- `--worktimes` / `-w` : shows time worked for each day of the week or each week of the month
+- `--bar` / `-b` : display bar graphs
+- `--details` / `-d` (default) : displays the details of each task
+
+Other options:
+
+- `--at xx:xx` : add task at a specific time
+- `--settings /path/to/file` : specify a non-default settings file
+
+**Note**: single character options can be combined, _e.g._ `-ad` shows all tasks using the details report.
+
 ## Examples
 
 ![Examples](./docs/img/examples.png)

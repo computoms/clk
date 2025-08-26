@@ -46,7 +46,7 @@ public static class Args
 {
     // FilterApartmentStates
     public readonly static Option All = new("all", "a");
-    public readonly static Option Week = new("week", "w");
+    public readonly static Option Week = new("week", "t");
     public readonly static Option Yesterday = new("yesterday", "y");
     public readonly static Option Tags = new("group-by", string.Empty);
     // Reports
