@@ -31,7 +31,7 @@ public record ProgramArguments(string[] Args)
             {
                 return i;
             }
-            if (Args[i].StartsWith("-") && Args[i].StartsWith("--") && Args[i].Contains(opt.Short))
+            if (Args[i].StartsWith("-") && !Args[i].StartsWith("--") && Args[i].Contains(opt.Short))
             {
                 return i;
             }
