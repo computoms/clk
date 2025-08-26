@@ -66,7 +66,10 @@ Some settings can be configured, in `~/.clock/settings.yml`:
 ```yml
 File: /Users/thomas/clock.txt # Path to the file we use to store our tasks 
 DefaultTask: Admin +internal # Default task using when using command add without any other parameters
+EditorCommand: code # Command used to open the clock.txt with `clock open`
 ```
+
+Additionally, a custom settings file can be passed using the `--settings /path/to/file.yml` flag.
 
 ## Adding new entries
 
