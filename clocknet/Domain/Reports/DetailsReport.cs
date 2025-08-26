@@ -2,7 +2,7 @@
 
 namespace clocknet.Domain.Reports;
 
-public class DetailsReport(IDisplay display, IRecordRepository recordRepository) : IReport
+public class DetailsReport(IDisplay display, IRecordRepository recordRepository, ProgramArguments pArgs) : IReport
 {
     public Option Name { get; } = Args.Details;
 
@@ -12,7 +12,37 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository)
             .OrderBy(a => a.Records.MaxBy(r => r.StartTime)?.StartTime ?? DateTime.MinValue)
             .LastOrDefault();
 
+        if (pArgs.HasOption(Args.GroupBy))
+        {
+            PrintByTags(activities, current);
+            return;
+        }
 
+        PrintDetails(activities, current);
+    }
+
+    private void PrintByTags(IEnumerable<Activity> activities, Activity? current)
+    {
+        var groups = ReportUtils.FilterByTags(activities, pArgs.GetValue(Args.GroupBy));
+        display.Print(
+            groups
+            .Select(g => new TagInfo(
+                g.Key,
+                g.OrderBy(a => a.Records.Min(r => r.StartTime))
+                    .FirstOrDefault()?.Records
+                    .FirstOrDefault()?.StartTime.Date ?? DateTime.MinValue,
+                g.Aggregate(TimeSpan.Zero, (t, a) => t + a.Duration))
+            )
+            .GroupBy(e => e.Date)
+            .SelectMany(g => g.SelectMany(a => LayoutTagInfo(a)))
+            .Append(" ".FormatLine())
+            .Append(TotalTime(groups.SelectMany(g => g)))
+            .Append(" ".FormatLine())
+            .Append(Current(current)));
+    }
+
+    private void PrintDetails(IEnumerable<Activity> activities, Activity? current)
+    {
         display.Print(
             activities
                 .Select(a => new { Date = a.Records.OrderBy(r => r.StartTime.Date).FirstOrDefault()?.StartTime.Date, Activity = a })
@@ -63,6 +93,18 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository)
             .SelectMany(LayoutActivity).Prepend((date?.ToString("yyyy-MM-dd") ?? "").FormatLine());
     }
 
+    private IEnumerable<FormattedLine> LayoutTagInfo(TagInfo info)
+    {
+        var duration = Utilities.PrintDuration(info.Duration);
+        var line = new List<FormattedText>
+        {
+            $"{duration}".FormatChunk(ConsoleColor.DarkGreen),
+            info.Name.PrependSpaceIfNotNull().FormatChunk(),
+        };
+
+        return new List<FormattedLine> { display.Layout(line, 1) };
+    }
+
     private IEnumerable<FormattedLine> LayoutActivity(Activity activity)
     {
         var duration = Utilities.PrintDuration(activity.Duration);
@@ -91,5 +133,7 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository)
         };
         return display.Layout(formattedRecords, 2);
     }
+
+    private record TagInfo(string? Name, DateTime Date, TimeSpan Duration);
 }
 

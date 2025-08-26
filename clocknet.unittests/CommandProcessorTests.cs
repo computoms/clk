@@ -104,7 +104,7 @@ public class CommandProcessorTests
         // Arrange
         var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show", option]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object) }));
+            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option])) }));
 
         // Act
         processor.Execute();
@@ -115,13 +115,13 @@ public class CommandProcessorTests
 
     [Theory]
     [InlineData("--week")]
-    [InlineData("-w")]
+    [InlineData("-t")]
     public void WithWeekOption_WhenShowing_ThenGetsActivitiesOfTheWeek(string option)
     {
         // Arrange
         var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show", option]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new WorktimeReport(_display.Object), new DetailsReport(_display.Object, _repository.Object) }));
+            _timeProvider.Object, new List<IReport>() { new WorktimeReport(_display.Object), new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option])) }));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
         // Act
@@ -139,7 +139,7 @@ public class CommandProcessorTests
         // Arrange
         var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show", option]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object) }));
+            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option])) }));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
         // Act
@@ -155,7 +155,7 @@ public class CommandProcessorTests
         // Arrange
         var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show"]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object) }));
+            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show"])) }));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
         // Act

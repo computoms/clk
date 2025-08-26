@@ -12,9 +12,9 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
 
     public void Print(IEnumerable<Activity> activities)
     {
-        if (pArgs.HasOption(Args.Tags))
+        if (pArgs.HasOption(Args.GroupBy))
         {
-            var groupBy = pArgs.GetValue(Args.Tags);
+            var groupBy = pArgs.GetValue(Args.GroupBy);
             PrintByTags(activities, groupBy);
             return;
         }
@@ -24,7 +24,7 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
 
     private void PrintByTags(IEnumerable<Activity> activities, string tagFilter)
     {
-        var groups = FilterByTags(activities, tagFilter);
+        var groups = ReportUtils.FilterByTags(activities, tagFilter);
 
         var durations = groups.Select(g => g.Aggregate(TimeSpan.Zero, (total, a2) => total + a2.Duration)).ToList();
         if (durations.Count == 0)
@@ -45,19 +45,6 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
                 .Select(g => DisplayBarGraph(
                     g.Key ?? noCat, g.Aggregate(TimeSpan.Zero, (total, a) => total + a.Duration),
                     maxActivityDuration, layout.TextAlignment, layout.MaxBarLength)));
-    }
-
-    private IEnumerable<IGrouping<string?, Activity>> FilterByTags(IEnumerable<Activity> activities, string tagFilter)
-    {
-        var tags = tagFilter.Split(",").Select(t => t[0] == '+' ? t.Substring(1) : t).ToList();
-        if (tags.Count == 1 && tags[0] == "tags")
-            return activities.GroupBy(a => a.Task.Tags.FirstOrDefault());
-
-        return activities
-                // Filter all activities that contain all the tags we want to filter on
-                .Where(a => tags.All(t => a.Task.Tags.Contains(t)))
-                // Remove filter tags before grouping by remaining tags
-                .GroupBy(a => a.Task.Tags.Where(t => !tags.Contains(t)).FirstOrDefault());
     }
 
     private TimeSpan GetGroupDuration(IGrouping<string?, Activity> group)
