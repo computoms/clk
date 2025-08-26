@@ -34,11 +34,12 @@ public class CommandProcessorTests
     }
 
     [Theory]
-    [InlineData("[Stop]", false)]
-    public void WithStopCommand_WhenExecute_ThenAddsRawEntry(string expectedRawEntry, bool expectIncludeTime)
+    [InlineData(new string[1] { "stop" }, "[Stop]", false)]
+    [InlineData(new string[3] { "stop", "--at", "10:00" }, "10:00 [Stop]", true)]
+    public void WithStopCommand_WhenExecute_ThenAddsRawEntry(string[] args, string expectedRawEntry, bool expectIncludeTime)
     {
         // Arrange
-        var processor = new CommandProcessor(new Commands.StopCommand(new ProgramArguments(["stop"]), _repository.Object));
+        var processor = new CommandProcessor(new Commands.StopCommand(new ProgramArguments(args), _repository.Object));
 
         // Act
         processor.Execute();
