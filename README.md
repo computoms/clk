@@ -11,10 +11,10 @@ Download the executable from the build artifacts. Then, alias the executable `cl
 On macos, if you use zsh, you can add the following line to your [profile](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html), _i.e._ `~/.zshenv` file (if you downloaded the package into the downloads folder):
 
 ```zsh
-alias clock="~/Downloads/clocknet/clocknet"
+alias clk="~/Downloads/clocknet/clocknet"
 ```
 
-Remark: on macos, it is possible that the OS prevents you from running the software. In this case, you can use the `dotnet` tool to run it with the command: `dotnet ~/Downloads/clocknet/clocknet.dll`
+Remark: on macos, it is possible that the OS prevents you from running the software. Update the security settings to allow the `clocknet` program to run.
 
 ### Windows
 
@@ -22,7 +22,7 @@ On windows, if you use Powershell, you can add the following line to your [profi
 
 ```pwsh
 function Invoke-Clock { "C:/path/to/the/package/clocknet.exe" }
-New-Alias -Name clock -Value Invoke-Clock
+New-Alias -Name clk -Value Invoke-Clock
 ```
 
 # Usage
@@ -51,9 +51,9 @@ Here is an example file:
 
 An entry in this file can be associated with tags if you start the tag with a `+` (`+tag`) or ID if you start with a `.` (`.456`). 
 
-Tags allow for powerful filtering and reporting. They are ordered, meaning that `+project +doc` is different from `+doc +project` (see reports and filters below).
+Tags allow for powerful filtering and reporting.
 
-IDs allow to track time of tasks from an external tool, such as Jira. Entries with an ID are automatically assigned a default tag (`+jira`).
+IDs allow to track time of tasks from an external tool, such as Jira. They also allow to restart a task if you know its id (see examples below).
 
 ## Special tasks
 
@@ -66,7 +66,7 @@ Some settings can be configured, in `~/.clock/settings.yml`:
 ```yml
 File: /Users/thomas/clock.txt # Path to the file we use to store our tasks 
 DefaultTask: Admin +internal # Default task using when using command add without any other parameters
-EditorCommand: code # Command used to open the clock.txt with `clock open`
+EditorCommand: code # Command used to open the clock.txt with `clk open`
 ```
 
 Additionally, a custom settings file can be passed using the `--settings /path/to/file.yml` flag.
@@ -76,40 +76,40 @@ Additionally, a custom settings file can be passed using the `--settings /path/t
 You can add a new entry by using the `add` command:
 
 ```
-$ clock add Definition of the prototype +myapp +proto
+$ clk add Definition of the prototype +myapp +proto
 ```
 
 To switch to a new task, just use the same command:
 
 ```
-$ clock add Switching to new task
+$ clk add Switching to new task
 ```
 
 This will automatically stop the last task and start a new one. When you have finished working, use the `stop` command:
 
 ```
-$ clock stop
+$ clk stop
 ```
 
 If you forgot to add a task, you can add it later using the `--at` option:
 
 ```
-$ clock add --at 10:00 Forgot to add a task
+$ clk add --at 10:00 Forgot to add a task
 ```
 
 ### Restarting last entry
 
-After you took a break by using the `clock stop` command, you can restart the latest task using the `restart` command.
+After you took a break by using the `clk stop` command, you can restart the latest task using the `restart` command.
 
 ### Restarting a task by id
 
 You can also only specify the id of a task that has already been tracked before, and this will add the corresponding title/tags automatically:
 
 ```
-$ clock add This is a new task with an id +tag .123
-$ clock stop
-$ clock add This is a second task
-$ clock add .123 # Will automatically add the entry 'This is a new task with an id +tag .123'
+$ clk add This is a new task with an id +tag .123
+$ clk stop
+$ clk add This is a second task
+$ clk add .123 # Will automatically add the entry 'This is a new task with an id +tag .123'
 ```
 
 ## Reports
@@ -117,7 +117,7 @@ $ clock add .123 # Will automatically add the entry 'This is a new task with an 
 You can show reports/statistics with the `show` command:
 
 ```
-$ clock show
+$ clk show
 ```
 
 #### Details
@@ -141,7 +141,7 @@ The command `open` allows to open the `clock.txt` source file with the default e
 All task names (with tags and ids) can be found using the `list` command. This is useful to be used with [fzf](https://github.com/junegunn/fzf/blob/master/README.md):
 
 ```bash
-TASK_NAME=$(clock list | fzf); clock add $TASK_NAME
+TASK_NAME=$(clk list | fzf); clk add $TASK_NAME
 ```
 
 The above line allows to find an existing task by fuzzy finding its name, then adding it as current task.
