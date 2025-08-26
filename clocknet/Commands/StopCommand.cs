@@ -8,14 +8,16 @@ public class StopCommand(ProgramArguments pArgs, IRecordRepository recordReposit
 
     public void Execute()
     {
-        if (!pArgs.HasOption(Args.At))
-        {
-            recordRepository.AddRaw("[Stop]");
-            return;
-        }
+        var inputLine = ParseOptions();
+        var activity = new InputTask(new Domain.Task("[Stop]", [], string.Empty), new Record(inputLine.Time));
+        recordRepository.AddRecord(activity.Task, activity.Record);
+    }
 
-        int index = pArgs.Args.ToList().IndexOf("--at");
-        var time = pArgs.Args.Skip(index + 1).FirstOrDefault();
-        recordRepository.AddRaw(time + " [Stop]", true);
+    private InputLine ParseOptions()
+    {
+        var words = pArgs.Args.Skip(1).ToList();
+        return new InputLine(words, DateTime.Now)
+            .ExtractAtOption(pArgs)
+            .ExtractSettingsOption(pArgs);
     }
 }

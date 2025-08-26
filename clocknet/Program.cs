@@ -14,6 +14,7 @@ serviceProvider
     .AddSingleton<IStream, FileStream>()
     .AddSingleton<ITimeProvider, clocknet.Utils.TimeProvider>()
     .AddSingleton<Settings>()
+    .AddSingleton<CommandUtils>()
     .AddSingleton<IDisplay, ConsoleDisplay>(sp => new ConsoleDisplay(true))
     .AddSingleton(sp => new ProgramArguments(args))
     .AddSingleton(sp => new CommandProcessor(sp.GetRequiredKeyedService<ICommand>(args.FirstOrDefault())));

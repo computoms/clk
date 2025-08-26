@@ -19,14 +19,6 @@ public class FileStorage : IStorage
         this.timeProvider = timeProvider;
     }
 
-    public void AddEntryRaw(string rawEntry, bool parseTime = false)
-    {
-        var line = ParseLine(rawEntry, timeProvider.Now, parseTime);
-        var record = new Record(parseTime ? line.StartTime : timeProvider.Now, null);
-        var task = FindPartiallyMatchingTask(line);
-        AddEntry(task, record);
-    }
-
     public void AddEntry(Domain.Task task, Record record)
     {
         if (!isInitialized)
@@ -96,22 +88,6 @@ public class FileStorage : IStorage
             activities.Add(activity);
         }
         return activity;
-    }
-
-    private Domain.Task FindPartiallyMatchingTask(ParsedLine line)
-    {
-        var defaultTask = new Domain.Task(line.Title, line.Tags, line.Id);
-        if (string.IsNullOrWhiteSpace(line.Id))
-            return defaultTask;
-
-        var correspondingActivity = ReadAll().FirstOrDefault(x => x.Task.Id == line.Id);
-        if (correspondingActivity == null)
-            return defaultTask;
-
-        if (!string.IsNullOrWhiteSpace(line.Title) && line.Title != correspondingActivity.Task.Title)
-            throw new InvalidDataException($"Id {line.Id} already exists");
-
-        return correspondingActivity.Task;
     }
 
     private ParsedLine ParseLine(string line, DateTime currentDate, bool parseHour = true)

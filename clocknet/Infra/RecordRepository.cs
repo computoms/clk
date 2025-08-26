@@ -16,18 +16,6 @@ public class RecordRepository : IRecordRepository
         this.display = new ConsoleDisplay(true);
     }
 
-    public void AddRaw(string recordRaw, bool parseTime = false)
-    { 
-        try
-        { 
-            storage.AddEntryRaw(recordRaw, parseTime);
-	    }
-        catch (Exception e)
-        {
-            display.Error(e.Message);
-	    }
-    }
-
     public void AddRecord(Domain.Task activity, Record record)
     {
         try

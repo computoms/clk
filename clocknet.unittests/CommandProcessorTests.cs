@@ -3,6 +3,7 @@ using clocknet.Domain.Reports;
 using clocknet.Utils;
 using FluentAssertions;
 using Moq;
+using Xunit.Sdk;
 using YamlDotNet.Serialization;
 
 namespace clocknet.unittests;
@@ -18,39 +19,50 @@ public class CommandProcessorTests
     }
 
     [Theory]
-    [InlineData(new string[4] { "add", "bla", "bli", "blou" }, "bla bli blou", false)]
-    [InlineData(new string[1] { "add" }, "Started empty task", false)]
-    [InlineData(new string[5] { "add", "--at", "10:00", "Test", "+tag" }, "10:00 Test +tag", true)]
-    [InlineData(new string[5] { "add", "Test", "--at", "10:00", "+tag" }, "10:00 Test +tag", true)]
-    [InlineData(new string[4] { "add", "--at", "10:00", ".123" }, "10:00 .123", true)]
-    public void WithAddCommand_WhenExecute_ThenAddsRawEntry(string[] arguments, string expectedRawEntry, bool expectIncludeTime)
+    [InlineData(new string[4] { "add", "bla", "bli", "blou" }, "bla bli blou", new string[0], "", 0, 0)]
+    [InlineData(new string[1] { "add" }, "Started empty task", new string[0], "", 0, 0)]
+    [InlineData(new string[5] { "add", "--at", "10:00", "Test", "+tag" }, "Test", new string[1] { "tag" }, "", 10, 0)]
+    [InlineData(new string[5] { "add", "Test", "--at", "10:00", "+tag" }, "Test", new string[1] { "tag" }, "", 10, 0)]
+    [InlineData(new string[4] { "add", "--at", "10:00", ".123" }, "", new string[0], "123", 10, 0)]
+    public void WithAddCommand_WhenExecute_ThenAddsRawEntry(string[] arguments, string expectedTitle, string[] expectedTag, string expectedId, int expectedHour, int expectedMin)
     {
         // Arrange
         var settings = new Settings(new ProgramArguments(arguments));
         settings.Data = new Settings.SettingsData();
         var processor = new CommandProcessor(
-            new Commands.AddCommand(new ProgramArguments(arguments), settings, _repository.Object));
+            new Commands.AddCommand(new ProgramArguments(arguments), settings, _repository.Object, new Commands.CommandUtils(_repository.Object)));
+        var expectedTask = new Domain.Task(expectedTitle, expectedTag, expectedId);
+        if (expectedHour == 0 && expectedMin == 0)
+        {
+            expectedHour = DateTime.Now.Hour;
+            expectedMin = DateTime.Now.Minute;
+        }
 
         // Act
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.AddRaw(expectedRawEntry, expectIncludeTime));
+        _repository.Verify(x => x.AddRecord(It.Is<Domain.Task>(t => t.Title == expectedTitle && t.Id == expectedId && t.Tags.Count() == expectedTag.Count() && t.Tags.All(tag => expectedTag.Contains(tag))), It.Is<Domain.Record>(r => r.StartTime.Hour == expectedHour && r.StartTime.Minute == expectedMin)));
     }
 
     [Theory]
-    [InlineData(new string[1] { "stop" }, "[Stop]", false)]
-    [InlineData(new string[3] { "stop", "--at", "10:00" }, "10:00 [Stop]", true)]
-    public void WithStopCommand_WhenExecute_ThenAddsRawEntry(string[] args, string expectedRawEntry, bool expectIncludeTime)
+    [InlineData(new string[1] { "stop" }, 0, 0)]
+    [InlineData(new string[3] { "stop", "--at", "10:00" }, 10, 0)]
+    public void WithStopCommand_WhenExecute_ThenAddsRawEntry(string[] args, int expectedHour, int expectedMin)
     {
         // Arrange
         var processor = new CommandProcessor(new Commands.StopCommand(new ProgramArguments(args), _repository.Object));
+        if (expectedHour == 0 && expectedMin == 0)
+        {
+            expectedHour = DateTime.Now.Hour;
+            expectedMin = DateTime.Now.Minute;
+        }
 
         // Act
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.AddRaw(expectedRawEntry, expectIncludeTime));
+        _repository.Verify(x => x.AddRecord(It.Is<Domain.Task>(t => t.Title == "[Stop]"), It.Is<Domain.Record>(r => r.StartTime.Hour == expectedHour && r.StartTime.Minute == expectedMin)));
     }
 
     [Fact]

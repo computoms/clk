@@ -19,16 +19,19 @@ public class RecordRepositoryTests
     }
 
     [Theory]
-    [InlineData("New Entry .123", false)]
-    [InlineData("11:00 New Entry .123", true)]
-    [InlineData("11:00 .123", true)]
-    public void WhenAddingRawEntry_ThenEntryIsAddedToStorage(string entry, bool parseTime)
+    [InlineData("New Entry", "123")]
+    [InlineData(" ", "123")]
+    public void WhenAddingRawEntry_ThenEntryIsAddedToStorage(string title, string id)
     {
+        // Arrange
+        var task = new Domain.Task(title, [], id);
+        var record = new Domain.Record(DateTime.Now);
+
         // Act
-        _repository.AddRaw(entry, parseTime);
+        _repository.AddRecord(task, record);
 
         // Assert
-        _storage.Verify(x => x.AddEntryRaw(entry, parseTime), Times.Once);
+        _storage.Verify(x => x.AddEntry(task, record), Times.Once);
     }
 
     [Fact]
@@ -39,19 +42,6 @@ public class RecordRepositoryTests
 
         // Act
         var act = () => _repository.AddRecord(new Domain.Task("Test", new string[0], ""), new Domain.Record(DateTime.Now, null));
-
-        // Assert
-        act.Should().NotThrow();
-    }
-
-    [Fact]
-    public void WithThrowingStorage_WhenAddingEntryRaw_ThenDoesNotThrow()
-    {
-        // Arrange
-        _storage.Setup(x => x.AddEntryRaw(It.IsAny<string>(), It.IsAny<bool>())).Throws<InvalidDataException>();
-
-        // Act
-        var act = () => _repository.AddRaw("test");
 
         // Assert
         act.Should().NotThrow();
