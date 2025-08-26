@@ -12,7 +12,7 @@ public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordReposi
         bool parseTime = false;
         if (pArgs.Args.Length == 1)
         {
-            rawLine = settings.DefaultTask;
+            rawLine = settings.Data.DefaultTask;
         }
         else if (pArgs.HasOption(Args.At))
         {

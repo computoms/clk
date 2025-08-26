@@ -8,7 +8,7 @@ public class FileStream : IStream
 
     public FileStream(Settings settings)
     {
-        _filename = settings.File;
+        _filename = settings.Data.File;
     }
 
     public void AddLine(string line)

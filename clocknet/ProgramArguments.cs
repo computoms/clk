@@ -1,3 +1,5 @@
+using System.Security.Cryptography.X509Certificates;
+
 namespace clocknet;
 
 public record ProgramArguments(string[] Args)
@@ -10,6 +12,31 @@ public record ProgramArguments(string[] Args)
             return false;
 
         return Args.Any(x => x.StartsWith("-") && !x.StartsWith("--") && x.Contains(opt.Short));
+    }
+
+    public string GetValue(Option opt)
+    {
+        int index = GetIndex(opt);
+        if (index == -1 || index == Args.Length - 1)
+            return "";
+
+        return Args[index + 1];
+    }
+
+    private int GetIndex(Option opt)
+    {
+        for (int i = 0; i < Args.Length; ++i)
+        {
+            if (Args[i] == $"--{opt.Long}")
+            {
+                return i;
+            }
+            if (Args[i].StartsWith("-") && Args[i].StartsWith("--") && Args[i].Contains(opt.Short))
+            {
+                return i;
+            }
+        }
+        return -1;
     }
 }
 
@@ -27,4 +54,5 @@ public static class Args
     public readonly static Option Details = new("details", "d");
     // Others
     public readonly static Option At = new("at", string.Empty);
+    public readonly static Option Settings = new("settings", string.Empty);
 }

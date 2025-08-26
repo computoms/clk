@@ -1,7 +1,9 @@
 ﻿using clocknet.Domain;
 using clocknet.Domain.Reports;
 using clocknet.Utils;
+using FluentAssertions;
 using Moq;
+using YamlDotNet.Serialization;
 
 namespace clocknet.unittests;
 
@@ -24,7 +26,10 @@ public class CommandProcessorTests
     public void WithAddCommand_WhenExecute_ThenAddsRawEntry(string[] arguments, string expectedRawEntry, bool expectIncludeTime)
     {
         // Arrange
-        var processor = new CommandProcessor(new Commands.AddCommand(new ProgramArguments(arguments), new Settings(), _repository.Object));
+        var settings = new Settings(new ProgramArguments(arguments));
+        settings.Data = new Settings.SettingsData();
+        var processor = new CommandProcessor(
+            new Commands.AddCommand(new ProgramArguments(arguments), settings, _repository.Object));
 
         // Act
         processor.Execute();

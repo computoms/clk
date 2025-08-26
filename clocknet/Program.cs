@@ -7,14 +7,13 @@ using clocknet.Domain;
 using clocknet.Infra;
 using clocknet.Domain.Reports;
 
-var settings = Settings.Read();
 var serviceProvider = new ServiceCollection();
 serviceProvider
     .AddSingleton<IRecordRepository, RecordRepository>()
     .AddSingleton<IStorage, FileStorage>()
     .AddSingleton<IStream, FileStream>()
     .AddSingleton<ITimeProvider, clocknet.Utils.TimeProvider>()
-    .AddSingleton(sp => Settings.Read())
+    .AddSingleton<Settings>()
     .AddSingleton<IDisplay, ConsoleDisplay>(sp => new ConsoleDisplay(true))
     .AddSingleton(sp => new ProgramArguments(args))
     .AddSingleton(sp => new CommandProcessor(sp.GetRequiredKeyedService<ICommand>(args.FirstOrDefault())));

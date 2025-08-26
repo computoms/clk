@@ -10,8 +10,8 @@ public class OpenCommand(Settings settings) : ICommand
     {
         using var p = new Process();
         p.StartInfo.UseShellExecute = false;
-        p.StartInfo.FileName = settings.EditorCommand;
-        p.StartInfo.Arguments = settings.File;
+        p.StartInfo.FileName = settings.Data.EditorCommand;
+        p.StartInfo.Arguments = settings.Data.File;
         p.StartInfo.CreateNoWindow = true;
         p.Start();
     }
