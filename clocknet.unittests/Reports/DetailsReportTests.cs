@@ -50,6 +50,8 @@ public class DetailsReportTests
             "     00:27 (14:00 -> 14:27)",
             " ",
             "02:05 Total",
+            " ",
+            " --> 00:35 Activity2 .002"
         };
         var calledStrings = new List<FormattedLine>();
         _display.Setup(x => x.Print(It.IsAny<IEnumerable<FormattedLine>>()))

@@ -30,7 +30,7 @@ public class CommandProcessorTests
         var settings = new Settings(new ProgramArguments(arguments));
         settings.Data = new Settings.SettingsData();
         var processor = new CommandProcessor(
-            new Commands.AddCommand(new ProgramArguments(arguments), settings, _repository.Object, new Commands.CommandUtils(_repository.Object)));
+            new Commands.AddCommand(new ProgramArguments(arguments), settings, _repository.Object, new Commands.CommandUtils(_repository.Object, _display.Object), _display.Object));
         var expectedTask = new Domain.Task(expectedTitle, expectedTag, expectedId);
         if (expectedHour == 0 && expectedMin == 0)
         {
@@ -51,7 +51,7 @@ public class CommandProcessorTests
     public void WithStopCommand_WhenExecute_ThenAddsRawEntry(string[] args, int expectedHour, int expectedMin)
     {
         // Arrange
-        var processor = new CommandProcessor(new Commands.StopCommand(new ProgramArguments(args), _repository.Object));
+        var processor = new CommandProcessor(new Commands.StopCommand(new ProgramArguments(args), _repository.Object, new Commands.CommandUtils(_repository.Object, _display.Object)));
         if (expectedHour == 0 && expectedMin == 0)
         {
             expectedHour = DateTime.Now.Hour;
@@ -104,7 +104,7 @@ public class CommandProcessorTests
         // Arrange
         var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show", option]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object) }));
+            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object) }));
 
         // Act
         processor.Execute();
@@ -121,7 +121,7 @@ public class CommandProcessorTests
         // Arrange
         var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show", option]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new WorktimeReport(_display.Object), new DetailsReport(_display.Object) }));
+            _timeProvider.Object, new List<IReport>() { new WorktimeReport(_display.Object), new DetailsReport(_display.Object, _repository.Object) }));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
         // Act
@@ -139,7 +139,7 @@ public class CommandProcessorTests
         // Arrange
         var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show", option]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object) }));
+            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object) }));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
         // Act
@@ -155,7 +155,7 @@ public class CommandProcessorTests
         // Arrange
         var processor = new CommandProcessor(new Commands.ShowCommand(
             new ProgramArguments(["show"]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object) }));
+            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object) }));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
         // Act

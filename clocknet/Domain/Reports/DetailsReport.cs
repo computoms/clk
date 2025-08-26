@@ -10,7 +10,7 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository)
     {
         var current = recordRepository.FilterByDate(DateTime.Today)
             .OrderBy(a => a.Records.MaxBy(r => r.StartTime)?.StartTime ?? DateTime.MinValue)
-            .Last();
+            .LastOrDefault();
 
 
         display.Print(
@@ -24,16 +24,19 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository)
                 .Append(Current(current)));
     }
 
-    private FormattedLine Current(Activity current)
+    private FormattedLine Current(Activity? current)
     {
-        var currentRecord = current.Records.MaxBy(r => r.StartTime);
-        if (currentRecord?.EndTime == null || (currentRecord.EndTime?.Hour == DateTime.Now.Hour && currentRecord.EndTime?.Minute == DateTime.Now.Minute))
+        var currentRecord = current?.Records.MaxBy(r => r.StartTime);
+        if (currentRecord == null)
+            return new FormattedLine();
+
+        if (currentRecord.EndTime == null || (currentRecord.EndTime?.Hour == DateTime.Now.Hour && currentRecord.EndTime?.Minute == DateTime.Now.Minute))
         {
             return new FormattedLine
             {
                 Chunks = new List<FormattedText> {
                     " --> ".FormatChunk(),
-                    $"{Utilities.PrintDuration(current.Duration)} ".FormatChunk(ConsoleColor.DarkGreen),
+                    $"{Utilities.PrintDuration(current!.Duration)} ".FormatChunk(ConsoleColor.DarkGreen),
                     current.Task.Title.FormatChunk(ConsoleColor.DarkYellow)
                 }
             };
