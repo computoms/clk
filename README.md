@@ -145,3 +145,7 @@ TASK_NAME=$(clk list | fzf); clk add $TASK_NAME
 ```
 
 The above line allows to find an existing task by fuzzy finding its name, then adding it as current task.
+
+## Examples
+
+![Examples](./docs/img/examples.png)
