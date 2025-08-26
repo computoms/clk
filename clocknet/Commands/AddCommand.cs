@@ -2,7 +2,7 @@ using clocknet.Domain;
 
 namespace clocknet.Commands;
 
-public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordRepository recordRepository, CommandUtils commandUtils) : ICommand
+public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordRepository recordRepository, CommandUtils commandUtils, IDisplay display) : ICommand
 {
     public static string Name { get; } = "add";
 
@@ -12,6 +12,7 @@ public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordReposi
         var activity = ParseInput(inputLine);
         activity = activity with { Task = commandUtils.FindPartiallyMatchingTask(activity.Task) };
         recordRepository.AddRecord(activity.Task, activity.Record);
+        commandUtils.DisplayResult(activity);
     }
 
     private InputLine ParseOptions()
@@ -31,4 +32,16 @@ public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordReposi
         return new InputTask(new Domain.Task(title, tags, number ?? string.Empty), new Record(line.Time));
     }
 
+    private void DisplayResult(InputTask activity)
+    {
+        display.Print([
+            display.Layout(
+            [
+                (activity.Record.StartTime.ToString("HH:mm") + " ").FormatChunk(ConsoleColor.DarkGreen),
+                activity.Task.Title.FormatChunk(),
+                activity.Task.Tags.Aggregate("", (t1, t2) => t1 + " +" + t2).FormatChunk(ConsoleColor.DarkBlue),
+                $" .{activity.Task.Id}".FormatChunk(ConsoleColor.DarkYellow)
+            ])
+        ]);
+    }
 }

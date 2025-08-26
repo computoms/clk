@@ -4,7 +4,7 @@ using clocknet.Domain;
 
 namespace clocknet.Commands;
 
-public class CommandUtils(IRecordRepository repository)
+public class CommandUtils(IRecordRepository repository, IDisplay display)
 {
     public Domain.Task FindPartiallyMatchingTask(Domain.Task task)
     {
@@ -21,6 +21,20 @@ public class CommandUtils(IRecordRepository repository)
 
         return correspondingActivity.Task;
     }
+
+    public void DisplayResult(InputTask activity)
+    {
+        display.Print([
+            display.Layout(
+            [
+                (activity.Record.StartTime.ToString("HH:mm") + " ").FormatChunk(ConsoleColor.DarkGreen),
+                activity.Task.Title.FormatChunk(),
+                activity.Task.Tags.Aggregate("", (t1, t2) => t1 + " +" + t2).FormatChunk(ConsoleColor.DarkBlue),
+                activity.Task.Id != string.Empty ? $" .{activity.Task.Id}".FormatChunk(ConsoleColor.DarkYellow) : string.Empty.FormatChunk()
+            ])
+        ]);
+    }
+
 }
 
 public record InputTask(clocknet.Domain.Task Task, clocknet.Domain.Record Record);

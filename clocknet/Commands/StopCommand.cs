@@ -2,7 +2,7 @@ using clocknet.Domain;
 
 namespace clocknet.Commands;
 
-public class StopCommand(ProgramArguments pArgs, IRecordRepository recordRepository) : ICommand
+public class StopCommand(ProgramArguments pArgs, IRecordRepository recordRepository, CommandUtils commandUtils) : ICommand
 {
     public static string Name { get; } = "stop";
 
@@ -11,6 +11,7 @@ public class StopCommand(ProgramArguments pArgs, IRecordRepository recordReposit
         var inputLine = ParseOptions();
         var activity = new InputTask(new Domain.Task("[Stop]", [], string.Empty), new Record(inputLine.Time));
         recordRepository.AddRecord(activity.Task, activity.Record);
+        commandUtils.DisplayResult(activity);
     }
 
     private InputLine ParseOptions()
