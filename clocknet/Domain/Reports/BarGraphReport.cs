@@ -1,4 +1,6 @@
 
+using clocknet.Utils;
+
 namespace clocknet.Domain.Reports;
 
 public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
@@ -45,11 +47,16 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
 
         var layout = GetLayout(maxTitle);
 
-        display.Print(groups.Select(
-            g => DisplayBarGraph(
-                g.Key ?? noCat, g.Aggregate(TimeSpan.Zero, (total, a) => total + a.Duration),
-                maxActivityDuration, layout.TextAlignment, layout.MaxBarLength)));
+        display.Print(
+            groups
+                .OrderBy(GetGroupDuration)
+                .Select(g => DisplayBarGraph(
+                    g.Key ?? noCat, g.Aggregate(TimeSpan.Zero, (total, a) => total + a.Duration),
+                    maxActivityDuration, layout.TextAlignment, layout.MaxBarLength)));
     }
+
+    private TimeSpan GetGroupDuration(IGrouping<string?, Activity> group)
+        => group.Aggregate(TimeSpan.Zero, (ts, a) => ts + a.Duration);
 
     private void PrintByTaskTitles(IEnumerable<Activity> activities)
     {
@@ -57,7 +64,10 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
         var maxTitle = activities.Max(a => a.Task.Title.Length);
 
         var layout = GetLayout(maxTitle);
-        display.Print(activities.Select(a => DisplayBarGraph(a.Task.Title, a.Duration, maxActivityDuration, layout.TextAlignment, layout.MaxBarLength)));
+        display.Print(
+            activities
+                .OrderBy(a => a.Duration)
+                .Select(a => DisplayBarGraph(a.Task.Title, a.Duration, maxActivityDuration, layout.TextAlignment, layout.MaxBarLength)));
     }
 
     private static BarLayout GetLayout(int maxTitleLength)
