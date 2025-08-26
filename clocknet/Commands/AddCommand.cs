@@ -15,16 +15,16 @@ public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordReposi
         commandUtils.DisplayResult(activity);
     }
 
-    private InputLine ParseOptions()
+    private CommandLineInput ParseOptions()
     {
         var words = pArgs.Args.Skip(1).ToList();
-        return new InputLine(words, DateTime.Now)
+        return new CommandLineInput(words, DateTime.Now)
             .ExtractAtOption(pArgs)
             .ExtractSettingsOption(pArgs)
             .IncludeDefaultTask(settings.Data.DefaultTask);
     }
 
-    private static InputTask ParseInput(InputLine line)
+    private static InputTask ParseInput(CommandLineInput line)
     {
         var tags = line.Words.Where(x => x.StartsWith('+')).Select(x => x[1..]).ToArray();
         var number = line.Words.FirstOrDefault(x => x.StartsWith('.') && x.Skip(1).All(char.IsDigit))?[1..];

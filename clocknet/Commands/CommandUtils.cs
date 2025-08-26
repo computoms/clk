@@ -39,9 +39,9 @@ public class CommandUtils(IRecordRepository repository, IDisplay display)
 
 public record InputTask(clocknet.Domain.Task Task, clocknet.Domain.Record Record);
 
-public record InputLine(List<string> Words, DateTime Time)
+public record CommandLineInput(List<string> Words, DateTime Time)
 {
-    public InputLine ExtractAtOption(ProgramArguments pArgs)
+    public CommandLineInput ExtractAtOption(ProgramArguments pArgs)
     {
         if (!pArgs.HasOption(Args.At))
             return this;
@@ -53,10 +53,10 @@ public record InputLine(List<string> Words, DateTime Time)
                     SanitizeInput(timeRaw), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
                 ? date : DateTime.MinValue;
         var time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, convertedTime.Hour, convertedTime.Minute, 0);
-        return new InputLine([.. lineWithoutTime], time);
+        return new CommandLineInput([.. lineWithoutTime], time);
     }
 
-    public InputLine ExtractSettingsOption(ProgramArguments pArgs)
+    public CommandLineInput ExtractSettingsOption(ProgramArguments pArgs)
     {
         if (!pArgs.HasOption(Args.Settings))
             return this;
@@ -65,7 +65,7 @@ public record InputLine(List<string> Words, DateTime Time)
         return this with { Words = [.. Words.Where(w => w != $"--{Args.Settings}" && w != settingsValue)] };
     }
 
-    public InputLine IncludeDefaultTask(string defaultTask)
+    public CommandLineInput IncludeDefaultTask(string defaultTask)
     {
         return Words.Count == 0 ? (this with { Words = [.. defaultTask.Split(' ')] }) : this;
     }

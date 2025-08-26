@@ -14,10 +14,10 @@ public class StopCommand(ProgramArguments pArgs, IRecordRepository recordReposit
         commandUtils.DisplayResult(activity);
     }
 
-    private InputLine ParseOptions()
+    private CommandLineInput ParseOptions()
     {
         var words = pArgs.Args.Skip(1).ToList();
-        return new InputLine(words, DateTime.Now)
+        return new CommandLineInput(words, DateTime.Now)
             .ExtractAtOption(pArgs)
             .ExtractSettingsOption(pArgs);
     }
