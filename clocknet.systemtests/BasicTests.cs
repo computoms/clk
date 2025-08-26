@@ -23,6 +23,8 @@ public static class BasicTests
 			$"   00:00 ({currentTime} -> {currentTime})",
 			" ",
 			"00:00 Total",
+			" ",
+			" --> 00:00 Test2"
 		};
 
 		Test.Expect(expected, output);
@@ -50,6 +52,8 @@ public static class BasicTests
 			$"   00:00 ({currentTime} -> {currentTime})",
 			" ",
 			"00:00 Total",
+			" ",
+			" --> 00:00 none"
 		};
 
 		Test.Expect(expected, output);
