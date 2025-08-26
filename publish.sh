@@ -1,0 +1,1 @@
+dotnet publish clocknet/clocknet.csproj -c Release -o ~/.clock/bin -r osx-x64 --self-contained true -p:PublishSingleFile=true -p:InclueNativeLibrariesForSelfExtract=true
