@@ -13,12 +13,12 @@ public class ShowCommand(ProgramArguments pArgs,
 
     public void Execute()
     {
-        var activities = GetActivities(out bool isAll);
-        var report = GetReport(isAll) ?? throw new KeyNotFoundException("Specified report type could not be found");
+        var activities = GetActivities();
+        var report = GetReport() ?? throw new KeyNotFoundException("Specified report type could not be found");
         report.Print(activities);
     }
 
-    private IReport? GetReport(bool isAll)
+    private IReport? GetReport()
     {
         if (pArgs.HasOption(Args.WorkTimes))
         {
@@ -32,23 +32,30 @@ public class ShowCommand(ProgramArguments pArgs,
     }
 
 
-    private IEnumerable<Activity> GetActivities(out bool isAll)
+    private IEnumerable<Activity> GetActivities()
     {
-        isAll = false;
         if (pArgs.HasOption(Args.All))
         {
-            isAll = true;
             return recordRepository.GetAll();
         }
-        else if (pArgs.HasOption(Args.Week))
+        if (pArgs.HasOption(Args.Week))
         {
             return recordRepository.FilterByDate(timeProvider.Now.MondayOfTheWeek(), timeProvider.Now.MondayOfTheWeek().AddDays(4));
         }
-        else if (pArgs.HasOption(Args.Yesterday))
+        if (pArgs.HasOption(Args.Yesterday))
         {
             return recordRepository.FilterByDate(timeProvider.Now.Date.AddDays(-1));
         }
+        if (GetFilterArgs().Count > 0)
+        {
+            return recordRepository.FilterByTag(GetFilterArgs());
+        }
         return recordRepository.FilterByDate(timeProvider.Now.Date);
+    }
+
+    private List<string> GetFilterArgs()
+    {
+        return [.. pArgs.Args.Skip(1).Where(a => !a.StartsWith("-")).Select(a => a.First() == '+' ? a[1..] : a)];
     }
 
 }
