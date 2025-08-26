@@ -2,26 +2,53 @@
 
 namespace clocknet.Domain.Reports;
 
-public class DetailsReport : IReport
+public class DetailsReport(IDisplay display, IRecordRepository recordRepository) : IReport
 {
-    private readonly IDisplay _display;
-
-    public DetailsReport(IDisplay display)
-    {
-        _display = display;
-    }
-
     public Option Name { get; } = Args.Details;
 
     public void Print(IEnumerable<Activity> activities)
     {
-        _display.Print(
+        var current = recordRepository.FilterByDate(DateTime.Today)
+            .OrderBy(a => a.Records.MaxBy(r => r.StartTime)?.StartTime ?? DateTime.MinValue)
+            .Last();
+
+
+        display.Print(
             activities
-                .Select(a => new {Date = a.Records.OrderBy(r => r.StartTime.Date).FirstOrDefault()?.StartTime.Date, Activity = a})
+                .Select(a => new { Date = a.Records.OrderBy(r => r.StartTime.Date).FirstOrDefault()?.StartTime.Date, Activity = a })
                 .GroupBy(x => x.Date)
                 .SelectMany(g => LayoutActivitiesOfTheDay(g.Key, g.Select(x => x.Activity)))
                 .Append(" ".FormatLine())
-                .Append(TotalTime(activities)));
+                .Append(TotalTime(activities))
+                .Append(" ".FormatLine())
+                .Append(Current(current)));
+    }
+
+    private FormattedLine Current(Activity current)
+    {
+        var currentRecord = current.Records.MaxBy(r => r.StartTime);
+        if (currentRecord?.EndTime == null || (currentRecord.EndTime?.Hour == DateTime.Now.Hour && currentRecord.EndTime?.Minute == DateTime.Now.Minute))
+        {
+            return new FormattedLine
+            {
+                Chunks = new List<FormattedText> {
+                    " --> ".FormatChunk(),
+                    $"{Utilities.PrintDuration(current.Duration)} ".FormatChunk(ConsoleColor.DarkGreen),
+                    current.Task.Title.FormatChunk(ConsoleColor.DarkYellow)
+                }
+            };
+        }
+
+        TimeSpan stopDuration = (TimeSpan)(DateTime.Now - currentRecord.EndTime!);
+        return new FormattedLine
+        {
+            Chunks = new List<FormattedText> {
+                " --> ".FormatChunk(),
+                $"{Utilities.PrintDuration(stopDuration)} ".FormatChunk(ConsoleColor.DarkGreen),
+                "Stopped".FormatChunk(ConsoleColor.DarkYellow)
+            }
+        };
+
     }
 
     private FormattedLine TotalTime(IEnumerable<Activity> activities)
@@ -47,7 +74,7 @@ public class DetailsReport : IReport
             id.PrependSpaceIfNotNull().FormatChunk(ConsoleColor.DarkYellow)
         };
 
-        return activity.Records.Select(LayoutRecords).Prepend(_display.Layout(line, 1));
+        return activity.Records.Select(LayoutRecords).Prepend(display.Layout(line, 1));
     }
 
     private FormattedLine LayoutRecords(Record record)
@@ -59,7 +86,7 @@ public class DetailsReport : IReport
             $"{recordDuration}".FormatChunk(ConsoleColor.DarkCyan),
             $" ({recordStart} -> {recordEnd})".FormatChunk(ConsoleColor.DarkGray)
         };
-        return _display.Layout(formattedRecords, 2);
+        return display.Layout(formattedRecords, 2);
     }
 }
 
