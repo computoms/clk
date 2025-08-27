@@ -16,14 +16,21 @@ alias clk="~/Downloads/clocknet/clocknet"
 
 Remark: on macos, it is possible that the OS prevents you from running the software. Update the security settings to allow the `clocknet` program to run.
 
-### Windows
+### Windows PowerShell
+
+On windows, you can install this tool in `$env:UserProfile/.clock/bin` using the following script:
+
+```pwsh
+. { iwr -useb "https://raw.githubusercontent.com/computoms/clocknet/refs/heads/main/install/install.ps1" } | iex;
+```
 
 On windows, if you use Powershell, you can add the following line to your [profile](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.2):
 
 ```pwsh
-function Invoke-Clock { "C:/path/to/the/package/clocknet.exe" }
-New-Alias -Name clk -Value Invoke-Clock
+New-Alias -Name clk -Value "$env:UserProfile/.clock/bin/clocknet"
 ```
+
+This is automatically added to your `$profile` by the `install.ps1` script.
 
 # Usage
 
