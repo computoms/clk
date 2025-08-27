@@ -21,7 +21,7 @@ Remark: on macos, it is possible that the OS prevents you from running the softw
 On windows, you can install this tool in `$env:UserProfile/.clk/bin` using the following script:
 
 ```pwsh
-. { iwr -useb "https://raw.githubusercontent.com/computoms/clocknet/refs/heads/main/install/install.ps1" } | iex;
+. { iwr -useb "https://raw.githubusercontent.com/computoms/clk/refs/heads/main/install/install.ps1" } | iex;
 ```
 
 On windows, if you use Powershell, you can add the following line to your [profile](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.2):

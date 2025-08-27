@@ -4,7 +4,7 @@ Write-Host "Installing clk"
 $dest = "$env:UserProfile/.clk/bin"
 $latestRelease = "v2.0"
 mkdir -p $dest
-Invoke-WebRequest -Uri "https://github.com/computoms/clocknet/releases/download/release%2F$lastestRelease/publish-windows-latest.zip" -OutFile "$dest/publish-windows-latest.zip"
+Invoke-WebRequest -Uri "https://github.com/computoms/clk/releases/download/release%2F$lastestRelease/publish-windows-latest.zip" -OutFile "$dest/publish-windows-latest.zip"
 Expand-Archive -Path "$dest/publish-windows-latest.zip" -Destination "$dest/"
 rm "$dest/publish-windows-latest.zip"
 
@@ -14,13 +14,13 @@ if (-not (Test-Path -Path $Profile)) {
 }
 $profileContent = Get-Content $Profile
 
-if (-not ($profileContent -match "Set-Alias -Name clk -Value")) {
-    $answer = Read-Host "Add clk alias to Powershell Profile? (yes/no)"
+if (-not ($profileContent -match ".clk/bin")) {
+    $answer = Read-Host "Add ~/.clk/bin to PATH? (yes/no)"
     if ($answer -ne "yes") {
         exit
     }
 
-    'Set-Alias -Name clk -Value "$env:UserProfile/.clk/bin/clk.exe"' | Add-Content $PROFILE
+    '$env:Path += ";$env:UserProfile/.clk/bin"' | Add-Content $Profile
 }
 
 
