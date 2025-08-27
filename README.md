@@ -8,10 +8,16 @@ Download the executable from the build artifacts. Then, alias the executable `cl
 
 ### Mac OS
 
-On macos, if you use zsh, you can add the following line to your [profile](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html), _i.e._ `~/.zshenv` file (if you downloaded the package into the downloads folder):
+You can install clk into `~/.clk/bin` using the following command:
+
+```sh
+curl https://raw.githubusercontent.com/computoms/clk/refs/heads/main/install/install.sh | sh
+```
+
+You need to have the `~/.clk/bin` in your PATH to use clk from your shell. If you use zsh, you can add the following line to your [profile](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html), _i.e._ `~/.zshenv` file:
 
 ```zsh
-alias clk="~/Downloads/clk/clk"
+export PATH="~/.clk/bin:$PATH"
 ```
 
 Remark: on macos, it is possible that the OS prevents you from running the software. Update the security settings to allow the `clk` program to run.
@@ -24,13 +30,7 @@ On windows, you can install this tool in `$env:UserProfile/.clk/bin` using the f
 . { iwr -useb "https://raw.githubusercontent.com/computoms/clk/refs/heads/main/install/install.ps1" } | iex;
 ```
 
-On windows, if you use Powershell, you can add the following line to your [profile](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.2):
-
-```pwsh
-New-Alias -Name clk -Value "$env:UserProfile/.clk/bin/clk"
-```
-
-This is automatically added to your `$profile` by the `install.ps1` script.
+This script will also add the `$env:UserProfile/.clk/bin` to your PATH in the PowerShell `$PROFILE`.
 
 # Usage
 
