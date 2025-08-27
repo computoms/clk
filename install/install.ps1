@@ -1,12 +1,12 @@
-# This script installs the clocknet command-line-tool
+# This script installs the clk command-line-tool
 
-Write-Host "Installing clocknet"
-$clocknetDest = "$env:UserProfile/.clock/bin"
+Write-Host "Installing clk"
+$dest = "$env:UserProfile/.clk/bin"
 $latestRelease = "v2.0"
-mkdir -p $clocknetDest
-Invoke-WebRequest -Uri "https://github.com/computoms/clocknet/releases/download/release%2F$lastestRelease/publish-windows-latest.zip" -OutFile "$clocknetDest/publish-windows-latest.zip"
-Expand-Archive -Path "$clocknetDest/publish-windows-latest.zip" -Destination "$clocknetDest/"
-rm "$clocknetDest/publish-windows-latest.zip"
+mkdir -p $dest
+Invoke-WebRequest -Uri "https://github.com/computoms/clocknet/releases/download/release%2F$lastestRelease/publish-windows-latest.zip" -OutFile "$dest/publish-windows-latest.zip"
+Expand-Archive -Path "$dest/publish-windows-latest.zip" -Destination "$dest/"
+rm "$dest/publish-windows-latest.zip"
 
 
 if (-not (Test-Path -Path $Profile)) {
@@ -20,7 +20,7 @@ if (-not ($profileContent -match "Set-Alias -Name clk -Value")) {
         exit
     }
 
-    'Set-Alias -Name clk -Value "$env:UserProfile/.clock/bin/clocknet.exe"' | Add-Content $PROFILE
+    'Set-Alias -Name clk -Value "$env:UserProfile/.clk/bin/clk.exe"' | Add-Content $PROFILE
 }
 
 

@@ -43,7 +43,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: docker build -f Dockerfile.SystemTests -t systemtests .;docker run systemtests
     - name: Publish
-      run: dotnet publish clocknet/clocknet.csproj -c Release -o publish-${{ matrix.os }} -r ${{ matrix.runtime }} --self-contained true -p:PublishSingleFile=true -p:InclueNativeLibrariesForSelfExtract=true
+      run: dotnet publish clk/clk.csproj -c Release -o publish-${{ matrix.os }} -r ${{ matrix.runtime }} --self-contained true -p:PublishSingleFile=true -p:InclueNativeLibrariesForSelfExtract=true
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4
       with:

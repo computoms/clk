@@ -8,18 +8,18 @@ USER systemtest
 
 # Copy program and systemtests sources
 WORKDIR /home/systemtest/src
-COPY --chown=systemtest clocknet               ./clocknet/
-COPY --chown=systemtest clocknet.systemtests   ./clocknet.systemtests/
+COPY --chown=systemtest clk               ./clk/
+COPY --chown=systemtest clk.systemtests   ./clk.systemtests/
 
 # Build both projects and publish program
-RUN dotnet restore clocknet/clocknet.csproj
-RUN dotnet restore clocknet.systemtests/clocknet.systemtests.csproj
-RUN dotnet build clocknet/clocknet.csproj -c Release -o /home/systemtest/build/clocknet
-RUN dotnet build clocknet.systemtests/clocknet.systemtests.csproj -c Release -o /home/systemtest/build/clocknet.systemtests
-RUN dotnet publish "clocknet/clocknet.csproj" -c Release -o /home/systemtest/bin/
+RUN dotnet restore clk/clk.csproj
+RUN dotnet restore clk.systemtests/clk.systemtests.csproj
+RUN dotnet build clk/clk.csproj -c Release -o /home/systemtest/build/clk
+RUN dotnet build clk.systemtests/clk.systemtests.csproj -c Release -o /home/systemtest/build/clk.systemtests
+RUN dotnet publish "clk/clk.csproj" -c Release -o /home/systemtest/bin/
 
 # Copy settings file
-COPY --chown=systemtest ./clocknet.systemtests/resources/settings.yml.disabled /home/systemtest/.clock/
+COPY --chown=systemtest ./clk.systemtests/resources/settings.yml.disabled /home/systemtest/.clk/
 # Run system tests
-CMD [ "dotnet", "/home/systemtest/build/clocknet.systemtests/clocknet.systemtests.dll" ]
+CMD [ "dotnet", "/home/systemtest/build/clk.systemtests/clk.systemtests.dll" ]
 
