@@ -3,7 +3,7 @@
 Write-Host "Installing clocknet"
 $clocknetDest = "$env:UserProfile/.clock/bin"
 $latestRelease = "v2.0"
-mkdir $clocknetDest
+mkdir -p $clocknetDest
 Invoke-WebRequest -Uri "https://github.com/computoms/clocknet/releases/download/release%2F$lastestRelease/publish-windows-latest.zip" -OutFile "$clocknetDest/publish-windows-latest.zip"
 Expand-Archive -Path "$clocknetDest/publish-windows-latest.zip" -Destination "$clocknetDest/"
 rm "$clocknetDest/publish-windows-latest.zip"
