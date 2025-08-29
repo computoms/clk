@@ -46,16 +46,6 @@ public class ShowCommand(ProgramArguments pArgs,
         {
             return recordRepository.FilterByDate(timeProvider.Now.Date.AddDays(-1));
         }
-        if (GetFilterArgs().Count > 0)
-        {
-            return recordRepository.FilterByTag(GetFilterArgs());
-        }
         return recordRepository.FilterByDate(timeProvider.Now.Date);
     }
-
-    private List<string> GetFilterArgs()
-    {
-        return [.. pArgs.Args.Skip(1).Where(a => !a.StartsWith("-")).Select(a => a.First() == '+' ? a[1..] : a)];
-    }
-
 }
