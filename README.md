@@ -78,6 +78,8 @@ EditorCommand: code # Command used to open the clock.txt with `clk open`
 
 Additionally, a custom settings file can be passed using the `--settings /path/to/file.yml` flag.
 
+**Note**: on Windows, `EditorCommand` should reference the executable, such as `C:/Program Files/Microsoft VS Code/Code.exe`.
+
 ## Adding new entries
 
 You can add a new entry by using the `add` command:
