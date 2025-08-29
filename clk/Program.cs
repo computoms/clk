@@ -29,6 +29,7 @@ serviceProvider.AddKeyedSingleton<ICommand, StopCommand>(StopCommand.Name);
 serviceProvider.AddKeyedSingleton<ICommand, RestartCommand>(RestartCommand.Name);
 serviceProvider.AddKeyedSingleton<ICommand, OpenCommand>(OpenCommand.Name);
 serviceProvider.AddKeyedSingleton<ICommand, ListCommand>(ListCommand.Name);
+serviceProvider.AddKeyedSingleton<ICommand, CurrentTaskCommand>(CurrentTaskCommand.Name);
 
 var services = serviceProvider.BuildServiceProvider();
 var commandProcessor = services.GetRequiredService<CommandProcessor>();

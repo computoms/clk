@@ -19,13 +19,13 @@ public class RecordRepository : IRecordRepository
     public void AddRecord(Domain.Task activity, Record record)
     {
         try
-        { 
+        {
             storage.AddEntry(activity, record);
-	    }
+        }
         catch (Exception e)
         {
             display.Error(e.Message);
-	    }
+        }
     }
 
     public IEnumerable<Activity> FilterByTag(IList<string> tags)
@@ -36,14 +36,26 @@ public class RecordRepository : IRecordRepository
 
     public IEnumerable<Activity> GetAll() => storage.GetActivities();
 
+    public Activity? GetCurrent()
+    {
+        var currentActivity = FilterByDate(timeProvider.Now.Date)
+            .OrderBy(a => a.Records.MaxBy(r => r.StartTime)?.StartTime ?? DateTime.MinValue)
+            .LastOrDefault();
+
+        if (currentActivity == null || currentActivity.IsStopped(timeProvider))
+            return null;
+
+        return currentActivity;
+    }
+
     public IEnumerable<Activity> FilterByDate(DateTime date) => FilterByDate(date, date);
 
-    public IEnumerable<Activity> FilterByDate(DateTime startDate, DateTime endDate) 
-	    => storage.GetActivities()
+    public IEnumerable<Activity> FilterByDate(DateTime startDate, DateTime endDate)
+        => storage.GetActivities()
             .Select(x => new Activity(x.Task, x.Records.Where(y => IsMatchingDate(y, startDate, endDate))))
             .Where(x => x.Records.Any());
 
-    private bool IsMatchingDate(Record record, DateTime startDate, DateTime endDate) 
-	    => record.StartTime.Date.CompareTo(startDate.Date) >= 0 && record.StartTime.Date.CompareTo(endDate.Date) <= 0;
+    private bool IsMatchingDate(Record record, DateTime startDate, DateTime endDate)
+        => record.StartTime.Date.CompareTo(startDate.Date) >= 0 && record.StartTime.Date.CompareTo(endDate.Date) <= 0;
 }
 

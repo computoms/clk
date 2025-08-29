@@ -2,15 +2,13 @@
 
 namespace clk.Domain.Reports;
 
-public class DetailsReport(IDisplay display, IRecordRepository recordRepository, ProgramArguments pArgs) : IReport
+public class DetailsReport(IDisplay display, IRecordRepository recordRepository, ProgramArguments pArgs, ITimeProvider timeProvider) : IReport
 {
     public Option Name { get; } = Args.Details;
 
     public void Print(IEnumerable<Activity> activities)
     {
-        var current = recordRepository.FilterByDate(DateTime.Today)
-            .OrderBy(a => a.Records.MaxBy(r => r.StartTime)?.StartTime ?? DateTime.MinValue)
-            .LastOrDefault();
+        var current = recordRepository.GetCurrent();
 
         if (pArgs.HasOption(Args.GroupBy))
         {
@@ -60,28 +58,27 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
         if (currentRecord == null)
             return new FormattedLine();
 
-        if (currentRecord.EndTime == null || (currentRecord.EndTime?.Hour == DateTime.Now.Hour && currentRecord.EndTime?.Minute == DateTime.Now.Minute))
+        if (current!.IsStopped(timeProvider))
         {
+            TimeSpan stopDuration = (TimeSpan)(DateTime.Now - currentRecord.EndTime!);
             return new FormattedLine
             {
                 Chunks = new List<FormattedText> {
                     " --> ".FormatChunk(),
-                    $"{Utilities.PrintDuration(current!.Duration)} ".FormatChunk(ConsoleColor.DarkGreen),
-                    current.Task.Title.FormatChunk(ConsoleColor.DarkYellow)
+                    $"{Utilities.PrintDuration(stopDuration)} ".FormatChunk(ConsoleColor.DarkGreen),
+                    "Stopped".FormatChunk(ConsoleColor.DarkYellow)
                 }
             };
         }
 
-        TimeSpan stopDuration = (TimeSpan)(DateTime.Now - currentRecord.EndTime!);
         return new FormattedLine
         {
             Chunks = new List<FormattedText> {
                 " --> ".FormatChunk(),
-                $"{Utilities.PrintDuration(stopDuration)} ".FormatChunk(ConsoleColor.DarkGreen),
-                "Stopped".FormatChunk(ConsoleColor.DarkYellow)
+                $"{Utilities.PrintDuration(current!.Duration)} ".FormatChunk(ConsoleColor.DarkGreen),
+                current.Task.Title.FormatChunk(ConsoleColor.DarkYellow)
             }
         };
-
     }
 
     private FormattedLine TotalTime(IEnumerable<Activity> activities)

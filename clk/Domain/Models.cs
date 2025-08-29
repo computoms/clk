@@ -1,4 +1,6 @@
-﻿namespace clk.Domain;
+﻿using clk.Utils;
+
+namespace clk.Domain;
 
 public class Activity
 {
@@ -25,6 +27,14 @@ public class Activity
     {
         _records.Add(record);
     }
+
+    public bool IsStopped(ITimeProvider timeProvider)
+    {
+        var lastRecord = Records.OrderBy(r => r.StartTime).LastOrDefault();
+        return !IsNow(timeProvider, lastRecord?.EndTime ?? DateTime.MinValue);
+    }
+
+    private bool IsNow(ITimeProvider timeProvider, DateTime recordTime) => recordTime.Hour == timeProvider.Now.Hour && recordTime.Minute == timeProvider.Now.Minute;
 }
 
 public record Task(string Title, string[] Tags, string Id)
