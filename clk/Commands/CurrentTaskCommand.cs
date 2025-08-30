@@ -10,6 +10,6 @@ public class CurrentTaskCommand(IRecordRepository recordRepository, IDisplay dis
     {
         var activity = recordRepository.GetCurrent();
         var taskName = activity?.Task.Raw ?? "None";
-        display.Print([taskName.FormatLine()]);
+        display.Print(taskName.FormatLine());
     }
 }

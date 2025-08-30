@@ -23,17 +23,22 @@ public class ConsoleDisplay : IDisplay
         };
     }
 
+    public void Print(FormattedLine line)
+    {
+        foreach (var chunk in line.Chunks)
+        {
+            Console.ForegroundColor = chunk.Color;
+            Console.Write(chunk.RawText);
+            Console.ResetColor();
+        }
+        Console.WriteLine("");
+    }
+
     public void Print(IEnumerable<FormattedLine> lines)
     {
         foreach (var line in lines)
         {
-            foreach (var chunk in line.Chunks)
-            {
-                Console.ForegroundColor = chunk.Color;
-                Console.Write(chunk.RawText);
-                Console.ResetColor();
-            }
-            Console.WriteLine("");
+            Print(line);
         }
     }
 

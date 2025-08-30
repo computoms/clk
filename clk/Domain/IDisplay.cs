@@ -35,6 +35,9 @@ public static class FormattedTextExtensions
         Color = color
     };
 
+    public static IEnumerable<FormattedText> ToEnumerable(this FormattedText chunk) => [chunk];
+    public static FormattedLine ToLine(this IEnumerable<FormattedText> chuncks) => new() { Chunks = chuncks };
+
     public static FormattedLine Append(this FormattedLine line, string chunk)
     {
         line.Chunks = line.Chunks.Append(chunk.FormatChunk());
@@ -52,6 +55,7 @@ public interface IDisplay
 {
     FormattedLine Layout(IEnumerable<FormattedText> chunks, int tabs = 0);
     void Print(IEnumerable<FormattedLine> lines);
+    void Print(FormattedLine line);
     void Error(string errorMessage);
 }
 

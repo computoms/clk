@@ -28,7 +28,7 @@ public static class Utilities
         return PrintDuration(duration);
     }
 
-    public static string PrependSpaceIfNotNull(this string str)
+    public static string PrependSpaceIfNotNull(this string? str)
         => string.IsNullOrEmpty(str) ? "" : $" {str}";
 }
 

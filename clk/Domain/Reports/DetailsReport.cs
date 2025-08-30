@@ -96,7 +96,7 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
         var line = new List<FormattedText>
         {
             $"{duration}".FormatChunk(ConsoleColor.DarkGreen),
-            info.Name.PrependSpaceIfNotNull().FormatChunk(),
+            info.Name?.PrependSpaceIfNotNull()?.FormatChunk() ?? "".FormatChunk(),
         };
 
         return new List<FormattedLine> { display.Layout(line, 1) };
