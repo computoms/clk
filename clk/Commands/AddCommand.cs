@@ -8,40 +8,30 @@ public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordReposi
 
     public void Execute()
     {
-        var inputLine = ParseOptions();
-        var activity = ParseInput(inputLine);
+        var activity = ParseInput();
         activity = activity with { Task = commandUtils.FindPartiallyMatchingTask(activity.Task) };
         recordRepository.AddRecord(activity.Task, activity.Record);
         commandUtils.DisplayResult(activity);
     }
 
-    private CommandLineInput ParseOptions()
+    private InputTask ParseInput()
     {
-        var words = pArgs.Args.Skip(1).ToList();
-        return new CommandLineInput(words, DateTime.Now)
-            .ExtractAtOption(pArgs)
-            .ExtractSettingsOption(pArgs)
-            .IncludeDefaultTask(settings.Data.DefaultTask);
-    }
+        var rawTitle = string.IsNullOrWhiteSpace(pArgs.Title) ? settings.Data.DefaultTask : pArgs.Title;
+        var words = rawTitle.Split(' ');
+        var title = string.Empty;
+        var tags = new List<string>();
+        var id = string.Empty;
+        foreach (string v in words)
+        {
+            if (v.Length > 1 && v.StartsWith('+'))
+                tags.Add(v[1..]);
+            else if (v.Length > 1 && v.StartsWith('.'))
+                id = v[1..];
+            else
+                title += v + " ";
+        }
 
-    private static InputTask ParseInput(CommandLineInput line)
-    {
-        var tags = line.Words.Where(x => x.StartsWith('+')).Select(x => x[1..]).ToArray();
-        var number = line.Words.FirstOrDefault(x => x.StartsWith('.') && x.Skip(1).All(char.IsDigit))?[1..];
-        var title = string.Join(' ', line.Words.Where(x => !x.StartsWith('+') && x != $".{number}")).Trim();
-        return new InputTask(new Domain.Task(title, tags, number ?? string.Empty), new Record(line.Time));
-    }
-
-    private void DisplayResult(InputTask activity)
-    {
-        display.Print([
-            display.Layout(
-            [
-                (activity.Record.StartTime.ToString("HH:mm") + " ").FormatChunk(ConsoleColor.DarkGreen),
-                activity.Task.Title.FormatChunk(),
-                activity.Task.Tags.Aggregate("", (t1, t2) => t1 + " +" + t2).FormatChunk(ConsoleColor.DarkBlue),
-                $" .{activity.Task.Id}".FormatChunk(ConsoleColor.DarkYellow)
-            ])
-        ]);
+        title = title.Trim();
+        return new InputTask(new Domain.Task(title, [.. tags], id), new Record(pArgs.Time));
     }
 }

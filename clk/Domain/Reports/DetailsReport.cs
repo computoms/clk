@@ -4,7 +4,7 @@ namespace clk.Domain.Reports;
 
 public class DetailsReport(IDisplay display, IRecordRepository recordRepository, ProgramArguments pArgs, ITimeProvider timeProvider) : IReport
 {
-    public Option Name { get; } = Args.Details;
+    public string Name { get; } = Args.Details;
 
     public void Print(IEnumerable<Activity> activities)
     {

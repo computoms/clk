@@ -2,7 +2,7 @@
 
 public interface IReport
 {
-    Option Name { get; }
+    string Name { get; }
     void Print(IEnumerable<Activity> activities);
 }
 

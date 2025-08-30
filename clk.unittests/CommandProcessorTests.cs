@@ -1,10 +1,7 @@
 ﻿using clk.Domain;
 using clk.Domain.Reports;
 using clk.Utils;
-using FluentAssertions;
 using Moq;
-using Xunit.Sdk;
-using YamlDotNet.Serialization;
 
 namespace clk.unittests;
 

@@ -8,7 +8,7 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
     private readonly ConsoleColor[] _colors = { ConsoleColor.Blue, ConsoleColor.DarkGreen, ConsoleColor.DarkMagenta, ConsoleColor.Gray, ConsoleColor.DarkGray, ConsoleColor.Green, ConsoleColor.DarkCyan, ConsoleColor.DarkBlue };
     private int _colorIndex = 0;
 
-    public Option Name { get; } = Args.BarGraphs;
+    public string Name { get; } = Args.BarGraphs;
 
     public void Print(IEnumerable<Activity> activities)
     {

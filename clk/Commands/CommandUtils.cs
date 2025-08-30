@@ -1,5 +1,3 @@
-
-using System.Globalization;
 using clk.Domain;
 
 namespace clk.Commands;
@@ -34,42 +32,6 @@ public class CommandUtils(IRecordRepository repository, IDisplay display)
             ])
         ]);
     }
-
 }
 
 public record InputTask(clk.Domain.Task Task, clk.Domain.Record Record);
-
-public record CommandLineInput(List<string> Words, DateTime Time)
-{
-    public CommandLineInput ExtractAtOption(ProgramArguments pArgs)
-    {
-        if (!pArgs.HasOption(Args.At))
-            return this;
-
-        int index = Words.IndexOf("--at");
-        var timeRaw = Words.Skip(index + 1).FirstOrDefault() ?? DateTime.Now.ToString("HH:mm");
-        var lineWithoutTime = Words.Where(x => x != "--at" && x != timeRaw);
-        var convertedTime = DateTime.TryParseExact(
-                    SanitizeInput(timeRaw), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
-                ? date : DateTime.MinValue;
-        var time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, convertedTime.Hour, convertedTime.Minute, 0);
-        return new CommandLineInput([.. lineWithoutTime], time);
-    }
-
-    public CommandLineInput ExtractSettingsOption(ProgramArguments pArgs)
-    {
-        if (!pArgs.HasOption(Args.Settings))
-            return this;
-
-        var settingsValue = pArgs.GetValue(Args.Settings);
-        return this with { Words = [.. Words.Where(w => w != $"--{Args.Settings}" && w != settingsValue)] };
-    }
-
-    public CommandLineInput IncludeDefaultTask(string defaultTask)
-    {
-        return Words.Count == 0 ? (this with { Words = [.. defaultTask.Split(' ')] }) : this;
-    }
-
-    private static string SanitizeInput(string line) => line.Replace("\r", "").Replace("\n", "").Trim();
-}
-

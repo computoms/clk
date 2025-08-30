@@ -1,59 +1,123 @@
-using System.Security.Cryptography.X509Certificates;
+using System.Globalization;
+using System.Reflection.Metadata;
 
 namespace clk;
 
-public record ProgramArguments(string[] Args)
+public record ProgramArguments
 {
-    public bool HasOption(Option opt)
+    public ProgramArguments(string[] rawArgs)
     {
-        if (Args.Contains($"--{opt.Long}"))
-            return true;
-        if (string.IsNullOrEmpty(opt.Short))
-            return false;
-
-        return Args.Any(x => x.StartsWith("-") && !x.StartsWith("--") && x.Contains(opt.Short));
+        ParseArguments(rawArgs);
     }
 
-    public string GetValue(Option opt)
-    {
-        int index = GetIndex(opt);
-        if (index == -1 || index == Args.Length - 1)
-            return "";
+    public List<SwitchOption> Switches { get; private set; } = [];
+    public List<ValueOption> ValueOptions { get; private set; } = [];
 
-        return Args[index + 1];
-    }
+    public string Title { get; private set; } = string.Empty;
+    public DateTime Time { get; private set; } = DateTime.Now;
+    public string Command { get; private set; } = string.Empty;
 
-    private int GetIndex(Option opt)
+    public bool HasOption(string name) => Switches.Any(s => s.Name == name) || ValueOptions.Any(v => v.Name == name);
+
+    public string GetValue(string name) => ValueOptions.FirstOrDefault(v => v.Name == name)?.Value ?? string.Empty;
+
+    private void ParseArguments(string[] rawArgs)
     {
-        for (int i = 0; i < Args.Length; ++i)
+        Command = rawArgs.FirstOrDefault() ?? string.Empty;
+
+        for (int i = 1; i < rawArgs.Length; i++)
         {
-            if (Args[i] == $"--{opt.Long}")
+            if (GetSwitch(rawArgs[i]) is var swOpt && swOpt != null)
             {
-                return i;
+                Switches.Add(swOpt);
             }
-            if (Args[i].StartsWith("-") && !Args[i].StartsWith("--") && Args[i].Contains(opt.Short))
+            else if (GetValueOption(rawArgs[i]) is var valOpt && valOpt != null)
             {
-                return i;
+                if (i < rawArgs.Length - 1)
+                {
+                    valOpt = valOpt with { Value = rawArgs[i + 1] };
+                    ++i;
+                }
+                ValueOptions.Add(valOpt);
+            }
+            else
+            {
+                Title += rawArgs[i] + " ";
             }
         }
-        return -1;
+
+        Title = Title.Trim();
+
+        if (HasOption(Args.At))
+        {
+            var atValue = GetValue(Args.At);
+            var convertedTime = DateTime.TryParseExact(
+                        SanitizeInput(atValue), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
+                    ? date : DateTime.MinValue;
+            var now = DateTime.Now;
+            Time = new DateTime(now.Year, now.Month, now.Day, convertedTime.Hour, convertedTime.Minute, 0);
+        }
     }
+
+    private static string SanitizeInput(string line) => line.Replace("\r", "").Replace("\n", "").Trim();
+
+    private static SwitchOption? GetSwitch(string arg)
+    {
+        return Args.Switches.FirstOrDefault(v => $"--{v.Long}" == arg)
+            ?? (IsShortArg(arg)
+                ? Args.Switches.FirstOrDefault(v => arg.Contains(v.Short))
+                : null);
+    }
+
+    private static ValueOption? GetValueOption(string arg) => Args.ValueOptions.FirstOrDefault(v => $"--{v.Long}" == arg);
+
+    private static bool IsShortArg(string arg) => arg.Length >= 2 && arg.StartsWith('-') && arg[1] != '-';
 }
 
-public record Option(string Long, string Short);
+/// <summary>
+/// Switch option
+/// </summary>
+/// <param name="Long">Long description, such as all, which becomes --all</param>
+/// <param name="Short">One letter description, such as a, which becomes -a (can be combined)</param>
+public record SwitchOption(string Name, string Long, string Short);
+
+/// <summary>
+/// Option with value
+/// </summary>
+/// <param name="Long">Option name, such as group-by which becomes --group-by in command line args</param>
+/// <param name="Value">Option value specified by user</param>
+public record ValueOption(string Name, string Long, string Value);
 
 public static class Args
 {
-    // FilterApartmentStates
-    public readonly static Option All = new("all", "a");
-    public readonly static Option Week = new("week", "t");
-    public readonly static Option Yesterday = new("yesterday", "y");
-    public readonly static Option GroupBy = new("group-by", string.Empty);
-    // Reports
-    public readonly static Option WorkTimes = new("worktimes", "w");
-    public readonly static Option BarGraphs = new("bar", "b");
-    public readonly static Option Details = new("details", "d");
-    // Others
-    public readonly static Option At = new("at", string.Empty);
-    public readonly static Option Settings = new("settings", string.Empty);
+    public const string All = "All";
+    public const string Week = "Week";
+    public const string Yesterday = "Yesterday";
+    public const string WorkTimes = "WorkTimes";
+    public const string BarGraphs = "BarGraphs";
+    public const string Details = "Details";
+    public const string GroupBy = "GroupBy";
+    public const string At = "At";
+    public const string Settings = "Settings";
+
+    public static List<SwitchOption> Switches { get; } = new List<SwitchOption>()
+    {
+        // FilterApartmentStates
+        new (All, "all", "a"),
+        new (Week, "week", "t"),
+        new (Yesterday, "yesterday", "y"),
+        // Reports
+        new (WorkTimes, "worktimes", "w"),
+        new (BarGraphs, "bar", "b"),
+        new (Details, "details", "d"),
+    };
+
+    public static List<ValueOption> ValueOptions { get; } = new List<ValueOption>()
+    {
+        // Filters
+        new(GroupBy, "group-by", string.Empty),
+        // Others
+        new(At, "at", string.Empty),
+        new(Settings, "settings", string.Empty)
+    };
 }
