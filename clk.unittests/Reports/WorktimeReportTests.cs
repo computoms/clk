@@ -74,7 +74,7 @@ public class WorktimeReportTests
         _display.Setup(x => x.Print(It.IsAny<IEnumerable<FormattedLine>>()))
             .Callback((IEnumerable<FormattedLine> strings) => calledStrings = strings.ToList());
         _display.Setup(x => x.Layout(It.IsAny<IEnumerable<FormattedText>>(), It.IsAny<int>()))
-            .Returns((string str, int tabs) => (string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  ")) + str).FormatLine());
+            .Returns((string str, int tabs) => (string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  ")) + str).AsLine());
 
         // Act
         report.Print(activities);

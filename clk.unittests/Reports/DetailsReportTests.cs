@@ -58,14 +58,7 @@ public class DetailsReportTests
             .Callback((IEnumerable<FormattedLine> strings) => calledStrings = strings.ToList());
         _display.Setup(x => x.Layout(It.IsAny<IEnumerable<FormattedText>>(), It.IsAny<int>()))
             .Returns((IEnumerable<FormattedText> str, int tabs) =>
-                new FormattedLine
-                {
-                    Chunks = str.Prepend(new()
-                    {
-                        RawText = string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  ")),
-                        Color = Console.ForegroundColor
-                    })
-                });
+                new FormattedLine(str.Prepend(new(string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  "))))));
 
 
         // Act

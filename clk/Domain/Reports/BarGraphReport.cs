@@ -36,7 +36,7 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
     {
         if (!infos.Any())
         {
-            display.Print("Nothing to show".FormatLine());
+            display.Print("Nothing to show".AsLine());
         }
 
         var maxDuratin = infos.Max(i => i.Duration);
@@ -70,8 +70,8 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
     private FormattedLine DisplayBarGraph(string title, TimeSpan duration, TimeSpan maxDuration, int textAlignment, int maxBarLength)
     {
         var length = (int)(duration.Ticks * maxBarLength / maxDuration.Ticks);
-        return AlignText(title, textAlignment).FormatLine()
-            .Append(BarGraph(length).FormatChunk(GetColor()));
+        return AlignText(title, textAlignment).AsLine()
+            .Append(new FormattedLine(BarGraph(length).FormatChunk(GetColor())));
     }
 
     private string BarGraph(int length) => length == 0 ? "" : Enumerable.Range(0, length).Select(i => "\u2588").Aggregate((a, b) => $"{a}{b}");

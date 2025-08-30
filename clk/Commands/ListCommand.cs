@@ -10,6 +10,6 @@ public class ListCommand(IRecordRepository recordRepository, IDisplay display) :
     {
         var activities = recordRepository.GetAll();
         display.Print(activities
-                .Select(x => x.Task.Raw.FormatLine()).ToList());
+                .Select(x => x.Task.Raw.AsLine()).ToList());
     }
 }
