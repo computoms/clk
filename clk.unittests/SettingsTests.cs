@@ -6,7 +6,7 @@ using YamlDotNet.Serialization;
 public class SettingsTests
 {
     [Fact]
-    public void Test()
+    public void DeserializerTest()
     {
         var deserializer = new DeserializerBuilder()
             .Build();

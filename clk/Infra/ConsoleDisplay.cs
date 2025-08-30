@@ -12,16 +12,7 @@ public class ConsoleDisplay : IDisplay
     }
 
     public FormattedLine Layout(IEnumerable<FormattedText> chunks, int tabs = 0)
-    {
-        return new FormattedLine
-        {
-            Chunks = chunks.Prepend(new()
-            {
-                RawText = string.Join(' ', Enumerable.Range(0, tabs).Select(x => " ")),
-                Color = Console.ForegroundColor
-            })
-        };
-    }
+        => new FormattedLine(chunks).Prepend(new FormattedLine(string.Join(' ', Enumerable.Range(0, tabs).Select(x => " "))));
 
     public void Print(FormattedLine line)
     {

@@ -26,14 +26,14 @@ public class WorktimeReportTests
         {
             // Day 1: 5:30
             new Activity(
-		        new Domain.Task("Activity1", new string[] { "tag" }, "001"),
+		        new Domain.Task("Activity1", [], ["tag"], "001"),
                 new List<Domain.Record>()
                 {
                     new Domain.Record(Date(9), Date(10)),
                     new Domain.Record(Date(11), Date(12)),
 		        }),
             new Activity(
-		        new Domain.Task("Activity2", new string[] { "tag" }, "002"),
+		        new Domain.Task("Activity2", [], ["tag"], "002"),
                 new List<Domain.Record>()
                 {
                     new Domain.Record(Date(10), Date(11)),
@@ -41,14 +41,14 @@ public class WorktimeReportTests
 		        }),
             // Day2: 5:32
             new Activity(
-		        new Domain.Task("Activity1", new string[] { "tag" }, "001"),
+		        new Domain.Task("Activity1", [], ["tag"], "001"),
                 new List<Domain.Record>()
                 {
                     new Domain.Record(Date(10, 0, 2), Date(11, 0, 2)),
                     new Domain.Record(Date(13, 0, 2), Date(15, 30, 2)),
 		        }),
             new Activity(
-		        new Domain.Task("Activity2", new string[] { "tag" }, "002"),
+		        new Domain.Task("Activity2", [], ["tag"], "002"),
                 new List<Domain.Record>()
                 {
                     new Domain.Record(Date(11, 0, 2), Date(12, 0, 2)),
@@ -74,7 +74,7 @@ public class WorktimeReportTests
         _display.Setup(x => x.Print(It.IsAny<IEnumerable<FormattedLine>>()))
             .Callback((IEnumerable<FormattedLine> strings) => calledStrings = strings.ToList());
         _display.Setup(x => x.Layout(It.IsAny<IEnumerable<FormattedText>>(), It.IsAny<int>()))
-            .Returns((string str, int tabs) => (string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  ")) + str).FormatLine());
+            .Returns((string str, int tabs) => (string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  ")) + str).AsLine());
 
         // Act
         report.Print(activities);

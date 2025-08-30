@@ -6,7 +6,7 @@ public class CommandUtils(IRecordRepository repository, IDisplay display)
 {
     public Domain.Task FindPartiallyMatchingTask(Domain.Task task)
     {
-        var defaultTask = new Domain.Task(task.Title, task.Tags, task.Id);
+        var defaultTask = new Domain.Task(task.Title, task.Path, task.Tags, task.Id);
         if (string.IsNullOrWhiteSpace(task.Id))
             return defaultTask;
 

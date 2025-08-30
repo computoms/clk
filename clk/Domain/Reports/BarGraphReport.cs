@@ -13,11 +13,11 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
 
     public void Print(IEnumerable<Activity> activities)
     {
-        if (pArgs.HasOption(Args.GroupBy))
+        if (pArgs.HasOption(Args.GroupBy) || pArgs.HasOption(Args.GroupByPath))
         {
-            var groupBy = pArgs.GetValue(Args.GroupBy);
-            var groups = ReportUtils.FilterByTags(activities, groupBy);
-            const string noCat = "No category";
+            var groupBy = pArgs.HasOption(Args.GroupByPath) ? "/*" : pArgs.GetValue(Args.GroupBy);
+            var groups = ReportUtils.GroupByPath(activities, groupBy);
+            const string noCat = "Others";
             PrintBarGraph(
                 groups.Select(g => new BarInfo(
                 g.Key ?? noCat,
@@ -36,7 +36,7 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
     {
         if (!infos.Any())
         {
-            display.Print("Nothing to show".FormatLine());
+            display.Print("Nothing to show".AsLine());
         }
 
         var maxDuratin = infos.Max(i => i.Duration);
@@ -55,13 +55,15 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
     private static BarLayout GetLayout(int maxTitleLength)
     {
         var displayFullWidth = Console.WindowWidth > MaxTotalWidthChars ? MaxTotalWidthChars : Console.WindowWidth;
-        var textAlignment = maxTitleLength + 5;
+        const int durationLength = 7;
+        const int extraLength = 5 + durationLength;
+        var textAlignment = maxTitleLength + extraLength;
         if (textAlignment > MaxTextAlignmentRatio * displayFullWidth)
         {
-            textAlignment = (int)(MaxTextAlignmentRatio * displayFullWidth) + 5;
+            textAlignment = (int)(MaxTextAlignmentRatio * displayFullWidth) + extraLength;
         }
 
-        return new BarLayout(textAlignment, displayFullWidth - textAlignment - 5);
+        return new BarLayout(textAlignment, displayFullWidth - textAlignment - extraLength);
     }
 
     private const int MaxTotalWidthChars = 150;
@@ -70,8 +72,9 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
     private FormattedLine DisplayBarGraph(string title, TimeSpan duration, TimeSpan maxDuration, int textAlignment, int maxBarLength)
     {
         var length = (int)(duration.Ticks * maxBarLength / maxDuration.Ticks);
-        return AlignText(title, textAlignment).FormatLine()
-            .Append(BarGraph(length).FormatChunk(GetColor()));
+        return AlignText(title, textAlignment).AsLine()
+            .Append(new FormattedLine((Utilities.PrintDuration(duration) + "  ").FormatChunk(ConsoleColor.DarkGreen)))
+            .Append(new FormattedLine(BarGraph(length).FormatChunk(GetColor())));
     }
 
     private string BarGraph(int length) => length == 0 ? "" : Enumerable.Range(0, length).Select(i => "\u2588").Aggregate((a, b) => $"{a}{b}");

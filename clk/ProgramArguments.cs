@@ -1,5 +1,5 @@
+using System.Diagnostics;
 using System.Globalization;
-using System.Reflection.Metadata;
 
 namespace clk;
 
@@ -27,9 +27,9 @@ public record ProgramArguments
 
         for (int i = 1; i < rawArgs.Length; i++)
         {
-            if (GetSwitch(rawArgs[i]) is var swOpt && swOpt != null)
+            if (GetSwitches(rawArgs[i]) is var switches && switches.Any())
             {
-                Switches.Add(swOpt);
+                Switches.AddRange(switches);
             }
             else if (GetValueOption(rawArgs[i]) is var valOpt && valOpt != null)
             {
@@ -61,12 +61,15 @@ public record ProgramArguments
 
     private static string SanitizeInput(string line) => line.Replace("\r", "").Replace("\n", "").Trim();
 
-    private static SwitchOption? GetSwitch(string arg)
+    private static IEnumerable<SwitchOption> GetSwitches(string arg)
     {
-        return Args.Switches.FirstOrDefault(v => $"--{v.Long}" == arg)
-            ?? (IsShortArg(arg)
-                ? Args.Switches.FirstOrDefault(v => arg.Contains(v.Short))
-                : null);
+        var fullName = Args.Switches.FirstOrDefault(v => $"--{v.Long}" == arg);
+        if (fullName != null)
+            return [fullName];
+
+        return IsShortArg(arg)
+            ? Args.Switches.Where(v => arg.Contains(v.Short)) 
+            : [];
     }
 
     private static ValueOption? GetValueOption(string arg) => Args.ValueOptions.FirstOrDefault(v => $"--{v.Long}" == arg);
@@ -90,32 +93,43 @@ public record ValueOption(string Name, string Long, string Value);
 
 public static class Args
 {
+    // Filters
     public const string All = "All";
     public const string Week = "Week";
     public const string Yesterday = "Yesterday";
-    public const string WorkTimes = "WorkTimes";
-    public const string BarGraphs = "BarGraphs";
-    public const string Details = "Details";
+    // Reports
+    public const string Report = "Report";
+    public const string Timesheet = "timesheet";
+    public const string BarGraphs = "bars";
+    public const string Details = "details";
+    // Others
     public const string GroupBy = "GroupBy";
+    public const string GroupByPath = "GroupByPath";
+    public const string Tags = "Tags";
+    public const string Path = "Path";
     public const string At = "At";
     public const string Settings = "Settings";
 
     public static List<SwitchOption> Switches { get; } = new List<SwitchOption>()
     {
-        // FilterApartmentStates
+        // Filters
         new (All, "all", "a"),
-        new (Week, "week", "t"),
+        new (Week, "week", "w"),
         new (Yesterday, "yesterday", "y"),
-        // Reports
-        new (WorkTimes, "worktimes", "w"),
-        new (BarGraphs, "bar", "b"),
-        new (Details, "details", "d"),
+        // Shortcuts
+        new (BarGraphs, "bars", "b"),
+        new (Timesheet, "timesheet", "t"),
+        new (GroupByPath, "group-by-path", "p")
     };
 
     public static List<ValueOption> ValueOptions { get; } = new List<ValueOption>()
     {
+        // Reports (WorkTimes, BarGraphs, Details)
+        new (Report, "report", string.Empty),
         // Filters
         new(GroupBy, "group-by", string.Empty),
+        new(Tags, "tags", string.Empty),
+        new(Path, "path", string.Empty),
         // Others
         new(At, "at", string.Empty),
         new(Settings, "settings", string.Empty)

@@ -1,5 +1,6 @@
 ﻿using clk.Utils;
 using clk.Domain;
+using System.Security.Cryptography.X509Certificates;
 
 namespace clk.Infra;
 
@@ -28,12 +29,6 @@ public class RecordRepository : IRecordRepository
         }
     }
 
-    public IEnumerable<Activity> FilterByTag(IList<string> tags)
-    {
-        return storage.GetActivities()
-            .Where(x => tags.All(y => x.Task.Tags.Contains(y)));
-    }
-
     public IEnumerable<Activity> GetAll() => storage.GetActivities();
 
     public Activity? GetCurrent()
@@ -48,7 +43,31 @@ public class RecordRepository : IRecordRepository
         return currentActivity;
     }
 
-    public IEnumerable<Activity> FilterByDate(DateTime date) => FilterByDate(date, date);
+    public IEnumerable<Activity> FilterByQuery(RepositoryQuery query)
+    {
+        var activities = GetAll();
+        if (query.From != null && query.To != null)
+        {
+            activities = FilterByDate((DateTime)query.From, (DateTime)query.To);
+        }
+        if (query.Path != null)
+        {
+            activities = activities
+                .Where(x => query.Path.Count <= x.Task.Path.Length)
+                .Where(x => Enumerable.Range(0, query.Path.Count).All(i => query.Path[i] == x.Task.Path[i]));
+        }
+        if (query.Tags != null)
+        {
+            activities = activities.Where(x => query.Tags.All(y => x.Task.Tags.Contains(y)));
+        }
+        if (query.Id != null)
+        {
+            activities = activities.Where(x => x.Task.Id == query.Id);
+        }
+        return activities;
+    }
+
+    private IEnumerable<Activity> FilterByDate(DateTime date) => FilterByDate(date, date);
 
     public IEnumerable<Activity> FilterByDate(DateTime startDate, DateTime endDate)
         => storage.GetActivities()

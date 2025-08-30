@@ -51,7 +51,7 @@ public class UtilitiesTests
         // Arrange
         var records = Enumerable.Range(0, 1)
 	        .Select(x => new Activity(
-		        new Domain.Task("Test", new string[0], ""), 
+		        new Domain.Task("Test", [], [], ""), 
 		        new List<Domain.Record>() { new Domain.Record(new DateTime(2022, 10, 10, 9, 8, 0), new DateTime(2022, 10, 10, 10, 9, 0)) }));
 
         // Act

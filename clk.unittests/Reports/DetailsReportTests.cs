@@ -25,14 +25,14 @@ public class DetailsReportTests
         var activities = new List<Activity>()
         {
             new Activity(
-                new Domain.Task("Activity1", new string[] { }, "001"),
+                new Domain.Task("Activity1", [], [], "001"),
                 new List<Domain.Record>()
                 {
                     new Domain.Record(Date(9), Date(10)),
                     new Domain.Record(Date(11), Date(11, 30)),
                 }),
             new Activity(
-                new Domain.Task("Activity2", new string[] { "tag2", "tag3" }, "002"),
+                new Domain.Task("Activity2", [], ["tag2", "tag3"], "002"),
                 new List<Domain.Record>()
                 {
                     new Domain.Record(Date(13), Date(13, 8)),
@@ -58,14 +58,7 @@ public class DetailsReportTests
             .Callback((IEnumerable<FormattedLine> strings) => calledStrings = strings.ToList());
         _display.Setup(x => x.Layout(It.IsAny<IEnumerable<FormattedText>>(), It.IsAny<int>()))
             .Returns((IEnumerable<FormattedText> str, int tabs) =>
-                new FormattedLine
-                {
-                    Chunks = str.Prepend(new()
-                    {
-                        RawText = string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  ")),
-                        Color = Console.ForegroundColor
-                    })
-                });
+                new FormattedLine(str.Prepend(new(string.Join(' ', Enumerable.Range(0, tabs).Select(x => "  "))))));
 
 
         // Act

@@ -2,16 +2,15 @@ using clk.Domain;
 
 public static class ReportUtils
 {
-    public static IEnumerable<IGrouping<string?, Activity>> FilterByTags(IEnumerable<Activity> activities, string tagFilter)
+    public static IEnumerable<IGrouping<string?, Activity>> GroupByPath(IEnumerable<Activity> activities, string pathGroup)
     {
-        var tags = tagFilter.Split(",").Select(t => t[0] == '+' ? t.Substring(1) : t).Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
-        if (tags.Count == 1 && tags[0] == "tags")
-            return activities.GroupBy(a => a.Task.Tags.FirstOrDefault());
+        var path = pathGroup.Split("/", StringSplitOptions.RemoveEmptyEntries).ToList();
+        if (path.Count == 1 && path[0] == "*")
+            return activities.GroupBy(a => a.Task.Path.FirstOrDefault());
 
         return activities
-                // Filter all activities that contain all the tags we want to filter on
-                .Where(a => tags.All(t => a.Task.Tags.Contains(t)))
-                // Remove filter tags before grouping by remaining tags
-                .GroupBy(a => a.Task.Tags.Where(t => !tags.Contains(t)).FirstOrDefault());
+                // Remove all group-by path and take first child
+                .GroupBy(a => a.Task.Path.Where(p => !path.Contains(p)).FirstOrDefault());
     }
+
 }

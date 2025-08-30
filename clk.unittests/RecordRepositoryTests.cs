@@ -24,7 +24,7 @@ public class RecordRepositoryTests
     public void WhenAddingRawEntry_ThenEntryIsAddedToStorage(string title, string id)
     {
         // Arrange
-        var task = new Domain.Task(title, [], id);
+        var task = new Domain.Task(title, [], [], id);
         var record = new Domain.Record(DateTime.Now);
 
         // Act
@@ -41,7 +41,7 @@ public class RecordRepositoryTests
         _storage.Setup(x => x.AddEntry(It.IsAny<Domain.Task>(), It.IsAny<Domain.Record>())).Throws<InvalidDataException>();
 
         // Act
-        var act = () => _repository.AddRecord(new Domain.Task("Test", new string[0], ""), new Domain.Record(DateTime.Now, null));
+        var act = () => _repository.AddRecord(new Domain.Task("Test", [], [], ""), new Domain.Record(DateTime.Now, null));
 
         // Assert
         act.Should().NotThrow();
@@ -51,7 +51,7 @@ public class RecordRepositoryTests
     public void WhenAddingEntry_ThenEntryIsAddedToStorage()
     {
         // Arrange
-        var activity = new Domain.Task("Test", new string[0], "");
+        var activity = new Domain.Task("Test", [], [], "");
         var record = new Domain.Record(DateTime.Now, null);
 
         // Act
@@ -65,10 +65,10 @@ public class RecordRepositoryTests
     public void WithOneEntryWithOneTag_WhenFilterByTag_ThenReturnsEntry()
     {
         // Arrange
-        _storage.Setup(x => x.GetActivities()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", new string[] { "tag" }, "123")) });
+        _storage.Setup(x => x.GetActivities()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", [], ["tag"], "123")) });
 
         // Act
-        var result = _repository.FilterByTag(new List<string>() { "tag" });
+        var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string>{"tag"}, null));
 
         // Assert
         result.Should().HaveCount(1);
@@ -80,10 +80,10 @@ public class RecordRepositoryTests
     public void WithOneEntryWithTwoTags_WhenFilterByTag_ThenReturnsEntry()
     {
         // Arrange
-        _storage.Setup(x => x.GetActivities()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", new string[] { "tag1", "tag2" }, "123")) });
+        _storage.Setup(x => x.GetActivities()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", [], ["tag1", "tag2"], "123")) });
 
         // Act
-        var result = _repository.FilterByTag(new List<string>() { "tag1" });
+        var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string>{"tag1"}, null));
 
         // Assert
         result.Should().HaveCount(1);
@@ -98,12 +98,12 @@ public class RecordRepositoryTests
         _storage.Setup(x => x.GetActivities()).Returns(
 	    new List<Activity>() 
 	    { 
-	        new Activity(new Domain.Task("Entry1", new string[] { "tag1", "tag2" }, "123")),
-	        new Activity(new Domain.Task("Entry2", new string[] { "tag1", "tag3" }, "345")),
+	        new Activity(new Domain.Task("Entry1", [], ["tag1", "tag2"], "123")),
+	        new Activity(new Domain.Task("Entry2", [], ["tag1", "tag3"], "345")),
 	    });
 
         // Act
-        var result = _repository.FilterByTag(new List<string>() { "tag1", "tag2" });
+        var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string> { "tag1", "tag2" }, null));
 
         // Assert
         result.Should().HaveCount(1);
@@ -115,7 +115,7 @@ public class RecordRepositoryTests
     public void WithOneActivity_WithTwoRecords_WhenFilterByDate_ThenReturnsCorrectRecords()
     {
         // Arrange
-        var activity = new Activity(new Domain.Task("Entry1", new string[] { }, ""));
+        var activity = new Activity(new Domain.Task("Entry1", [], [], ""));
         var startTime = new DateTime(2022, 10, 10, 10, 0, 0);
         activity.AddRecord(new Domain.Record(startTime, new DateTime(2022, 10, 10, 11, 0, 0)));
         activity.AddRecord(new Domain.Record(new DateTime(2022, 10, 11, 10, 0, 0), new DateTime(2022, 10, 11, 11, 0, 0)));
@@ -127,7 +127,7 @@ public class RecordRepositoryTests
                 });
 
         // Act
-        var result = _repository.FilterByDate(new DateTime(2022, 10, 10));
+        var result = _repository.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10), null, null, null));
 
         // Assert
         result.First().Records.Should().HaveCount(1);
@@ -141,15 +141,35 @@ public class RecordRepositoryTests
         _storage.Setup(x => x.GetActivities())
             .Returns(new List<Activity>()
             {
-                new Activity(new Domain.Task("Activtiy1", new string[0], ""), new List<Domain.Record>(){new Domain.Record(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10))}),
-                new Activity(new Domain.Task("Activtiy2", new string[0], ""), new List<Domain.Record>(){new Domain.Record(new DateTime(2022, 10, 11), new DateTime(2022, 10, 11))}),
+                new Activity(new Domain.Task("Activtiy1", [], [], ""), new List<Domain.Record>(){new Domain.Record(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10))}),
+                new Activity(new Domain.Task("Activtiy2", [], [], ""), new List<Domain.Record>(){new Domain.Record(new DateTime(2022, 10, 11), new DateTime(2022, 10, 11))}),
             });
 
         // Act
-        var result = _repository.FilterByDate(new DateTime(2022, 10, 10));
+        var result = _repository.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10), null, null, null));
 
         // Assert
         result.Should().HaveCount(1);
+    }
+
+    [Theory]
+    [InlineData(new string[1] { "project" }, 2)]
+    [InlineData(new string[2] { "project", "task" }, 1)]
+    public void WithTwoActivities_WhenFilterByPath_ThenReturnsMatchingActivities(string[] paths, int expectedCount)
+    {
+        // Arrange
+        _storage.Setup(x => x.GetActivities())
+            .Returns(
+            [
+                new Activity(new Domain.Task("Activtiy1", ["project", "task"], [], ""), [new(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10))]),
+                new Activity(new Domain.Task("Activtiy2", ["project"], [], ""), [new(new DateTime(2022, 10, 11), new DateTime(2022, 10, 11))]),
+            ]);
+
+        // Act
+        var result = _repository.FilterByQuery(new RepositoryQuery(null, null, [.. paths], null, null));
+
+        // Assert
+        result.Should().HaveCount(expectedCount);
     }
 
     [Fact]

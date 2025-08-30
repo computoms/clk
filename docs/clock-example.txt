@@ -1,0 +1,12 @@
+[2025-08-25]
+10:00 Starting project X /projectX
+11:23 Starting documentation of project X /projectX/module1 +doc
+11:40 Starting documentation of project X /projectX/module2 +doc
+11:42 Meeting on project X /projectX +meeting
+12:00 [Stop]
+[2025-08-26]
+08:05 Starting workday, checking emails /office/emails
+09:00 Back on documentation /projectX +doc
+10:00 Call to company Y /office/call
+11:40 Starting documentation of project X /projectX/module3 +doc
+12:00 [Stop]

@@ -23,7 +23,7 @@ public class FileStorageTests
         _storage = _mocker.CreateInstance<FileStorage>();
         _stream = _mocker.GetMock<IStream>();
         _mocker.GetMock<ITimeProvider>().Setup(x => x.Now).Returns(_baseTime);
-        _activity = new Domain.Task("Test", new string[] { "feature" }, "123");
+        _activity = new Domain.Task("Test", [], ["feature"], "123");
         _record = new Domain.Record(_baseTime, null);
     }
 
@@ -58,7 +58,7 @@ public class FileStorageTests
     {
         // Arrange
         SetupLines(_today);
-        var task = new Domain.Task(title, tags, id);
+        var task = new Domain.Task(title, [], tags, id);
 
         // Act
         _storage.AddEntry(task, _record);
@@ -74,7 +74,7 @@ public class FileStorageTests
         SetupLines(_today, "09:00 Activity1 .123");
 
         // Act
-        var act = () => _storage.AddEntry(new Domain.Task("Activity2", new string[0], "123"), new Domain.Record(DateTime.Now, null));
+        var act = () => _storage.AddEntry(new Domain.Task("Activity2", [], [], "123"), new Domain.Record(DateTime.Now, null));
 
         // Assert
         act.Should().Throw<InvalidDataException>("Id 123 already exists");
@@ -87,7 +87,7 @@ public class FileStorageTests
         SetupLines(_today, "09:00 Activity1 .123");
 
         // Act
-        var act = () => _storage.AddEntry(new Domain.Task("Activity1", new string[0], "123"), new Domain.Record(DateTime.Now, null));
+        var act = () => _storage.AddEntry(new Domain.Task("Activity1", [], [], "123"), new Domain.Record(DateTime.Now, null));
 
         // Assert
         act.Should().NotThrow<InvalidDataException>();

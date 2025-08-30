@@ -1,12 +1,13 @@
 ﻿namespace clk.Domain;
 
+public record RepositoryQuery(DateTime? From = null, DateTime? To = null, List<string>? Path = null, List<string>? Tags = null, string? Id = null);
+
 public interface IRecordRepository
 {
     void AddRecord(Task activity, Record record);
-    IEnumerable<Activity> FilterByTag(IList<string> tags);
     IEnumerable<Activity> GetAll();
     Activity? GetCurrent();
-    IEnumerable<Activity> FilterByDate(DateTime date);
-    IEnumerable<Activity> FilterByDate(DateTime startDate, DateTime endDate);
+
+    IEnumerable<Activity> FilterByQuery(RepositoryQuery query);
 }
 
