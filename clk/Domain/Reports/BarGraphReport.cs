@@ -1,4 +1,5 @@
 
+using System.ComponentModel;
 using clk.Utils;
 
 namespace clk.Domain.Reports;
@@ -15,51 +16,40 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
         if (pArgs.HasOption(Args.GroupBy))
         {
             var groupBy = pArgs.GetValue(Args.GroupBy);
-            PrintByTags(activities, groupBy);
+            var groups = ReportUtils.FilterByTags(activities, groupBy);
+            const string noCat = "No category";
+            PrintBarGraph(
+                groups.Select(g => new BarInfo(
+                g.Key ?? noCat,
+                g.Aggregate(TimeSpan.Zero, (total, a) => total + a.Duration))),
+                noCat.Length);
             return;
         }
 
-        PrintByTaskTitles(activities);
+        PrintBarGraph(
+            activities.Select(a => new BarInfo(
+                a.Task.Title,
+                a.Duration)));
     }
 
-    private void PrintByTags(IEnumerable<Activity> activities, string tagFilter)
+    private void PrintBarGraph(IEnumerable<BarInfo> infos, int minTitle = 10)
     {
-        var groups = ReportUtils.FilterByTags(activities, tagFilter);
-
-        var durations = groups.Select(g => g.Aggregate(TimeSpan.Zero, (total, a2) => total + a2.Duration)).ToList();
-        if (durations.Count == 0)
+        if (!infos.Any())
         {
-            Console.WriteLine("Nothing to show");
-            return;
+            display.Print("Nothing to show".FormatLine());
         }
 
-        var maxActivityDuration = durations.Max();
-        const string noCat = "No category";
-        var maxTitle = groups.Where(g => g.Key != null).Select(g => g.Key).Append(noCat).Max(x => x!.Length);
-
-        var layout = GetLayout(maxTitle);
-
-        display.Print(
-            groups
-                .OrderBy(GetGroupDuration)
-                .Select(g => DisplayBarGraph(
-                    g.Key ?? noCat, g.Aggregate(TimeSpan.Zero, (total, a) => total + a.Duration),
-                    maxActivityDuration, layout.TextAlignment, layout.MaxBarLength)));
-    }
-
-    private TimeSpan GetGroupDuration(IGrouping<string?, Activity> group)
-        => group.Aggregate(TimeSpan.Zero, (ts, a) => ts + a.Duration);
-
-    private void PrintByTaskTitles(IEnumerable<Activity> activities)
-    {
-        var maxActivityDuration = activities.Max(a => a.Duration);
-        var maxTitle = activities.Max(a => a.Task.Title.Length);
+        var maxDuratin = infos.Max(i => i.Duration);
+        var maxTitle = infos.Max(i => i.Title.Length);
+        if (maxTitle < minTitle)
+            maxTitle = minTitle;
 
         var layout = GetLayout(maxTitle);
         display.Print(
-            activities
-                .OrderBy(a => a.Duration)
-                .Select(a => DisplayBarGraph(a.Task.Title, a.Duration, maxActivityDuration, layout.TextAlignment, layout.MaxBarLength)));
+            infos
+                .OrderBy(i => i.Duration)
+                .Select(i => DisplayBarGraph(
+                    i.Title, i.Duration, maxDuratin, layout.TextAlignment, layout.MaxBarLength)));
     }
 
     private static BarLayout GetLayout(int maxTitleLength)
@@ -95,6 +85,7 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
         return _colors[_colorIndex++ % _colors.Length];
     }
 
+    private record BarInfo(string Title, TimeSpan Duration);
     private record BarLayout(int TextAlignment, int MaxBarLength);
 }
  
