@@ -13,6 +13,7 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
 
     public void Print(IEnumerable<Activity> activities)
     {
+        // TODO Group-by project or task name, then --levels n for showing n sub-levels for each project?
         if (pArgs.HasOption(Args.GroupBy))
         {
             var groupBy = pArgs.GetValue(Args.GroupBy);

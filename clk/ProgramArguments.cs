@@ -89,12 +89,16 @@ public record ValueOption(string Name, string Long, string Value);
 
 public static class Args
 {
+    // Filters
     public const string All = "All";
     public const string Week = "Week";
     public const string Yesterday = "Yesterday";
-    public const string WorkTimes = "WorkTimes";
-    public const string BarGraphs = "BarGraphs";
-    public const string Details = "Details";
+    // Reports
+    public const string Report = "Report";
+    public const string WorkTimes = "timesheet";
+    public const string BarGraphs = "bars";
+    public const string Details = "details";
+    // Others
     public const string GroupBy = "GroupBy";
     public const string Tags = "Tags";
     public const string Path = "Path";
@@ -107,14 +111,12 @@ public static class Args
         new (All, "all", "a"),
         new (Week, "week", "t"),
         new (Yesterday, "yesterday", "y"),
-        // Reports
-        new (WorkTimes, "worktimes", "w"),
-        new (BarGraphs, "bar", "b"),
-        new (Details, "details", "d"),
     };
 
     public static List<ValueOption> ValueOptions { get; } = new List<ValueOption>()
     {
+        // Reports (WorkTimes, BarGraphs, Details)
+        new (Report, "report", string.Empty),
         // Filters
         new(GroupBy, "group-by", string.Empty),
         new(Tags, "tags", string.Empty),

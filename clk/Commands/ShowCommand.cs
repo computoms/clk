@@ -17,14 +17,7 @@ public class ShowCommand(ProgramArguments pArgs,
 
     private IReport? GetReport()
     {
-        if (pArgs.HasOption(Args.WorkTimes))
-        {
-            return reports.FirstOrDefault(r => r.Name == Args.WorkTimes);
-        }
-        else if (pArgs.HasOption(Args.BarGraphs))
-        {
-            return reports.FirstOrDefault(r => r.Name == Args.BarGraphs);
-        }
-        return reports.FirstOrDefault(r => r.Name == Args.Details);
+        var reportName = pArgs.HasOption(Args.Report) ? pArgs.GetValue(Args.Report) : Args.Details;
+        return reports.FirstOrDefault(r => r.Name == reportName);
     }
 }
