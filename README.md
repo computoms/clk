@@ -147,7 +147,7 @@ Tasks can be filtered using the following options:
 - `--week`                  : select tasks from current week
 - `--yesterday`             : select tasks from yesterday
 - `--tags <tag-filter>`     : select tasks based on a list of tags. `<tag-filter>` is a comma-separated list of tags to filter on (do not include `+` signs in this list).
-- `--path <path-filter>`    : select tasks based on a path filter. `<path-filter>` is a path (starting with `/`) that will match all tasks with their paths starting by `<path-filter>`. Example: task `Task 1 /proj/task1` will be included in filter `<path-filter>`=`/proj` as well as `<path-filter>`=`/proj/task1`.
+- `--path <path-filter>`    : select tasks based on a path filter. `<path-filter>` is a path (starting with `/`) that will match all tasks with their paths starting by `<path-filter>`. All tasks with a path not starting by `<path-filter>` will be filtered out. Example: task `Task 1 /proj/task1` will be included in filter `<path-filter>`=`/proj` as well as `<path-filter>`=`/proj/task1`.
 
 **Note**: if `--all`, `--week` or `--yesterday` is not specified, the default date filter is tasks from today.
 
