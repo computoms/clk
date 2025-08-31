@@ -104,6 +104,7 @@ public static class Args
     public const string Details = "details";
     // Others
     public const string GroupBy = "GroupBy";
+    public const string GroupByPath = "GroupByPath";
     public const string Tags = "Tags";
     public const string Path = "Path";
     public const string At = "At";
@@ -115,9 +116,10 @@ public static class Args
         new (All, "all", "a"),
         new (Week, "week", "w"),
         new (Yesterday, "yesterday", "y"),
-        // Report shortcuts
+        // Shortcuts
         new (BarGraphs, "bars", "b"),
-        new (Timesheet, "timesheet", "t")
+        new (Timesheet, "timesheet", "t"),
+        new (GroupByPath, "group-by-path", "p")
     };
 
     public static List<ValueOption> ValueOptions { get; } = new List<ValueOption>()

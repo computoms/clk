@@ -13,9 +13,9 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
 
     public void Print(IEnumerable<Activity> activities)
     {
-        if (pArgs.HasOption(Args.GroupBy))
+        if (pArgs.HasOption(Args.GroupBy) || pArgs.HasOption(Args.GroupByPath))
         {
-            var groupBy = pArgs.GetValue(Args.GroupBy);
+            var groupBy = pArgs.HasOption(Args.GroupByPath) ? "/*" : pArgs.GetValue(Args.GroupBy);
             var groups = ReportUtils.GroupByPath(activities, groupBy);
             const string noCat = "Others";
             PrintBarGraph(
