@@ -1,38 +1,15 @@
 
-using System.ComponentModel;
 using clk.Utils;
 
 namespace clk.Domain.Reports;
 
-public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
+public class BaseBarGraphReport(IDisplay display)
 {
     private readonly ConsoleColor[] _colors = { ConsoleColor.Blue, ConsoleColor.DarkGreen, ConsoleColor.DarkMagenta, ConsoleColor.Gray, ConsoleColor.DarkGray, ConsoleColor.Green, ConsoleColor.DarkCyan, ConsoleColor.DarkBlue };
     private int _colorIndex = 0;
 
-    public string Name { get; } = Args.BarGraphs;
 
-    public void Print(IEnumerable<Activity> activities)
-    {
-        if (pArgs.HasOption(Args.GroupBy) || pArgs.HasOption(Args.GroupByPath))
-        {
-            var groupBy = pArgs.HasOption(Args.GroupByPath) ? "/*" : pArgs.GetValue(Args.GroupBy);
-            var groups = ReportUtils.GroupByPath(activities, groupBy);
-            const string noCat = "Others";
-            PrintBarGraph(
-                groups.Select(g => new BarInfo(
-                g.Key ?? noCat,
-                g.Aggregate(TimeSpan.Zero, (total, a) => total + a.Duration))),
-                noCat.Length);
-            return;
-        }
-
-        PrintBarGraph(
-            activities.Select(a => new BarInfo(
-                a.Task.Title,
-                a.Duration)));
-    }
-
-    private void PrintBarGraph(IEnumerable<BarInfo> infos, int minTitle = 10)
+    protected void PrintBarGraph(IEnumerable<BarInfo> infos, int minTitle = 10)
     {
         if (!infos.Any())
         {
@@ -52,7 +29,7 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
                     i.Title, i.Duration, maxDuratin, layout.TextAlignment, layout.MaxBarLength)));
     }
 
-    private static BarLayout GetLayout(int maxTitleLength)
+    protected static BarLayout GetLayout(int maxTitleLength)
     {
         var displayFullWidth = Console.WindowWidth > MaxTotalWidthChars ? MaxTotalWidthChars : Console.WindowWidth;
         const int durationLength = 7;
@@ -69,7 +46,7 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
     private const int MaxTotalWidthChars = 150;
     private const double MaxTextAlignmentRatio = 0.7;
 
-    private FormattedLine DisplayBarGraph(string title, TimeSpan duration, TimeSpan maxDuration, int textAlignment, int maxBarLength)
+    protected FormattedLine DisplayBarGraph(string title, TimeSpan duration, TimeSpan maxDuration, int textAlignment, int maxBarLength)
     {
         var length = (int)(duration.Ticks * maxBarLength / maxDuration.Ticks);
         return AlignText(title, textAlignment).AsLine()
@@ -88,7 +65,7 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
         return _colors[_colorIndex++ % _colors.Length];
     }
 
-    private record BarInfo(string Title, TimeSpan Duration);
-    private record BarLayout(int TextAlignment, int MaxBarLength);
+    protected record BarInfo(string Title, TimeSpan Duration);
+    protected record BarLayout(int TextAlignment, int MaxBarLength);
 }
  

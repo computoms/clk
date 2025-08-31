@@ -23,7 +23,8 @@ try
         .AddSingleton(sp => new CommandProcessor(sp.GetRequiredKeyedService<ICommand>(args.FirstOrDefault())));
 
     // Reports
-    serviceProvider.AddSingleton<IReport, BarGraphReport>();
+    serviceProvider.AddSingleton<IReport, FlatBarGraphReport>();
+    serviceProvider.AddSingleton<IReport, GroupedBarGraphReport>();
     serviceProvider.AddSingleton<IReport, WorktimeReport>();
     serviceProvider.AddSingleton<IReport, DetailsReport>();
 
