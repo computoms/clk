@@ -19,13 +19,13 @@ public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordReposi
         var rawTitle = string.IsNullOrWhiteSpace(pArgs.Title) ? settings.Data.DefaultTask : pArgs.Title;
         var words = rawTitle.Split(' ');
         var title = string.Empty;
-        var tree = new List<string>();
+        var path = new List<string>();
         var tags = new List<string>();
         var id = string.Empty;
         foreach (string v in words)
         {
             if (v.Length > 1 && v.StartsWith("/"))
-                tree.AddRange(v.Split('/', StringSplitOptions.RemoveEmptyEntries));
+                path.AddRange(v.Split('/', StringSplitOptions.RemoveEmptyEntries));
             else if (v.Length > 1 && v.StartsWith('+'))
                 tags.Add(v[1..]);
             else if (v.Length > 1 && v.StartsWith('.'))
@@ -35,6 +35,6 @@ public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordReposi
         }
 
         title = title.Trim();
-        return new InputTask(new Domain.Task(title, [.. tree], [.. tags], id), new Record(pArgs.Time));
+        return new InputTask(new Domain.Task(title, [.. path], [.. tags], id), new Record(pArgs.Time));
     }
 }

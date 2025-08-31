@@ -50,9 +50,9 @@ public class RecordRepository : IRecordRepository
         {
             activities = FilterByDate((DateTime)query.From, (DateTime)query.To);
         }
-        if (query.Tree != null)
+        if (query.Path != null)
         {
-            activities = activities.Where(x => Enumerable.Range(0, query.Tree.Count).All(i => query.Tree[i] == x.Task.Tree[i]));
+            activities = activities.Where(x => Enumerable.Range(0, query.Path.Count).All(i => query.Path[i] == x.Task.Path[i]));
         }
         if (query.Tags != null)
         {
