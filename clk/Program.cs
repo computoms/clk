@@ -6,6 +6,7 @@ using clk.Commands;
 using clk.Domain;
 using clk.Infra;
 using clk.Domain.Reports;
+using clk.Domain.Filters;
 
 try
 {
@@ -22,10 +23,12 @@ try
         .AddSingleton(sp => new ProgramArguments(args))
         .AddSingleton(sp => new CommandProcessor(sp.GetRequiredKeyedService<ICommand>(args.FirstOrDefault())));
 
+    // Reports
     serviceProvider.AddSingleton<IReport, BarGraphReport>();
     serviceProvider.AddSingleton<IReport, WorktimeReport>();
     serviceProvider.AddSingleton<IReport, DetailsReport>();
 
+    // Commands
     serviceProvider.AddKeyedSingleton<ICommand, AddCommand>(AddCommand.Name);
     serviceProvider.AddKeyedSingleton<ICommand, ShowCommand>(ShowCommand.Name);
     serviceProvider.AddKeyedSingleton<ICommand, StopCommand>(StopCommand.Name);
@@ -33,6 +36,13 @@ try
     serviceProvider.AddKeyedSingleton<ICommand, OpenCommand>(OpenCommand.Name);
     serviceProvider.AddKeyedSingleton<ICommand, ListCommand>(ListCommand.Name);
     serviceProvider.AddKeyedSingleton<ICommand, CurrentTaskCommand>(CurrentTaskCommand.Name);
+
+    // Filters
+    serviceProvider.AddSingleton<FilterFactory>();
+    serviceProvider.AddSingleton<IFilter, AllFilter>();
+    serviceProvider.AddSingleton<IFilter, WeekFilter>();
+    serviceProvider.AddSingleton<IFilter, YesterdayFilter>();
+    serviceProvider.AddSingleton<IFilter, TodayFilter>();
 
     var services = serviceProvider.BuildServiceProvider();
     var commandProcessor = services.GetRequiredService<CommandProcessor>();

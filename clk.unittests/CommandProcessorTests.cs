@@ -1,8 +1,10 @@
 ﻿using clk.Domain;
+using clk.Domain.Filters;
 using clk.Domain.Reports;
 using clk.Utils;
 using FluentAssertions;
 using Moq;
+using Xunit.Sdk;
 
 namespace clk.unittests;
 
@@ -12,10 +14,18 @@ public class CommandProcessorTests
     private readonly Mock<IDisplay> _display = new();
     private readonly Mock<ITimeProvider> _timeProvider = new();
     private readonly Commands.CommandUtils _cmdUtils;
+    private readonly AllFilter _allFilter;
+    private readonly WeekFilter _weekFilter;
+    private readonly YesterdayFilter _yesterdayFilter;
+    private readonly TodayFilter _todayFilter;
 
     public CommandProcessorTests()
     {
         _cmdUtils = new Commands.CommandUtils(_repository.Object, _display.Object);
+        _allFilter = new AllFilter(_repository.Object);
+        _weekFilter = new WeekFilter(_repository.Object, _timeProvider.Object);
+        _yesterdayFilter = new YesterdayFilter(_repository.Object, _timeProvider.Object);
+        _todayFilter = new TodayFilter(_repository.Object, _timeProvider.Object);
     }
 
     [Theory]
@@ -117,9 +127,10 @@ public class CommandProcessorTests
     public void WithAllOption_WhenShowing_ThenGetsAllActivities(string option)
     {
         // Arrange
+        var pArgs = new ProgramArguments(["show", option]);
         var processor = new CommandProcessor(new Commands.ShowCommand(
-            new ProgramArguments(["show", option]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object) }));
+            pArgs, new FilterFactory(pArgs, [_allFilter]),
+            [new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object)]));
 
         // Act
         processor.Execute();
@@ -134,9 +145,10 @@ public class CommandProcessorTests
     public void WithWeekOption_WhenShowing_ThenGetsActivitiesOfTheWeek(string option)
     {
         // Arrange
+        var pArgs = new ProgramArguments(["show", option]);
         var processor = new CommandProcessor(new Commands.ShowCommand(
-            new ProgramArguments(["show", option]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new WorktimeReport(_display.Object), new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object) }));
+            pArgs, new FilterFactory(pArgs, [_weekFilter]),
+            [new WorktimeReport(_display.Object), new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object)]));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
         // Act
@@ -152,9 +164,10 @@ public class CommandProcessorTests
     public void WithYesterdayOption_WhenShowing_ThenGetsActivitiesOfYesterday(string option)
     {
         // Arrange
+        var pArgs = new ProgramArguments(["show", option]);
         var processor = new CommandProcessor(new Commands.ShowCommand(
-            new ProgramArguments(["show", option]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object) }));
+            pArgs, new FilterFactory(pArgs, [_yesterdayFilter]),
+            [new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object)]));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
         // Act
@@ -168,9 +181,10 @@ public class CommandProcessorTests
     public void WithoutOptions_WhenShowing_ThenGetsActivitiesFromToday()
     {
         // Arrange
+        var pArgs = new ProgramArguments(["show"]);
         var processor = new CommandProcessor(new Commands.ShowCommand(
-            new ProgramArguments(["show"]), _repository.Object,
-            _timeProvider.Object, new List<IReport>() { new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show"]), _timeProvider.Object) }));
+            pArgs, new FilterFactory(pArgs, [_todayFilter]),
+            [new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show"]), _timeProvider.Object)]));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
         // Act

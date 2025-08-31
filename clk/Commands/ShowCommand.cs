@@ -1,21 +1,21 @@
 using clk.Domain;
+using clk.Domain.Filters;
 using clk.Domain.Reports;
 using clk.Utils;
 
 namespace clk.Commands;
 
 public class ShowCommand(ProgramArguments pArgs,
-    IRecordRepository recordRepository,
-    ITimeProvider timeProvider,
+    FilterFactory filterFactory,
     IEnumerable<IReport> reports) : ICommand
 {
     public static string Name { get; } = "show";
 
     public void Execute()
     {
-        var activities = GetActivities();
+        var filter = filterFactory.GetFilter();
         var report = GetReport() ?? throw new KeyNotFoundException("Specified report type could not be found");
-        report.Print(activities);
+        report.Print(filter.GetActivities());
     }
 
     private IReport? GetReport()
@@ -29,23 +29,5 @@ public class ShowCommand(ProgramArguments pArgs,
             return reports.FirstOrDefault(r => r.Name == Args.BarGraphs);
         }
         return reports.FirstOrDefault(r => r.Name == Args.Details);
-    }
-
-
-    private IEnumerable<Activity> GetActivities()
-    {
-        if (pArgs.HasOption(Args.All))
-        {
-            return recordRepository.GetAll();
-        }
-        if (pArgs.HasOption(Args.Week))
-        {
-            return recordRepository.FilterByDate(timeProvider.Now.MondayOfTheWeek(), timeProvider.Now.MondayOfTheWeek().AddDays(4));
-        }
-        if (pArgs.HasOption(Args.Yesterday))
-        {
-            return recordRepository.FilterByDate(timeProvider.Now.Date.AddDays(-1));
-        }
-        return recordRepository.FilterByDate(timeProvider.Now.Date);
     }
 }
