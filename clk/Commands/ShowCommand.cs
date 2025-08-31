@@ -18,6 +18,10 @@ public class ShowCommand(ProgramArguments pArgs,
     private IReport? GetReport()
     {
         var reportName = pArgs.HasOption(Args.Report) ? pArgs.GetValue(Args.Report) : Args.Details;
+        if (pArgs.HasOption(Args.BarGraphs))
+            reportName = Args.BarGraphs;
+        else if (pArgs.HasOption(Args.Timesheet))
+            reportName = Args.Timesheet;
         return reports.FirstOrDefault(r => r.Name == reportName);
     }
 }

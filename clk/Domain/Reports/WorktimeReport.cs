@@ -13,7 +13,7 @@ public class WorktimeReport : IReport
         this.perDay = perDay;
     }
 
-    public string Name { get; } = Args.WorkTimes;
+    public string Name { get; } = Args.Timesheet;
 
     public void Print(IEnumerable<Activity> activities)
     {

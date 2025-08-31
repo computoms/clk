@@ -132,7 +132,7 @@ public class CommandProcessorTests
 
     [Theory]
     [InlineData("--week")]
-    [InlineData("-t")]
+    [InlineData("-w")]
     public void WithWeekOption_WhenShowing_ThenGetsActivitiesOfTheWeek(string option)
     {
         // Arrange

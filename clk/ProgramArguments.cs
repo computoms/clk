@@ -95,7 +95,7 @@ public static class Args
     public const string Yesterday = "Yesterday";
     // Reports
     public const string Report = "Report";
-    public const string WorkTimes = "timesheet";
+    public const string Timesheet = "timesheet";
     public const string BarGraphs = "bars";
     public const string Details = "details";
     // Others
@@ -107,10 +107,13 @@ public static class Args
 
     public static List<SwitchOption> Switches { get; } = new List<SwitchOption>()
     {
-        // FilterApartmentStates
+        // Filters
         new (All, "all", "a"),
-        new (Week, "week", "t"),
+        new (Week, "week", "w"),
         new (Yesterday, "yesterday", "y"),
+        // Report shortcuts
+        new (BarGraphs, "bars", "b"),
+        new (Timesheet, "timesheet", "t")
     };
 
     public static List<ValueOption> ValueOptions { get; } = new List<ValueOption>()
