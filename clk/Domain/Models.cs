@@ -41,7 +41,7 @@ public record Task(string Title, string[] Tree, string[] Tags, string Id)
 {
     public string Raw => (
         Title
-        + Tree.Aggregate("", (r, t) => $"{r}/{t}")
+        + Tree.Aggregate(" ", (r, t) => $"{r}/{t}")
         + Tags.Aggregate("", (r, t) => $"{r} +{t}")
         + (Id != string.Empty ? $" .{Id}" : "")).Trim();
     public bool IsSameAs(string title, string[] tree, string[] tags, string number)

@@ -1,6 +1,7 @@
 ﻿using clk.Domain;
 using clk.Domain.Reports;
 using clk.Utils;
+using FluentAssertions;
 using Moq;
 
 namespace clk.unittests;
@@ -10,24 +11,27 @@ public class CommandProcessorTests
     private readonly Mock<IRecordRepository> _repository = new();
     private readonly Mock<IDisplay> _display = new();
     private readonly Mock<ITimeProvider> _timeProvider = new();
+    private readonly Commands.CommandUtils _cmdUtils;
 
     public CommandProcessorTests()
     {
+        _cmdUtils = new Commands.CommandUtils(_repository.Object, _display.Object);
     }
 
     [Theory]
-    [InlineData(new string[4] { "add", "bla", "bli", "blou" }, "bla bli blou", new string[0], "", 0, 0)]
-    [InlineData(new string[1] { "add" }, "Started empty task", new string[0], "", 0, 0)]
-    [InlineData(new string[5] { "add", "--at", "10:00", "Test", "+tag" }, "Test", new string[1] { "tag" }, "", 10, 0)]
-    [InlineData(new string[5] { "add", "Test", "--at", "10:00", "+tag" }, "Test", new string[1] { "tag" }, "", 10, 0)]
-    [InlineData(new string[4] { "add", "--at", "10:00", ".123" }, "", new string[0], "123", 10, 0)]
-    public void WithAddCommand_WhenExecute_ThenAddsRawEntry(string[] arguments, string expectedTitle, string[] expectedTag, string expectedId, int expectedHour, int expectedMin)
+    [InlineData(new string[4] { "add", "bla", "bli", "blou" }, "bla bli blou", new string[0], new string[0], "", 0, 0)]
+    [InlineData(new string[1] { "add" }, "Started empty task", new string[0], new string[0], "", 0, 0)]
+    [InlineData(new string[5] { "add", "--at", "10:00", "Test", "+tag" }, "Test", new string[0], new string[1] { "tag" }, "", 10, 0)]
+    [InlineData(new string[5] { "add", "Test", "--at", "10:00", "+tag" }, "Test", new string[0], new string[1] { "tag" }, "", 10, 0)]
+    [InlineData(new string[4] { "add", "--at", "10:00", ".123" }, "", new string[0], new string[0], "123", 10, 0)]
+    [InlineData(new string[7] { "add", "This", "is", "a", "test", "/project/task/subtask", ".123" }, "This is a test", new string[3] { "project", "task", "subtask" }, new string[0], "123", 0, 0)]
+    public void WithAddCommand_WhenExecute_ThenAddsRawEntry(string[] arguments, string expectedTitle, string[] expectedTree, string[] expectedTag, string expectedId, int expectedHour, int expectedMin)
     {
         // Arrange
         var settings = new Settings(new ProgramArguments(arguments));
         settings.Data = new Settings.SettingsData();
         var processor = new CommandProcessor(
-            new Commands.AddCommand(new ProgramArguments(arguments), settings, _repository.Object, new Commands.CommandUtils(_repository.Object, _display.Object)));
+            new Commands.AddCommand(new ProgramArguments(arguments), settings, _repository.Object, _cmdUtils));
         var expectedTask = new Domain.Task(expectedTitle, [], expectedTag, expectedId);
         if (expectedHour == 0 && expectedMin == 0)
         {
@@ -35,11 +39,25 @@ public class CommandProcessorTests
             expectedMin = DateTime.Now.Minute;
         }
 
+        Domain.Task? addedTask = null;
+        Domain.Record? addedRecord = null;
+        _repository.Setup(x => x.AddRecord(It.IsAny<Domain.Task>(), It.IsAny<Domain.Record>()))
+            .Callback((Domain.Task t, Domain.Record r) => { addedTask = t; addedRecord = r; });
+
         // Act
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.AddRecord(It.Is<Domain.Task>(t => t.Title == expectedTitle && t.Id == expectedId && t.Tags.Count() == expectedTag.Count() && t.Tags.All(tag => expectedTag.Contains(tag))), It.Is<Domain.Record>(r => r.StartTime.Hour == expectedHour && r.StartTime.Minute == expectedMin)));
+        addedTask.Should().NotBeNull();
+        addedRecord.Should().NotBeNull();
+        addedTask.Title.Should().Be(expectedTitle);
+        addedTask.Id.Should().Be(expectedId);
+        addedTask.Tree.Should().HaveCount(expectedTree.Length)
+            .And.ContainInOrder(expectedTree);
+        addedTask.Tags.Should().HaveCount(expectedTag.Length)
+            .And.ContainInOrder(expectedTag);
+        addedRecord.StartTime.Hour.Should().Be(expectedHour);
+        addedRecord.StartTime.Minute.Should().Be(expectedMin);
     }
 
     [Theory]
@@ -48,7 +66,7 @@ public class CommandProcessorTests
     public void WithStopCommand_WhenExecute_ThenAddsRawEntry(string[] args, int expectedHour, int expectedMin)
     {
         // Arrange
-        var processor = new CommandProcessor(new Commands.StopCommand(new ProgramArguments(args), _repository.Object, new Commands.CommandUtils(_repository.Object, _display.Object)));
+        var processor = new CommandProcessor(new Commands.StopCommand(new ProgramArguments(args), _repository.Object, _cmdUtils));
         if (expectedHour == 0 && expectedMin == 0)
         {
             expectedHour = DateTime.Now.Hour;
