@@ -12,19 +12,19 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
 
         if (pArgs.HasOption(Args.GroupBy))
         {
-            PrintByTags(activities, current);
+            PrintByPath(activities, current);
             return;
         }
 
         PrintDetails(activities, current);
     }
 
-    private void PrintByTags(IEnumerable<Activity> activities, Activity? current)
+    private void PrintByPath(IEnumerable<Activity> activities, Activity? current)
     {
-        var groups = ReportUtils.FilterByTags(activities, pArgs.GetValue(Args.GroupBy));
+        var groups = ReportUtils.GroupByPath(activities, pArgs.GetValue(Args.GroupBy));
         display.Print(
             groups
-            .Select(g => new TagInfo(
+            .Select(g => new PathInfo(
                 g.Key,
                 g.OrderBy(a => a.Records.Min(r => r.StartTime))
                     .FirstOrDefault()?.Records
@@ -84,7 +84,7 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
             .SelectMany(LayoutActivity).Prepend((date?.ToString("yyyy-MM-dd") ?? "").AsLine());
     }
 
-    private IEnumerable<FormattedLine> LayoutTagInfo(TagInfo info)
+    private IEnumerable<FormattedLine> LayoutTagInfo(PathInfo info)
     {
         var duration = Utilities.PrintDuration(info.Duration);
         var line = new List<FormattedText>
@@ -127,6 +127,6 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
         return display.Layout(formattedRecords, 2);
     }
 
-    private record TagInfo(string? Name, DateTime Date, TimeSpan Duration);
+    private record PathInfo(string? Name, DateTime Date, TimeSpan Duration);
 }
 
