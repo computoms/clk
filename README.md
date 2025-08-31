@@ -239,4 +239,6 @@ Other options:
 
 ## Examples
 
-![Examples](./docs/img/examples.png)
+![Examples Bars](./docs/img/examples-bars.png)
+![Examples Details](./docs/img/examples-details.png)
+![Examples Timesheet](./docs/img/examples-timesheet.png)
