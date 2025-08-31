@@ -27,8 +27,8 @@ public class CommandProcessorTests
         var settings = new Settings(new ProgramArguments(arguments));
         settings.Data = new Settings.SettingsData();
         var processor = new CommandProcessor(
-            new Commands.AddCommand(new ProgramArguments(arguments), settings, _repository.Object, new Commands.CommandUtils(_repository.Object, _display.Object), _display.Object));
-        var expectedTask = new Domain.Task(expectedTitle, expectedTag, expectedId);
+            new Commands.AddCommand(new ProgramArguments(arguments), settings, _repository.Object, new Commands.CommandUtils(_repository.Object, _display.Object)));
+        var expectedTask = new Domain.Task(expectedTitle, [], expectedTag, expectedId);
         if (expectedHour == 0 && expectedMin == 0)
         {
             expectedHour = DateTime.Now.Hour;
@@ -81,7 +81,7 @@ public class CommandProcessorTests
     {
         // Arrange
         var processor = new CommandProcessor(new Commands.RestartCommand(_repository.Object, _display.Object, _timeProvider.Object));
-        var task = new Domain.Task("Activity", new string[] { "tag" }, "123");
+        var task = new Domain.Task("Activity", [], ["tag"], "123");
         var record = new Domain.Record(new DateTime(2022, 1, 1), null);
         var activity = new Activity(task, new List<Domain.Record>() { record });
         _repository.Setup(x => x.GetAll()).Returns(new List<Activity>() { activity });

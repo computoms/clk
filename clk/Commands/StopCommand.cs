@@ -8,7 +8,7 @@ public class StopCommand(ProgramArguments pArgs, IRecordRepository recordReposit
 
     public void Execute()
     {
-        var activity = new InputTask(new Domain.Task("[Stop]", [], string.Empty), new Record(pArgs.Time));
+        var activity = new InputTask(new Domain.Task("[Stop]", [], [], string.Empty), new Record(pArgs.Time));
         recordRepository.AddRecord(activity.Task, activity.Record);
         commandUtils.DisplayResult(activity);
     }

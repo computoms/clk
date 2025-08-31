@@ -81,10 +81,10 @@ public class FileStorage : IStorage
         if (parsedLine.Title == SpecialActivities.Stop)
             return null;
 
-        var activity = activities.FirstOrDefault(x => x.Task.IsSameAs(parsedLine.Title, parsedLine.Tags, parsedLine.Id));
+        var activity = activities.FirstOrDefault(x => x.Task.IsSameAs(parsedLine.Title, parsedLine.Tree, parsedLine.Tags, parsedLine.Id));
         if (activity == null)
         {
-            activity = new Activity(new Domain.Task(parsedLine.Title, parsedLine.Tags, parsedLine.Id));
+            activity = new Activity(new Domain.Task(parsedLine.Title, parsedLine.Tree, parsedLine.Tags, parsedLine.Id));
             activities.Add(activity);
         }
         return activity;
@@ -98,12 +98,13 @@ public class FileStorage : IStorage
         if (parseHour)
             time = GetStartTime(words.FirstOrDefault() ?? string.Empty);
 
-        var tags = words.Where(x => x.StartsWith('+')).Select(x => x[1..]).ToArray();
+        var tree = words.FirstOrDefault(x => x.Length > 1 && x.StartsWith('/'))?.Split('/', StringSplitOptions.RemoveEmptyEntries).ToArray() ?? [];
+        var tags = words.Where(x => x.Length > 1 && x.StartsWith('+')).Select(x => x[1..]).ToArray();
         var number = words.FirstOrDefault(x => x.StartsWith('.') && x.Skip(1).All(char.IsDigit))?[1..];
         var title = string.Join(' ', (parseHour ? words.Skip(1) : words).Where(x => !x.StartsWith('+') && x != $".{number}")).Trim();
         return new ParsedLine(
 	        ConcatDateAndTime(currentDate, time),
-            title, tags, number ?? string.Empty);
+            title, tree, tags, number ?? string.Empty);
     }
 
     private void AssertUniqueId(Domain.Task task)
@@ -112,9 +113,9 @@ public class FileStorage : IStorage
             throw new InvalidDataException($"Id {task.Id} already exists");
     }
 
-    private DateTime ConcatDateAndTime(DateTime date, DateTime time) => new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, 0);
+    private DateTime ConcatDateAndTime(DateTime date, DateTime time) => new(date.Year, date.Month, date.Day, time.Hour, time.Minute, 0);
 
-    private record ParsedLine(DateTime StartTime, string Title, string[] Tags, string Id);
+    private record ParsedLine(DateTime StartTime, string Title, string[] Tree, string[] Tags, string Id);
 
     private void GetLastDate()
     {

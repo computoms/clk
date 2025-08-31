@@ -37,12 +37,17 @@ public class Activity
     private bool IsNow(ITimeProvider timeProvider, DateTime recordTime) => recordTime.Hour == timeProvider.Now.Hour && recordTime.Minute == timeProvider.Now.Minute;
 }
 
-public record Task(string Title, string[] Tags, string Id)
+public record Task(string Title, string[] Tree, string[] Tags, string Id)
 {
-    public string Raw => (Title + Tags.Aggregate("", (r, t) => $"{r} +{t}") + (Id != string.Empty ? $" .{Id}" : "")).Trim();
-    public bool IsSameAs(string title, string[] tags, string number)
+    public string Raw => (
+        Title
+        + Tree.Aggregate("", (r, t) => $"{r}/{t}")
+        + Tags.Aggregate("", (r, t) => $"{r} +{t}")
+        + (Id != string.Empty ? $" .{Id}" : "")).Trim();
+    public bool IsSameAs(string title, string[] tree, string[] tags, string number)
     { 
         return title == Title && number == Id
+            && Enumerable.Range(0, Tree.Length).All(i => Tree[i] == tree[i])
             && Tags.All(x => tags.Contains(x))
             && tags.All(x => Tags.Contains(x));
     }
