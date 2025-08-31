@@ -99,6 +99,7 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
     private IEnumerable<FormattedLine> LayoutActivity(Activity activity)
     {
         var duration = Utilities.PrintDuration(activity.Duration);
+        var path = (activity.Task.Path.Length > 0 ? "/" : "") + string.Join('/', activity.Task.Path);
         var tags = string.Join(' ', activity.Task.Tags.Select(x => $"+{x}"));
         var id = string.IsNullOrWhiteSpace(activity.Task.Id) ? "" : $".{activity.Task.Id}";
 
@@ -106,7 +107,8 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
         {
             $"{duration}".FormatChunk(ConsoleColor.DarkGreen),
             activity.Task.Title.PrependSpaceIfNotNull().FormatChunk(),
-            tags.PrependSpaceIfNotNull().FormatChunk(ConsoleColor.DarkBlue),
+            path.PrependSpaceIfNotNull().FormatChunk(ConsoleColor.DarkBlue),
+            tags.PrependSpaceIfNotNull().FormatChunk(ConsoleColor.DarkGreen),
             id.PrependSpaceIfNotNull().FormatChunk(ConsoleColor.DarkYellow)
         };
 

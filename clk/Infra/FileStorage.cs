@@ -101,7 +101,11 @@ public class FileStorage : IStorage
         var path = words.FirstOrDefault(x => x.Length > 1 && x.StartsWith('/'))?.Split('/', StringSplitOptions.RemoveEmptyEntries).ToArray() ?? [];
         var tags = words.Where(x => x.Length > 1 && x.StartsWith('+')).Select(x => x[1..]).ToArray();
         var number = words.FirstOrDefault(x => x.StartsWith('.') && x.Skip(1).All(char.IsDigit))?[1..];
-        var title = string.Join(' ', (parseHour ? words.Skip(1) : words).Where(x => !x.StartsWith('+') && x != $".{number}")).Trim();
+        var title = string.Join(' ', (parseHour ? words.Skip(1) : words)
+            .Where(x => !(x.Length > 1 && x.StartsWith('/')))
+            .Where(x => !(x.Length > 1 && x.StartsWith('+')))
+            .Where(x => x != $".{number}"))
+            .Trim();
         return new ParsedLine(
 	        ConcatDateAndTime(currentDate, time),
             title, path, tags, number ?? string.Empty);
