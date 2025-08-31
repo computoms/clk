@@ -1,5 +1,4 @@
 ﻿using clk.Domain;
-using clk.Domain.Filters;
 using clk.Domain.Reports;
 using clk.Utils;
 using FluentAssertions;
@@ -14,18 +13,10 @@ public class CommandProcessorTests
     private readonly Mock<IDisplay> _display = new();
     private readonly Mock<ITimeProvider> _timeProvider = new();
     private readonly Commands.CommandUtils _cmdUtils;
-    private readonly AllFilter _allFilter;
-    private readonly WeekFilter _weekFilter;
-    private readonly YesterdayFilter _yesterdayFilter;
-    private readonly TodayFilter _todayFilter;
 
     public CommandProcessorTests()
     {
         _cmdUtils = new Commands.CommandUtils(_repository.Object, _display.Object);
-        _allFilter = new AllFilter(_repository.Object);
-        _weekFilter = new WeekFilter(_repository.Object, _timeProvider.Object);
-        _yesterdayFilter = new YesterdayFilter(_repository.Object, _timeProvider.Object);
-        _todayFilter = new TodayFilter(_repository.Object, _timeProvider.Object);
     }
 
     [Theory]
@@ -129,14 +120,14 @@ public class CommandProcessorTests
         // Arrange
         var pArgs = new ProgramArguments(["show", option]);
         var processor = new CommandProcessor(new Commands.ShowCommand(
-            pArgs, new FilterFactory(pArgs, [_allFilter]),
+            pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
             [new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object)]));
 
         // Act
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.GetAll());
+        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(null, null, null, null, null)));
     }
 
     [Theory]
@@ -147,7 +138,7 @@ public class CommandProcessorTests
         // Arrange
         var pArgs = new ProgramArguments(["show", option]);
         var processor = new CommandProcessor(new Commands.ShowCommand(
-            pArgs, new FilterFactory(pArgs, [_weekFilter]),
+            pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
             [new WorktimeReport(_display.Object), new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object)]));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
@@ -155,7 +146,7 @@ public class CommandProcessorTests
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.FilterByDate(new DateTime(2022, 10, 17), new DateTime(2022, 10, 21)), Times.Once);
+        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 17), new DateTime(2022, 10, 21), null, null, null)), Times.Once);
     }
 
     [Theory]
@@ -166,7 +157,7 @@ public class CommandProcessorTests
         // Arrange
         var pArgs = new ProgramArguments(["show", option]);
         var processor = new CommandProcessor(new Commands.ShowCommand(
-            pArgs, new FilterFactory(pArgs, [_yesterdayFilter]),
+            pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
             [new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object)]));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
@@ -174,7 +165,7 @@ public class CommandProcessorTests
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.FilterByDate(new DateTime(2022, 10, 19)));
+        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 19), new DateTime(2022, 10, 19), null, null, null)));
     }
 
     [Fact]
@@ -183,7 +174,7 @@ public class CommandProcessorTests
         // Arrange
         var pArgs = new ProgramArguments(["show"]);
         var processor = new CommandProcessor(new Commands.ShowCommand(
-            pArgs, new FilterFactory(pArgs, [_todayFilter]),
+            pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
             [new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show"]), _timeProvider.Object)]));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
@@ -191,7 +182,7 @@ public class CommandProcessorTests
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.FilterByDate(new DateTime(2022, 10, 20)));
+        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 20), new DateTime(2022, 10, 20), null, null, null)));
     }
 }
 

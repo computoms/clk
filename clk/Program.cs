@@ -6,7 +6,6 @@ using clk.Commands;
 using clk.Domain;
 using clk.Infra;
 using clk.Domain.Reports;
-using clk.Domain.Filters;
 
 try
 {
@@ -38,11 +37,7 @@ try
     serviceProvider.AddKeyedSingleton<ICommand, CurrentTaskCommand>(CurrentTaskCommand.Name);
 
     // Filters
-    serviceProvider.AddSingleton<FilterFactory>();
-    serviceProvider.AddSingleton<IFilter, AllFilter>();
-    serviceProvider.AddSingleton<IFilter, WeekFilter>();
-    serviceProvider.AddSingleton<IFilter, YesterdayFilter>();
-    serviceProvider.AddSingleton<IFilter, TodayFilter>();
+    serviceProvider.AddSingleton<FilterParser>();
 
     var services = serviceProvider.BuildServiceProvider();
     var commandProcessor = services.GetRequiredService<CommandProcessor>();

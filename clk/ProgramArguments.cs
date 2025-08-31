@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Reflection.Metadata;
 
 namespace clk;
 
@@ -97,6 +96,8 @@ public static class Args
     public const string BarGraphs = "BarGraphs";
     public const string Details = "Details";
     public const string GroupBy = "GroupBy";
+    public const string Tags = "Tags";
+    public const string Path = "Path";
     public const string At = "At";
     public const string Settings = "Settings";
 
@@ -116,6 +117,8 @@ public static class Args
     {
         // Filters
         new(GroupBy, "group-by", string.Empty),
+        new(Tags, "tags", string.Empty),
+        new(Path, "path", string.Empty),
         // Others
         new(At, "at", string.Empty),
         new(Settings, "settings", string.Empty)

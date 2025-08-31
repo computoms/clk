@@ -68,7 +68,7 @@ public class RecordRepositoryTests
         _storage.Setup(x => x.GetActivities()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", [], ["tag"], "123")) });
 
         // Act
-        var result = _repository.FilterByTag(new List<string>() { "tag" });
+        var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string>{"tag"}, null));
 
         // Assert
         result.Should().HaveCount(1);
@@ -83,7 +83,7 @@ public class RecordRepositoryTests
         _storage.Setup(x => x.GetActivities()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", [], ["tag1", "tag2"], "123")) });
 
         // Act
-        var result = _repository.FilterByTag(new List<string>() { "tag1" });
+        var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string>{"tag1"}, null));
 
         // Assert
         result.Should().HaveCount(1);
@@ -103,7 +103,7 @@ public class RecordRepositoryTests
 	    });
 
         // Act
-        var result = _repository.FilterByTag(new List<string>() { "tag1", "tag2" });
+        var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string> { "tag1", "tag2" }, null));
 
         // Assert
         result.Should().HaveCount(1);
@@ -127,7 +127,7 @@ public class RecordRepositoryTests
                 });
 
         // Act
-        var result = _repository.FilterByDate(new DateTime(2022, 10, 10));
+        var result = _repository.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10), null, null, null));
 
         // Assert
         result.First().Records.Should().HaveCount(1);
@@ -146,7 +146,7 @@ public class RecordRepositoryTests
             });
 
         // Act
-        var result = _repository.FilterByDate(new DateTime(2022, 10, 10));
+        var result = _repository.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10), null, null, null));
 
         // Assert
         result.Should().HaveCount(1);

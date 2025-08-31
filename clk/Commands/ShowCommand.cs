@@ -1,21 +1,18 @@
 using clk.Domain;
-using clk.Domain.Filters;
 using clk.Domain.Reports;
-using clk.Utils;
 
 namespace clk.Commands;
 
 public class ShowCommand(ProgramArguments pArgs,
-    FilterFactory filterFactory,
+    FilterParser filterParser,
     IEnumerable<IReport> reports) : ICommand
 {
     public static string Name { get; } = "show";
 
     public void Execute()
     {
-        var filter = filterFactory.GetFilter();
         var report = GetReport() ?? throw new KeyNotFoundException("Specified report type could not be found");
-        report.Print(filter.GetActivities());
+        report.Print(filterParser.Filter());
     }
 
     private IReport? GetReport()
