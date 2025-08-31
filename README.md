@@ -45,24 +45,34 @@ Here is an example file:
 
 ```
 [2022-01-01]
-10:00 Starting project X +projectX
-11:23 Starting documentation of project X +projectX +doc
+10:00 Starting project X /projectX
+11:23 Starting documentation of project X /projectX/module1 +doc
 12:00 [Stop]
 [2022-01-02]
-08:05 Starting workday, checking emails +office +emails
-09:00 Back on documentation +projectX +doc
-10:00 [Stop]
+08:05 Starting workday, checking emails /office/emails
+09:00 Back on documentation /projectX/module1 +doc
+10:00 Start implementation of module 2 /projectX/module2 .002
+11:00 [Stop]
 ```
 
-## Tags and ids
+### Tasks
 
-An entry in this file can be associated with tags if you start the tag with a `+` (`+tag`) or ID if you start with a `.` (`.456`). 
+An line in the file is either associated to a date tag (following lines represent tasks started that day) or a task.
 
-Tags allow for powerful filtering and reporting.
+A task is composed of:
 
-IDs allow to track time of tasks from an external tool, such as Jira. They also allow to restart a task if you know its id (see examples below).
+- A _start time_, in the form `HH:mm`
+- A _title_ composed of words separated by spaces
+- An optional _path_, representing a hierarchical tree-like way of ordering and representing the task. A path is a single word starting with the `/` character, with sub-groups in the tree structure are separated by `/`, _e.g._ `/project/task/subtask`.
+- Optional _tags_, allowsing to filter the tasks. A tag is a single word starting with `+`, _e.g._ `+meeting`
+- An optional _id_, allowing to restart tasks and identify single tasks (or link tasks to external tools, such as Jira). An id is a single word starting with `.`, _e.g._ `.123`
 
-## Special tasks
+A task does not have a stop time, as it's either:
+
+- The start time of the following task
+- The time specified by the special `[Stop]` task (see below)
+
+### Special tasks
 
 The `[Stop]` task is used to stop the last task. It is not required if you switch tasks without taking a break.
 
@@ -85,7 +95,7 @@ Additionally, a custom settings file can be passed using the `--settings /path/t
 You can add a new entry by using the `add` command:
 
 ```
-$ clk add Definition of the prototype +myapp +proto
+$ clk add Definition of the prototype /myapp/proto
 ```
 
 To switch to a new task, just use the same command:
@@ -129,7 +139,23 @@ You can show reports/statistics with the `show` command:
 $ clk show
 ```
 
+### Filters
+
+Tasks can be filtered using the following options:
+
+- `--all`                   : select all tasks
+- `--week`                  : select tasks from current week
+- `--yesterday`             : select tasks from yesterday
+- `--tags <tag-filter>`     : select tasks based on a list of tags. `<tag-filter>` is a comma-separated list of tags to filter on (do not include `+` signs in this list).
+- `--path <path-filter>`    : select tasks based on a path filter. `<path-filter>` is a path (starting with `/`) that will match all tasks with their paths starting by `<path-filter>`. Example: task `Task 1 /proj/task1` will be included in filter `<path-filter>`=`/proj` as well as `<path-filter>`=`/proj/task1`.
+
+**Note**: if `--all`, `--week` or `--yesterday` is not specified, the default date filter is tasks from today.
+
+### Report types
+
 #### Details
+
+Option: `--report details` (default)
 
 By default, the details of today are shown.
 
@@ -137,15 +163,35 @@ To show the details for yesterday, use the `--yesterday` (or `-y`) switch.
 
 To show the details of all tasks in the file, use the `--all` (or `-a`) switch.
 
-#### Time worked
+#### Timesheet
+
+Option: `--report timesheet` or `--timesheet` or `-t`
 
 You can also show the time worked per day for the entire week using the `--week` option (or `-w`) or the time worked per week for the entire period using the `--all` in combination with the `--worktimes` switches (equivalent to `-aw`).
 
-## Opening file
+#### Bar graphs
+
+Option: `--report bars` or `--bars` or `-b`
+
+Shows task durations and bars representing their percentage of the total duration of the selected tasks.
+
+#### Grouping
+
+Tasks can be groupped by task title (default) or using a path:
+
+`--group-by <path-spec>`        : groups tasks by `<path-spec>`. `<path-spec>` is either `/*` to group by first level paths (_e.g_ a task with path `/project/task1` will be listed as `project`) or path specification, such as `/project` to list all sub-paths or `/project` (`task1` in last example).
+
+This grouping option can be used with the bar graphs report as well as the details report.
+
+Option `--group-by /*` can be simplified by `--group-by-path` or `-p`.
+
+## Other commands
+
+### Opening file
 
 The command `open` allows to open the `clock.txt` source file with the default editor (configured in settings as `EditorCommand`, default is `code`).
 
-## Listing tasks
+### Listing tasks
 
 All task names (with tags and ids) can be found using the `list` command. This is useful to be used with [fzf](https://github.com/junegunn/fzf/blob/master/README.md):
 
@@ -154,6 +200,12 @@ TASK_NAME=$(clk list | fzf); clk add $TASK_NAME
 ```
 
 The above line allows to find an existing task by fuzzy finding its name, then adding it as current task.
+
+### Getting current task
+
+The command `current` allows to get the currently running task. If no task is running, `None` is returned.
+
+This can be useful for automation / scripting.
 
 ## Arguments and options
 
@@ -164,25 +216,27 @@ Filters:
 - `--all` / `-a` : select all tasks without filtering
 - `--week` / `-t` : selects tasks from the current week
 - `--yesterday` / `-y` : selects tasks from yesterday
-- `--group-by` : used for filtering based on tags. Values can be `tags` to filter on the first tags of the tasks or `+tag` to filter tasks based on tag `tag` and display the bars according to the second level tag, or `+tag1,+tag2` to filter tasks based on multiple tags (and display bars according to the nth level tag).
+- `--group-by` : used for filtering based on paths. Values can be `/*` to filter on the first path name of the tasks or `/<path1>[/<path2>...]` to filter tasks based on given path filter and display the bars according to the nth level path.
+- `--group-by-path` / `-p` : short for `--group-by /*`.
 
 Reports:
 
-- `--worktimes` / `-w` : shows time worked for each day of the week or each week of the month
-- `--bar` / `-b` : display bar graphs
-- `--details` / `-d` (default) : displays the details of each task
+- `--report <report-name>`  : Show report `<report-name>`
+- `--bars` / `-b`           : Show bar graphs report (short for `--report bars`)
+- `--timesheet` / `-t`      : Show timesheet report (short for `--report timesheet`)
+
+Filters:
+
+- `--tags <tag-filter>`     : Filter by tags
+- `--path <path-filter>`    : Filter by path
 
 Other options:
 
 - `--at xx:xx` : add task at a specific time
 - `--settings /path/to/file` : specify a non-default settings file
 
-**Note**: single character options can be combined, _e.g._ `-ad` shows all tasks using the details report.
+**Note**: single character options can be combined, _e.g._ `-ab` shows all tasks using the bars report.
 
 ## Examples
 
 ![Examples](./docs/img/examples.png)
-
-Filtering by multiple tags:
-
-![Multi-tag filtering](./docs/img/example-multi-tags.png)
