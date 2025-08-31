@@ -152,6 +152,26 @@ public class RecordRepositoryTests
         result.Should().HaveCount(1);
     }
 
+    [Theory]
+    [InlineData(new string[1] { "project" }, 2)]
+    [InlineData(new string[2] { "project", "task" }, 1)]
+    public void WithTwoActivities_WhenFilterByPath_ThenReturnsMatchingActivities(string[] paths, int expectedCount)
+    {
+        // Arrange
+        _storage.Setup(x => x.GetActivities())
+            .Returns(
+            [
+                new Activity(new Domain.Task("Activtiy1", ["project", "task"], [], ""), [new(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10))]),
+                new Activity(new Domain.Task("Activtiy2", ["project"], [], ""), [new(new DateTime(2022, 10, 11), new DateTime(2022, 10, 11))]),
+            ]);
+
+        // Act
+        var result = _repository.FilterByQuery(new RepositoryQuery(null, null, [.. paths], null, null));
+
+        // Assert
+        result.Should().HaveCount(expectedCount);
+    }
+
     [Fact]
     public void DisplayDuration()
     {

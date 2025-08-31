@@ -52,7 +52,9 @@ public class RecordRepository : IRecordRepository
         }
         if (query.Path != null)
         {
-            activities = activities.Where(x => Enumerable.Range(0, query.Path.Count).All(i => query.Path[i] == x.Task.Path[i]));
+            activities = activities
+                .Where(x => query.Path.Count <= x.Task.Path.Length)
+                .Where(x => Enumerable.Range(0, query.Path.Count).All(i => query.Path[i] == x.Task.Path[i]));
         }
         if (query.Tags != null)
         {

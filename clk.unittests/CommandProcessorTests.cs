@@ -26,7 +26,7 @@ public class CommandProcessorTests
     [InlineData(new string[5] { "add", "Test", "--at", "10:00", "+tag" }, "Test", new string[0], new string[1] { "tag" }, "", 10, 0)]
     [InlineData(new string[4] { "add", "--at", "10:00", ".123" }, "", new string[0], new string[0], "123", 10, 0)]
     [InlineData(new string[7] { "add", "This", "is", "a", "test", "/project/task/subtask", ".123" }, "This is a test", new string[3] { "project", "task", "subtask" }, new string[0], "123", 0, 0)]
-    public void WithAddCommand_WhenExecute_ThenAddsRawEntry(string[] arguments, string expectedTitle, string[] expectedTree, string[] expectedTag, string expectedId, int expectedHour, int expectedMin)
+    public void WithAddCommand_WhenExecute_ThenAddsRawEntry(string[] arguments, string expectedTitle, string[] expectedPath, string[] expectedTag, string expectedId, int expectedHour, int expectedMin)
     {
         // Arrange
         var settings = new Settings(new ProgramArguments(arguments));
@@ -53,8 +53,8 @@ public class CommandProcessorTests
         addedRecord.Should().NotBeNull();
         addedTask.Title.Should().Be(expectedTitle);
         addedTask.Id.Should().Be(expectedId);
-        addedTask.Tree.Should().HaveCount(expectedTree.Length)
-            .And.ContainInOrder(expectedTree);
+        addedTask.Path.Should().HaveCount(expectedPath.Length)
+            .And.ContainInOrder(expectedPath);
         addedTask.Tags.Should().HaveCount(expectedTag.Length)
             .And.ContainInOrder(expectedTag);
         addedRecord.StartTime.Hour.Should().Be(expectedHour);
@@ -121,7 +121,7 @@ public class CommandProcessorTests
         var pArgs = new ProgramArguments(["show", option]);
         var processor = new CommandProcessor(new Commands.ShowCommand(
             pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
-            [new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object)]));
+            [new DetailsReport(_display.Object, _repository.Object, pArgs, _timeProvider.Object)]));
 
         // Act
         processor.Execute();
@@ -139,7 +139,7 @@ public class CommandProcessorTests
         var pArgs = new ProgramArguments(["show", option]);
         var processor = new CommandProcessor(new Commands.ShowCommand(
             pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
-            [new WorktimeReport(_display.Object), new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object)]));
+            [new WorktimeReport(_display.Object), new DetailsReport(_display.Object, _repository.Object, pArgs, _timeProvider.Object)]));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
         // Act
@@ -158,7 +158,7 @@ public class CommandProcessorTests
         var pArgs = new ProgramArguments(["show", option]);
         var processor = new CommandProcessor(new Commands.ShowCommand(
             pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
-            [new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show", option]), _timeProvider.Object)]));
+            [new DetailsReport(_display.Object, _repository.Object, pArgs, _timeProvider.Object)]));
         _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
 
         // Act
@@ -166,6 +166,26 @@ public class CommandProcessorTests
 
         // Assert
         _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 19), new DateTime(2022, 10, 19), null, null, null)));
+    }
+
+    [Fact]
+    public void FilterByPath_WhenShowing_ThenFiltersByPath()
+    {
+        // Arrange
+        var pArgs = new ProgramArguments(["show", "--all", "--path", "/project/task"]);
+        var processor = new CommandProcessor(new Commands.ShowCommand(
+            pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
+            [new DetailsReport(_display.Object, _repository.Object, pArgs, _timeProvider.Object)]
+        ));
+        List<string> path = new List<string>();
+        _repository.Setup(x => x.FilterByQuery(It.IsAny<RepositoryQuery>()))
+            .Callback((RepositoryQuery query) => { path = query.Path; });
+
+        // Act
+        processor.Execute();
+
+        // Assert
+        path.Should().HaveCount(2).And.ContainInOrder(["project", "task"]);
     }
 
     [Fact]

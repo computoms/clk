@@ -25,7 +25,7 @@ public class FilterParser(ProgramArguments pArgs, IRecordRepository recordReposi
         if (pArgs.HasOption(Args.Path))
         {
             var path = pArgs.GetValue(Args.Path).Split('/', StringSplitOptions.RemoveEmptyEntries).ToList();
-            query = query with { Tree = path };
+            query = query with { Path = path };
         }
 
         return recordRepository.FilterByQuery(query);
