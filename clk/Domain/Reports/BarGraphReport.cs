@@ -56,13 +56,15 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
     private static BarLayout GetLayout(int maxTitleLength)
     {
         var displayFullWidth = Console.WindowWidth > MaxTotalWidthChars ? MaxTotalWidthChars : Console.WindowWidth;
-        var textAlignment = maxTitleLength + 5;
+        const int durationLength = 7;
+        const int extraLength = 5 + durationLength;
+        var textAlignment = maxTitleLength + extraLength;
         if (textAlignment > MaxTextAlignmentRatio * displayFullWidth)
         {
-            textAlignment = (int)(MaxTextAlignmentRatio * displayFullWidth) + 5;
+            textAlignment = (int)(MaxTextAlignmentRatio * displayFullWidth) + extraLength;
         }
 
-        return new BarLayout(textAlignment, displayFullWidth - textAlignment - 5);
+        return new BarLayout(textAlignment, displayFullWidth - textAlignment - extraLength);
     }
 
     private const int MaxTotalWidthChars = 150;
@@ -72,6 +74,7 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
     {
         var length = (int)(duration.Ticks * maxBarLength / maxDuration.Ticks);
         return AlignText(title, textAlignment).AsLine()
+            .Append(new FormattedLine((Utilities.PrintDuration(duration) + "  ").FormatChunk(ConsoleColor.DarkGreen)))
             .Append(new FormattedLine(BarGraph(length).FormatChunk(GetColor())));
     }
 
