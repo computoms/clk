@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 
 namespace clk;
@@ -26,9 +27,9 @@ public record ProgramArguments
 
         for (int i = 1; i < rawArgs.Length; i++)
         {
-            if (GetSwitch(rawArgs[i]) is var swOpt && swOpt != null)
+            if (GetSwitches(rawArgs[i]) is var switches && switches.Any())
             {
-                Switches.Add(swOpt);
+                Switches.AddRange(switches);
             }
             else if (GetValueOption(rawArgs[i]) is var valOpt && valOpt != null)
             {
@@ -60,12 +61,15 @@ public record ProgramArguments
 
     private static string SanitizeInput(string line) => line.Replace("\r", "").Replace("\n", "").Trim();
 
-    private static SwitchOption? GetSwitch(string arg)
+    private static IEnumerable<SwitchOption> GetSwitches(string arg)
     {
-        return Args.Switches.FirstOrDefault(v => $"--{v.Long}" == arg)
-            ?? (IsShortArg(arg)
-                ? Args.Switches.FirstOrDefault(v => arg.Contains(v.Short))
-                : null);
+        var fullName = Args.Switches.FirstOrDefault(v => $"--{v.Long}" == arg);
+        if (fullName != null)
+            return [fullName];
+
+        return IsShortArg(arg)
+            ? Args.Switches.Where(v => arg.Contains(v.Short)) 
+            : [];
     }
 
     private static ValueOption? GetValueOption(string arg) => Args.ValueOptions.FirstOrDefault(v => $"--{v.Long}" == arg);
