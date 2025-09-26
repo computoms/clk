@@ -35,7 +35,6 @@
     <None Remove="Utils\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Reports\" />
     <Folder Include="Display\" />
     <Folder Include="Storage\" />
     <Folder Include="Utils\" />
