@@ -102,6 +102,7 @@ public static class Args
     public const string Timesheet = "timesheet";
     public const string BarGraphs = "bars";
     public const string Details = "details";
+    public const string Chrono = "chrono";
     // Others
     public const string GroupBy = "GroupBy";
     public const string GroupByPath = "GroupByPath";
@@ -117,6 +118,8 @@ public static class Args
         new (Week, "week", "w"),
         new (Yesterday, "yesterday", "y"),
         // Shortcuts
+        new (Chrono, "chrono", "c"),
+        new (Details, "details", "d"),
         new (BarGraphs, "bars", "b"),
         new (Timesheet, "timesheet", "t"),
         new (GroupByPath, "group-by-path", "p")

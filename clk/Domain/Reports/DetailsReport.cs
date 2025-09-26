@@ -34,9 +34,9 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
             .GroupBy(e => e.Date)
             .SelectMany(g => g.SelectMany(a => LayoutTagInfo(a)))
             .Append(" ".AsLine())
-            .Append(TotalTime(groups.SelectMany(g => g)))
+            .Append(ReportUtils.TotalTime(groups.SelectMany(g => g)))
             .Append(" ".AsLine())
-            .Append(Current(current)));
+            .Append(ReportUtils.Current(current, timeProvider)));
     }
 
     private void PrintDetails(IEnumerable<Activity> activities, Activity? current)
@@ -47,36 +47,10 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
                 .GroupBy(x => x.Date)
                 .SelectMany(g => LayoutActivitiesOfTheDay(g.Key, g.Select(x => x.Activity)))
                 .Append(" ".AsLine())
-                .Append(TotalTime(activities))
+                .Append(ReportUtils.TotalTime(activities))
                 .Append(" ".AsLine())
-                .Append(Current(current)));
+                .Append(ReportUtils.Current(current, timeProvider)));
     }
-
-    private FormattedLine Current(Activity? current)
-    {
-        var currentRecord = current?.Records.MaxBy(r => r.StartTime);
-        if (currentRecord == null)
-            return new FormattedLine(string.Empty);
-
-        if (current!.IsStopped(timeProvider))
-        {
-            TimeSpan stopDuration = (TimeSpan)(DateTime.Now - currentRecord.EndTime!);
-            return new FormattedLine(new List<FormattedText> {
-                    " --> ".FormatChunk(),
-                    $"{Utilities.PrintDuration(stopDuration)} ".FormatChunk(ConsoleColor.DarkGreen),
-                    "Stopped".FormatChunk(ConsoleColor.DarkYellow)
-                });
-        }
-
-        return new FormattedLine(new List<FormattedText> {
-                " --> ".FormatChunk(),
-                $"{Utilities.PrintDuration(current!.Duration)} ".FormatChunk(ConsoleColor.DarkGreen),
-                current.Task.Title.FormatChunk(ConsoleColor.DarkYellow)
-            });
-    }
-
-    private FormattedLine TotalTime(IEnumerable<Activity> activities)
-        => $"{Utilities.PrintDuration(activities.Aggregate(TimeSpan.Zero, (curr, act) => curr + act.Duration))} Total".AsLine();
 
     private IEnumerable<FormattedLine> LayoutActivitiesOfTheDay(DateTime? date, IEnumerable<Activity> activities)
     {

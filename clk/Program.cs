@@ -26,6 +26,7 @@ try
     serviceProvider.AddSingleton<IReport, BarGraphReport>();
     serviceProvider.AddSingleton<IReport, WorktimeReport>();
     serviceProvider.AddSingleton<IReport, DetailsReport>();
+    serviceProvider.AddSingleton<IReport, ChronologicalReport>();
 
     // Commands
     serviceProvider.AddKeyedSingleton<ICommand, AddCommand>(AddCommand.Name);
