@@ -23,10 +23,10 @@ try
         .AddSingleton(sp => new CommandProcessor(sp.GetRequiredKeyedService<ICommand>(args.FirstOrDefault())));
 
     // Reports
-    serviceProvider.AddSingleton<IReport, FlatBarGraphReport>();
-    serviceProvider.AddSingleton<IReport, GroupedBarGraphReport>();
+    serviceProvider.AddSingleton<IReport, BarGraphReport>();
     serviceProvider.AddSingleton<IReport, WorktimeReport>();
     serviceProvider.AddSingleton<IReport, DetailsReport>();
+    serviceProvider.AddSingleton<IReport, JsonReport>();
     serviceProvider.AddSingleton<IReport, ChronologicalReport>();
 
     // Commands
@@ -34,6 +34,7 @@ try
     serviceProvider.AddKeyedSingleton<ICommand, ShowCommand>(ShowCommand.Name);
     serviceProvider.AddKeyedSingleton<ICommand, StopCommand>(StopCommand.Name);
     serviceProvider.AddKeyedSingleton<ICommand, RestartCommand>(RestartCommand.Name);
+    serviceProvider.AddKeyedSingleton<ICommand, SwitchCommand>(SwitchCommand.Name);
     serviceProvider.AddKeyedSingleton<ICommand, OpenCommand>(OpenCommand.Name);
     serviceProvider.AddKeyedSingleton<ICommand, ListCommand>(ListCommand.Name);
     serviceProvider.AddKeyedSingleton<ICommand, CurrentTaskCommand>(CurrentTaskCommand.Name);

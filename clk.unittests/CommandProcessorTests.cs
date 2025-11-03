@@ -127,7 +127,7 @@ public class CommandProcessorTests
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(null, null, null, null, null)));
+        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(null, null, null, null, null, null)));
     }
 
     [Theory]
@@ -146,7 +146,7 @@ public class CommandProcessorTests
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 17), new DateTime(2022, 10, 21), null, null, null)), Times.Once);
+        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 17), new DateTime(2022, 10, 21), null, null, null, null)), Times.Once);
     }
 
     [Theory]
@@ -165,7 +165,7 @@ public class CommandProcessorTests
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 19), new DateTime(2022, 10, 19), null, null, null)));
+        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 19), new DateTime(2022, 10, 19), null, null, null, null)));
     }
 
     [Fact]
@@ -202,7 +202,7 @@ public class CommandProcessorTests
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 20), new DateTime(2022, 10, 20), null, null, null)));
+        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 20), new DateTime(2022, 10, 20), null, null, null, null)));
     }
 }
 

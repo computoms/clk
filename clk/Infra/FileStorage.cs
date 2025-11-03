@@ -57,6 +57,8 @@ public class FileStorage : IStorage
         DateTime previousRecordStartTime = DateTime.MinValue;
         foreach (var line in stream.ReadAllLines())
         {
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
             var date = GetDate(Sanitize(line));
             if (date != DateTime.MinValue)
             {
@@ -102,7 +104,7 @@ public class FileStorage : IStorage
 
         var path = words.FirstOrDefault(x => x.Length > 1 && x.StartsWith('/'))?.Split('/', StringSplitOptions.RemoveEmptyEntries).ToArray() ?? [];
         var tags = words.Where(x => x.Length > 1 && x.StartsWith('+')).Select(x => x[1..]).ToArray();
-        var number = words.FirstOrDefault(x => x.StartsWith('.') && x.Skip(1).All(char.IsDigit))?[1..];
+        var number = words.FirstOrDefault(x => x.StartsWith('.') && x.Length > 1)?[1..];
         var title = string.Join(' ', (parseHour ? words.Skip(1) : words)
             .Where(x => !(x.Length > 1 && x.StartsWith('/')))
             .Where(x => !(x.Length > 1 && x.StartsWith('+')))

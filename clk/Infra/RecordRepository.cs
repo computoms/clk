@@ -1,6 +1,5 @@
 ﻿using clk.Utils;
 using clk.Domain;
-using System.Security.Cryptography.X509Certificates;
 
 namespace clk.Infra;
 
@@ -64,6 +63,10 @@ public class RecordRepository : IRecordRepository
         {
             activities = activities.Where(x => x.Task.Id == query.Id);
         }
+        if (query.Last != null)
+        {
+            activities = TakeLast(activities, (int)query.Last);
+        }
         return activities;
     }
 
@@ -76,5 +79,18 @@ public class RecordRepository : IRecordRepository
 
     private bool IsMatchingDate(Record record, DateTime startDate, DateTime endDate)
         => record.StartTime.Date.CompareTo(startDate.Date) >= 0 && record.StartTime.Date.CompareTo(endDate.Date) <= 0;
+
+    private static IEnumerable<Activity> TakeLast(IEnumerable<Activity> activities, int last)
+    {
+        var records = activities.SelectMany(a => a.Records.Select(r => new { Activity = a, Record = r }))
+            .OrderBy(e => e.Record.StartTime)
+            .TakeLast(last)
+            .GroupBy(e => e.Activity);
+
+        foreach (var group in records)
+        {
+            yield return new Activity(group.Key.Task, group.Select(e => e.Record));
+        }
+    }
 }
 

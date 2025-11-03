@@ -18,7 +18,6 @@ internal class ChronologicalReport(IDisplay display, IRecordRepository recordRep
                 .Append(ReportUtils.TotalTime(activities))
                 .Append(" ".AsLine())
                 .Append(ReportUtils.Current(current, timeProvider))
-
         );
     }
 

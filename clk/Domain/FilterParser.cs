@@ -28,6 +28,11 @@ public class FilterParser(ProgramArguments pArgs, IRecordRepository recordReposi
             query = query with { Path = path };
         }
 
+        if (pArgs.HasOption(Args.Last))
+        {
+            query = query with { Last = int.Parse(pArgs.GetValue(Args.Last)) };
+        }
+
         return recordRepository.FilterByQuery(query);
     }
 }

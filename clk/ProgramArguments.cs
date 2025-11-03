@@ -97,12 +97,15 @@ public static class Args
     public const string All = "All";
     public const string Week = "Week";
     public const string Yesterday = "Yesterday";
+
+    public const string Last = "Last";
     // Reports
     public const string Report = "Report";
     public const string Timesheet = "timesheet";
     public const string BarGraphs = "bars";
     public const string Details = "details";
     public const string Chrono = "chrono";
+    public const string Json = "json";
     // Others
     public const string GroupBy = "GroupBy";
     public const string GroupByPath = "GroupByPath";
@@ -119,6 +122,7 @@ public static class Args
         new (Yesterday, "yesterday", "y"),
         // Shortcuts
         new (Chrono, "chrono", "c"),
+        new (Json, "json", "j"),
         new (Details, "details", "d"),
         new (BarGraphs, "bars", "b"),
         new (Timesheet, "timesheet", "t"),
@@ -133,6 +137,7 @@ public static class Args
         new(GroupBy, "group-by", string.Empty),
         new(Tags, "tags", string.Empty),
         new(Path, "path", string.Empty),
+        new (Last, "last", string.Empty),
         // Others
         new(At, "at", string.Empty),
         new(Settings, "settings", string.Empty)
