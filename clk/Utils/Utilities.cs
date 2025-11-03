@@ -22,12 +22,6 @@ public static class Utilities
         return PrintDuration(duration);
     }
 
-    public static string Duration(this IEnumerable<Activity> activities)
-    {
-        var duration = activities.Aggregate<Activity, TimeSpan>(TimeSpan.Zero, (aggr, rec) => aggr + rec.Duration);
-        return PrintDuration(duration);
-    }
-
     public static string PrependSpaceIfNotNull(this string? str)
         => string.IsNullOrEmpty(str) ? "" : $" {str}";
 }

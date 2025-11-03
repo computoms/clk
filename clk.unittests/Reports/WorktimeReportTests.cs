@@ -22,38 +22,22 @@ public class WorktimeReportTests
     {
         // Arrange
         var report = new WorktimeReport(_display.Object, perDay);
-        var activities = new List<Activity>()
+        var activities = new List<TaskLine>()
         {
             // Day 1: 5:30
-            new Activity(
-		        new Domain.Task("Activity1", [], ["tag"], "001"),
-                new List<Domain.Record>()
-                {
-                    new Domain.Record(Date(9), Date(10)),
-                    new Domain.Record(Date(11), Date(12)),
-		        }),
-            new Activity(
-		        new Domain.Task("Activity2", [], ["tag"], "002"),
-                new List<Domain.Record>()
-                {
-                    new Domain.Record(Date(10), Date(11)),
-                    new Domain.Record(Date(13), Date(15, 30)),
-		        }),
+            new TaskLine("09:00 Activity1 #tag .001", new DateTime(2022, 1, 1)),
+            new TaskLine("10:00 Activity2 #tag .002", new DateTime(2022, 1, 1)),
+            new TaskLine("11:00 Activity1 #tag .001", new DateTime(2022, 1, 1)),
+            new TaskLine("12:00 [Stop]", new DateTime(2022, 1, 1)),
+            new TaskLine("13:00 Activity2 #tag .002", new DateTime(2022, 1, 1)),
+            new TaskLine("15:30 [Stop]", new DateTime(2022, 1, 1)),
             // Day2: 5:32
-            new Activity(
-		        new Domain.Task("Activity1", [], ["tag"], "001"),
-                new List<Domain.Record>()
-                {
-                    new Domain.Record(Date(10, 0, 2), Date(11, 0, 2)),
-                    new Domain.Record(Date(13, 0, 2), Date(15, 30, 2)),
-		        }),
-            new Activity(
-		        new Domain.Task("Activity2", [], ["tag"], "002"),
-                new List<Domain.Record>()
-                {
-                    new Domain.Record(Date(11, 0, 2), Date(12, 0, 2)),
-                    new Domain.Record(Date(15, 30, 2), Date(16, 32, 2)),
-		        }),
+            new TaskLine("10:00 Activity1 #tag .001", new DateTime(2022, 1, 2)),
+            new TaskLine("11:00 Activity2 #tag .002", new DateTime(2022, 1, 2)),
+            new TaskLine("12:00 [Stop]", new DateTime(2022, 1, 2)),
+            new TaskLine("13:00 Activity1 #tag .001", new DateTime(2022, 1, 2)),
+            new TaskLine("15:30 Activity2 #tag .002", new DateTime(2022, 1, 2)),
+            new TaskLine("15:32 [Stop]", new DateTime(2022, 1, 2)),
         };
         var expectedOutputPerDay = new List<string>()
         {

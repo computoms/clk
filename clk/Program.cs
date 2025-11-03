@@ -25,7 +25,6 @@ try
     // Reports
     serviceProvider.AddSingleton<IReport, BarGraphReport>();
     serviceProvider.AddSingleton<IReport, WorktimeReport>();
-    serviceProvider.AddSingleton<IReport, DetailsReport>();
     serviceProvider.AddSingleton<IReport, JsonReport>();
     serviceProvider.AddSingleton<IReport, ChronologicalReport>();
 

@@ -103,7 +103,6 @@ public static class Args
     public const string Report = "Report";
     public const string Timesheet = "timesheet";
     public const string BarGraphs = "bars";
-    public const string Details = "details";
     public const string Chrono = "chrono";
     public const string Json = "json";
     // Others
@@ -123,7 +122,6 @@ public static class Args
         // Shortcuts
         new (Chrono, "chrono", "c"),
         new (Json, "json", "j"),
-        new (Details, "details", "d"),
         new (BarGraphs, "bars", "b"),
         new (Timesheet, "timesheet", "t"),
         new (GroupByPath, "group-by-path", "p")

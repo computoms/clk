@@ -22,8 +22,6 @@ public class ShowCommand(ProgramArguments pArgs,
             reportName = Args.BarGraphs;
         else if (pArgs.HasOption(Args.Timesheet))
             reportName = Args.Timesheet;
-        else if (pArgs.HasOption(Args.Details))
-            reportName = Args.Details;
         else if (pArgs.HasOption(Args.Json))
             reportName = Args.Json;
 

@@ -31,25 +31,4 @@ public class CommandUtils(IRecordRepository repository, IDisplay display)
             ])
         ]);
     }
-
-
-    public void DisplayResult(InputTask activity)
-    {
-        display.Print([
-            display.Layout(
-            [
-                (activity.Record.StartTime.ToString("HH:mm") + " ").FormatChunk(ConsoleColor.DarkGreen),
-                activity.Task.Title.FormatChunk(),
-                activity.Task.Tags.Aggregate("", (t1, t2) => t1 + " +" + t2).FormatChunk(ConsoleColor.DarkBlue),
-                activity.Task.Id != string.Empty ? $" .{activity.Task.Id}".FormatChunk(ConsoleColor.DarkYellow) : string.Empty.FormatChunk()
-            ])
-        ]);
-    }
-
-    public void DisplayResult(Domain.Task task, Record record)
-    {
-        DisplayResult(new InputTask(task, record));
-    }
 }
-
-public record InputTask(clk.Domain.Task Task, clk.Domain.Record Record);

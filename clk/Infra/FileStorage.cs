@@ -34,31 +34,6 @@ public class FileStorage : IStorage
         stream.AddLine(line.Raw);
     }
 
-    public void AddEntry(Domain.Task task, Record record)
-    {
-        if (!isInitialized)
-            GetLastDate();
-
-        if (_lastDate != timeProvider.Now.Date)
-        {
-            stream.AddLine(timeProvider.Now.ToString("[yyyy-MM-dd]"));
-            _lastDate = timeProvider.Now.Date;
-        }
-
-        AssertUniqueId(task);
-
-        var startTime = record.StartTime.ToString("HH:mm");
-        var tags = string.Join(" ", task.Tags.Select(x => $"+{x}"));
-        var path = string.Join("", task.Path.Select(x => $"/{x}"));
-        var id = string.IsNullOrWhiteSpace(task.Id) ? "" : $".{task.Id}";
-        var line = $"{startTime}"
-            + task.Title.PrependSpaceIfNotNull()
-            + path.PrependSpaceIfNotNull()
-            + tags.PrependSpaceIfNotNull()
-            + id.PrependSpaceIfNotNull();
-        stream.AddLine(line);
-    }
-
     public IEnumerable<TaskLine> GetTasks()
     {
         return ReadAll();
@@ -92,12 +67,6 @@ public class FileStorage : IStorage
         {
             yield return previousTask;
         }
-    }
-
-    private void AssertUniqueId(Domain.Task task)
-    {
-        if (GetTasks().Any(x => !string.IsNullOrWhiteSpace(x.Id) && x.Id == task.Id && x.Title != task.Title))
-            throw new InvalidDataException($"Id {task.Id} already exists");
     }
 
     private void AssertUniqueId(TaskLine line)

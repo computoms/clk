@@ -20,45 +20,37 @@ public class CommandProcessorTests
     }
 
     [Theory]
-    [InlineData(new string[4] { "add", "bla", "bli", "blou" }, "bla bli blou", new string[0], new string[0], "", 0, 0)]
-    [InlineData(new string[1] { "add" }, "Started empty task", new string[0], new string[0], "", 0, 0)]
-    [InlineData(new string[5] { "add", "--at", "10:00", "Test", "+tag" }, "Test", new string[0], new string[1] { "tag" }, "", 10, 0)]
-    [InlineData(new string[5] { "add", "Test", "--at", "10:00", "+tag" }, "Test", new string[0], new string[1] { "tag" }, "", 10, 0)]
-    [InlineData(new string[4] { "add", "--at", "10:00", ".123" }, "", new string[0], new string[0], "123", 10, 0)]
-    [InlineData(new string[7] { "add", "This", "is", "a", "test", "/project/task/subtask", ".123" }, "This is a test", new string[3] { "project", "task", "subtask" }, new string[0], "123", 0, 0)]
-    public void WithAddCommand_WhenExecute_ThenAddsRawEntry(string[] arguments, string expectedTitle, string[] expectedPath, string[] expectedTag, string expectedId, int expectedHour, int expectedMin)
+    [InlineData(new string[4] { "add", "bla", "bli", "blou" }, "bla bli blou", 0, 0)]
+    [InlineData(new string[1] { "add" }, "Started empty task", 0, 0)]
+    [InlineData(new string[5] { "add", "--at", "10:00", "Test", "#tag" }, "Test #tag", 10, 0)]
+    [InlineData(new string[5] { "add", "Test", "--at", "10:00", "#tag" }, "Test #tag", 10, 0)]
+    [InlineData(new string[4] { "add", "--at", "10:00", ".123" }, ".123", 10, 0)]
+    [InlineData(new string[7] { "add", "This", "is", "a", "test", "/project/task/subtask", ".123" }, "This is a test /project/task/subtask .123", 0, 0)]
+    public void WithAddCommand_WhenExecute_ThenAddsRawEntry(string[] arguments, string expectedTitle, int expectedHour, int expectedMin)
     {
         // Arrange
         var settings = new Settings(new ProgramArguments(arguments));
         settings.Data = new Settings.SettingsData();
         var processor = new CommandProcessor(
-            new Commands.AddCommand(new ProgramArguments(arguments), settings, _repository.Object, _cmdUtils));
-        var expectedTask = new Domain.Task(expectedTitle, [], expectedTag, expectedId);
+            new Commands.AddCommand(new ProgramArguments(arguments), settings, _repository.Object, _cmdUtils, _timeProvider.Object));
         if (expectedHour == 0 && expectedMin == 0)
         {
             expectedHour = DateTime.Now.Hour;
             expectedMin = DateTime.Now.Minute;
         }
+        TaskLine? addedTask = null;
 
-        Domain.Task? addedTask = null;
-        Domain.Record? addedRecord = null;
-        _repository.Setup(x => x.AddRecord(It.IsAny<Domain.Task>(), It.IsAny<Domain.Record>()))
-            .Callback((Domain.Task t, Domain.Record r) => { addedTask = t; addedRecord = r; });
+        _repository.Setup(x => x.AddTask(It.IsAny<TaskLine>()))
+            .Callback((TaskLine t) => { addedTask = t; });
 
         // Act
         processor.Execute();
 
         // Assert
         addedTask.Should().NotBeNull();
-        addedRecord.Should().NotBeNull();
         addedTask.Title.Should().Be(expectedTitle);
-        addedTask.Id.Should().Be(expectedId);
-        addedTask.Path.Should().HaveCount(expectedPath.Length)
-            .And.ContainInOrder(expectedPath);
-        addedTask.Tags.Should().HaveCount(expectedTag.Length)
-            .And.ContainInOrder(expectedTag);
-        addedRecord.StartTime.Hour.Should().Be(expectedHour);
-        addedRecord.StartTime.Minute.Should().Be(expectedMin);
+        addedTask.StartTime.Hour.Should().Be(expectedHour);
+        addedTask.StartTime.Minute.Should().Be(expectedMin);
     }
 
     [Theory]
@@ -78,15 +70,15 @@ public class CommandProcessorTests
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.AddRecord(It.Is<Domain.Task>(t => t.Title == "[Stop]"), It.Is<Domain.Record>(r => r.StartTime.Hour == expectedHour && r.StartTime.Minute == expectedMin)));
+        _repository.Verify(x => x.AddTask(It.Is<TaskLine>(t => t.Title == "[Stop]" && t.StartTime.Hour == expectedHour && t.StartTime.Minute == expectedMin)));
     }
 
     [Fact]
     public void WithNoActivity_WhenRestart_ThenShowsError()
     {
         // Arrange
-        _repository.Setup(x => x.GetAll()).Returns(new List<Activity>());
-        var processor = new CommandProcessor(new Commands.RestartCommand(_repository.Object, _display.Object, _timeProvider.Object));
+        _repository.Setup(x => x.GetAll()).Returns(new List<TaskLine>());
+        var processor = new CommandProcessor(new Commands.RestartCommand(_repository.Object, _display.Object, _timeProvider.Object, _cmdUtils));
 
         // Act
         processor.Execute();
@@ -99,110 +91,14 @@ public class CommandProcessorTests
     public void WithOneActivity_WithRestart_WhenExecute_ThenRestartsLastActivity()
     {
         // Arrange
-        var processor = new CommandProcessor(new Commands.RestartCommand(_repository.Object, _display.Object, _timeProvider.Object));
-        var task = new Domain.Task("Activity", [], ["tag"], "123");
-        var record = new Domain.Record(new DateTime(2022, 1, 1), null);
-        var activity = new Activity(task, new List<Domain.Record>() { record });
-        _repository.Setup(x => x.GetAll()).Returns(new List<Activity>() { activity });
+        var processor = new CommandProcessor(new Commands.RestartCommand(_repository.Object, _display.Object, _timeProvider.Object, _cmdUtils));
+        _repository.Setup(x => x.GetAll()).Returns(new List<TaskLine>() { new TaskLine("00:00 Test") });
 
         // Act
         processor.Execute();
 
         // Assert
-        _repository.Verify(x => x.AddRecord(task, It.IsAny<Domain.Record>()), Times.Once);
-    }
-
-    [Theory]
-    [InlineData("--all")]
-    [InlineData("-a")]
-    public void WithAllOption_WhenShowing_ThenGetsAllActivities(string option)
-    {
-        // Arrange
-        var pArgs = new ProgramArguments(["show", option]);
-        var processor = new CommandProcessor(new Commands.ShowCommand(
-            pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
-            [new DetailsReport(_display.Object, _repository.Object, pArgs, _timeProvider.Object)]));
-
-        // Act
-        processor.Execute();
-
-        // Assert
-        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(null, null, null, null, null, null)));
-    }
-
-    [Theory]
-    [InlineData("--week")]
-    [InlineData("-w")]
-    public void WithWeekOption_WhenShowing_ThenGetsActivitiesOfTheWeek(string option)
-    {
-        // Arrange
-        var pArgs = new ProgramArguments(["show", option]);
-        var processor = new CommandProcessor(new Commands.ShowCommand(
-            pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
-            [new WorktimeReport(_display.Object), new DetailsReport(_display.Object, _repository.Object, pArgs, _timeProvider.Object)]));
-        _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
-
-        // Act
-        processor.Execute();
-
-        // Assert
-        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 17), new DateTime(2022, 10, 21), null, null, null, null)), Times.Once);
-    }
-
-    [Theory]
-    [InlineData("--yesterday")]
-    [InlineData("-y")]
-    public void WithYesterdayOption_WhenShowing_ThenGetsActivitiesOfYesterday(string option)
-    {
-        // Arrange
-        var pArgs = new ProgramArguments(["show", option]);
-        var processor = new CommandProcessor(new Commands.ShowCommand(
-            pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
-            [new DetailsReport(_display.Object, _repository.Object, pArgs, _timeProvider.Object)]));
-        _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
-
-        // Act
-        processor.Execute();
-
-        // Assert
-        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 19), new DateTime(2022, 10, 19), null, null, null, null)));
-    }
-
-    [Fact]
-    public void FilterByPath_WhenShowing_ThenFiltersByPath()
-    {
-        // Arrange
-        var pArgs = new ProgramArguments(["show", "--all", "--path", "/project/task"]);
-        var processor = new CommandProcessor(new Commands.ShowCommand(
-            pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
-            [new DetailsReport(_display.Object, _repository.Object, pArgs, _timeProvider.Object)]
-        ));
-        List<string> path = new List<string>();
-        _repository.Setup(x => x.FilterByQuery(It.IsAny<RepositoryQuery>()))
-            .Callback((RepositoryQuery query) => { path = query.Path; });
-
-        // Act
-        processor.Execute();
-
-        // Assert
-        path.Should().HaveCount(2).And.ContainInOrder(["project", "task"]);
-    }
-
-    [Fact]
-    public void WithoutOptions_WhenShowing_ThenGetsActivitiesFromToday()
-    {
-        // Arrange
-        var pArgs = new ProgramArguments(["show"]);
-        var processor = new CommandProcessor(new Commands.ShowCommand(
-            pArgs, new FilterParser(pArgs, _repository.Object, _timeProvider.Object),
-            [new DetailsReport(_display.Object, _repository.Object, new ProgramArguments(["show"]), _timeProvider.Object)]));
-        _timeProvider.Setup(x => x.Now).Returns(new DateTime(2022, 10, 20, 10, 0, 0));
-
-        // Act
-        processor.Execute();
-
-        // Assert
-        _repository.Verify(x => x.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 20), new DateTime(2022, 10, 20), null, null, null, null)));
+        _repository.Verify(x => x.AddTask(It.Is<TaskLine>(t => t.Title == "Test")), Times.Once);
     }
 }
 

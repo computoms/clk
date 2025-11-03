@@ -30,6 +30,4 @@ internal class JsonReport(IDisplay display) : IReport
         };
         return display.Layout(line);
     }
-
-    private record SingleRecord(Record Record, Activity Activity);
 }

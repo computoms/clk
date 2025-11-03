@@ -45,6 +45,4 @@ internal class ChronologicalReport(IDisplay display, ITimeProvider timeProvider)
 
         return display.Layout(line);
     }
-
-    private record SingleRecord(Record Record, Activity Activity);
 }
