@@ -19,6 +19,21 @@ public class FileStorage : IStorage
         this.timeProvider = timeProvider;
     }
 
+    public void AddLine(TaskLine line)
+    {
+        if (!isInitialized)
+            GetLastDate();
+
+        if (_lastDate != timeProvider.Now.Date)
+        {
+            stream.AddLine(timeProvider.Now.ToString("[yyyy-MM-dd]"));
+            _lastDate = timeProvider.Now.Date;
+        }
+
+        AssertUniqueId(line);
+        stream.AddLine(line.Raw);
+    }
+
     public void AddEntry(Domain.Task task, Record record)
     {
         if (!isInitialized)
@@ -44,17 +59,15 @@ public class FileStorage : IStorage
         stream.AddLine(line);
     }
 
-    public List<Activity> GetActivities()
+    public IEnumerable<TaskLine> GetTasks()
     {
         return ReadAll();
     }
 
-    private List<Activity> ReadAll()
+    private IEnumerable<TaskLine> ReadAll()
     {
-        var activities = new List<Activity>();
         var currentDate = DateTime.MinValue;
-        Activity? previousActivity = null;
-        DateTime previousRecordStartTime = DateTime.MinValue;
+        TaskLine? previousTask = null;
         foreach (var line in stream.ReadAllLines())
         {
             if (string.IsNullOrWhiteSpace(line))
@@ -65,61 +78,34 @@ public class FileStorage : IStorage
                 currentDate = date;
                 continue;
             }
-            var entry = ParseLine(line, currentDate);
-            var currentActivity = GetActivity(entry, activities);
+            var entry = new TaskLine(line, currentDate);
 
-            if (previousActivity != null)
-                previousActivity.AddRecord(new Record(previousRecordStartTime, entry.StartTime));
+            if (previousTask != null)
+            {
+                previousTask.EndTime = entry.StartTime;
+                yield return previousTask;
+            }
 
-            previousActivity = currentActivity;
-            previousRecordStartTime = entry.StartTime;
+            previousTask = entry;
         }
-        if (previousActivity != null)
-            previousActivity.AddRecord(new Record(previousRecordStartTime, timeProvider.Now));
-
-        return activities;
-    }
-
-    private Activity? GetActivity(ParsedLine parsedLine, List<Activity> activities)
-    {
-        if (parsedLine.Title == SpecialActivities.Stop)
-            return null;
-
-        var activity = activities.FirstOrDefault(x => x.Task.IsSameAs(parsedLine.Title, parsedLine.Path, parsedLine.Tags, parsedLine.Id));
-        if (activity == null)
+        if (previousTask != null)
         {
-            activity = new Activity(new Domain.Task(parsedLine.Title, parsedLine.Path, parsedLine.Tags, parsedLine.Id));
-            activities.Add(activity);
+            yield return previousTask;
         }
-        return activity;
-    }
-
-    private ParsedLine ParseLine(string line, DateTime currentDate, bool parseHour = true)
-    {
-        line = Sanitize(line);
-        var words = line.Split(' ');
-        var time = currentDate;
-        if (parseHour)
-            time = GetStartTime(words.FirstOrDefault() ?? string.Empty);
-
-        var path = words.FirstOrDefault(x => x.Length > 1 && x.StartsWith('/'))?.Split('/', StringSplitOptions.RemoveEmptyEntries).ToArray() ?? [];
-        var tags = words.Where(x => x.Length > 1 && x.StartsWith('+')).Select(x => x[1..]).ToArray();
-        var number = words.FirstOrDefault(x => x.StartsWith('.') && x.Length > 1)?[1..];
-        var title = string.Join(' ', (parseHour ? words.Skip(1) : words)
-            .Where(x => !(x.Length > 1 && x.StartsWith('/')))
-            .Where(x => !(x.Length > 1 && x.StartsWith('+')))
-            .Where(x => x != $".{number}"))
-            .Trim();
-        return new ParsedLine(
-	        ConcatDateAndTime(currentDate, time),
-            title, path, tags, number ?? string.Empty);
     }
 
     private void AssertUniqueId(Domain.Task task)
     {
-        if (GetActivities().Any(x => !string.IsNullOrWhiteSpace(x.Task.Id) && x.Task.Id == task.Id && x.Task.Title != task.Title))
+        if (GetTasks().Any(x => !string.IsNullOrWhiteSpace(x.Id) && x.Id == task.Id && x.Title != task.Title))
             throw new InvalidDataException($"Id {task.Id} already exists");
     }
+
+    private void AssertUniqueId(TaskLine line)
+    {
+        if (GetTasks().Any(x => !string.IsNullOrWhiteSpace(x.Id) && x.Id == line.Id && x.Title != line.Title))
+            throw new InvalidDataException($"Id {line.Id} already exists");
+    }
+
 
     private DateTime ConcatDateAndTime(DateTime date, DateTime time) => new(date.Year, date.Month, date.Day, time.Hour, time.Minute, 0);
 
@@ -153,10 +139,5 @@ public class FileStorage : IStorage
             ? date : DateTime.MinValue;
 
     private string Sanitize(string line) => line.Replace("\r", "").Replace("\n", "").Trim();
-
-    private static class SpecialActivities
-    {
-        public static string Stop => "[Stop]";
-    }
 }
 

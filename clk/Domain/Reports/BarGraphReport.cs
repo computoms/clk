@@ -11,12 +11,12 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
 
     public string Name { get; } = Args.BarGraphs;
 
-    public void Print(IEnumerable<Activity> activities)
+    public void Print(IEnumerable<TaskLine> tasks)
     {
         if (pArgs.HasOption(Args.GroupBy) || pArgs.HasOption(Args.GroupByPath))
         {
             var groupBy = pArgs.HasOption(Args.GroupByPath) ? "/*" : pArgs.GetValue(Args.GroupBy);
-            var groups = ReportUtils.GroupByPath(activities, groupBy);
+            var groups = ReportUtils.GroupByPath(tasks, groupBy);
             const string noCat = "Others";
             PrintBarGraph(
                 groups.Select(g => new BarInfo(
@@ -27,9 +27,11 @@ public class BarGraphReport(IDisplay display, ProgramArguments pArgs) : IReport
         }
 
         PrintBarGraph(
-            activities.Select(a => new BarInfo(
-                a.Task.Title,
-                a.Duration)));
+            tasks
+                .GroupBy(t => t.Title)
+                .Select(g => new BarInfo(
+                g.Key,
+                g.Aggregate(TimeSpan.Zero, (total, d) => total + d.Duration))));
     }
 
     private void PrintBarGraph(IEnumerable<BarInfo> infos, int minTitle = 10)

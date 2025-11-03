@@ -11,17 +11,17 @@ public class RestartCommand(IRecordRepository recordRepository, IDisplay display
 
     public void Execute()
     {
-        var latestActivity = recordRepository.GetAll()
-            .Where(x => x.Records.Any())
-            .OrderBy(x => x.Records.Max(y => y.StartTime))
+        var latestTask = recordRepository.GetAll()
+            .OrderBy(x => x.StartTime)
             .LastOrDefault();
-        if (latestActivity == null)
+        if (latestTask == null)
         {
             display.Error("No activities to restart");
             return;
         }
 
-        recordRepository.AddRecord(latestActivity.Task, new Record(timeProvider.Now, null));
-        commandUtils.DisplayResult(latestActivity.Task, new Record(timeProvider.Now, null));
+        var newTask = latestTask.Duplicate(timeProvider.Now);
+        recordRepository.AddTask(newTask);
+        commandUtils.DisplayTask(newTask);
     }
 }

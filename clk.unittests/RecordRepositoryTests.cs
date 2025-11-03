@@ -65,7 +65,7 @@ public class RecordRepositoryTests
     public void WithOneEntryWithOneTag_WhenFilterByTag_ThenReturnsEntry()
     {
         // Arrange
-        _storage.Setup(x => x.GetActivities()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", [], ["tag"], "123")) });
+        _storage.Setup(x => x.GetTasks()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", [], ["tag"], "123")) });
 
         // Act
         var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string>{"tag"}, null));
@@ -80,7 +80,7 @@ public class RecordRepositoryTests
     public void WithOneEntryWithTwoTags_WhenFilterByTag_ThenReturnsEntry()
     {
         // Arrange
-        _storage.Setup(x => x.GetActivities()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", [], ["tag1", "tag2"], "123")) });
+        _storage.Setup(x => x.GetTasks()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", [], ["tag1", "tag2"], "123")) });
 
         // Act
         var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string>{"tag1"}, null));
@@ -95,7 +95,7 @@ public class RecordRepositoryTests
     public void WithTwoEntries_WithTwoTags_WhenFilterByTag_ThenReturnsCorrectEntry()
     {
         // Arrange
-        _storage.Setup(x => x.GetActivities()).Returns(
+        _storage.Setup(x => x.GetTasks()).Returns(
 	    new List<Activity>() 
 	    { 
 	        new Activity(new Domain.Task("Entry1", [], ["tag1", "tag2"], "123")),
@@ -119,7 +119,7 @@ public class RecordRepositoryTests
         var startTime = new DateTime(2022, 10, 10, 10, 0, 0);
         activity.AddRecord(new Domain.Record(startTime, new DateTime(2022, 10, 10, 11, 0, 0)));
         activity.AddRecord(new Domain.Record(new DateTime(2022, 10, 11, 10, 0, 0), new DateTime(2022, 10, 11, 11, 0, 0)));
-        _storage.Setup(x => x.GetActivities())
+        _storage.Setup(x => x.GetTasks())
             .Returns(
                 new List<Activity>()
                 {
@@ -138,7 +138,7 @@ public class RecordRepositoryTests
     public void WithTwoActivities_WhenFilter_ThenActivityNotConainingRecordsAreNotReturned()
     {
         // Arrange
-        _storage.Setup(x => x.GetActivities())
+        _storage.Setup(x => x.GetTasks())
             .Returns(new List<Activity>()
             {
                 new Activity(new Domain.Task("Activtiy1", [], [], ""), new List<Domain.Record>(){new Domain.Record(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10))}),
@@ -158,7 +158,7 @@ public class RecordRepositoryTests
     public void WithTwoActivities_WhenFilterByPath_ThenReturnsMatchingActivities(string[] paths, int expectedCount)
     {
         // Arrange
-        _storage.Setup(x => x.GetActivities())
+        _storage.Setup(x => x.GetTasks())
             .Returns(
             [
                 new Activity(new Domain.Task("Activtiy1", ["project", "task"], [], ""), [new(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10))]),

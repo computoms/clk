@@ -1,40 +1,24 @@
 using clk.Domain;
+using clk.Utils;
 
 namespace clk.Commands;
 
-public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordRepository recordRepository, CommandUtils commandUtils) : ICommand
+public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordRepository recordRepository, CommandUtils commandUtils, ITimeProvider timeProvider) : ICommand
 {
     public static string Name { get; } = "add";
 
     public void Execute()
     {
-        var activity = ParseInput();
-        activity = activity with { Task = commandUtils.FindPartiallyMatchingTask(activity.Task) };
-        recordRepository.AddRecord(activity.Task, activity.Record);
-        commandUtils.DisplayResult(activity);
+        var task = ParseInput();
+        task = commandUtils.FindPartiallyMatchingTask(task);
+        recordRepository.AddTask(task);
+        commandUtils.DisplayTask(task);
     }
 
-    private InputTask ParseInput()
+    private TaskLine ParseInput()
     {
         var rawTitle = string.IsNullOrWhiteSpace(pArgs.Title) ? settings.Data.DefaultTask : pArgs.Title;
-        var words = rawTitle.Split(' ');
-        var title = string.Empty;
-        var path = new List<string>();
-        var tags = new List<string>();
-        var id = string.Empty;
-        foreach (string v in words)
-        {
-            if (v.Length > 1 && v.StartsWith("/"))
-                path.AddRange(v.Split('/', StringSplitOptions.RemoveEmptyEntries));
-            else if (v.Length > 1 && v.StartsWith('+'))
-                tags.Add(v[1..]);
-            else if (v.Length > 1 && v.StartsWith('.'))
-                id = v[1..];
-            else
-                title += v + " ";
-        }
-
-        title = title.Trim();
-        return new InputTask(new Domain.Task(title, [.. path], [.. tags], id), new Record(pArgs.Time));
+        var now = timeProvider.Now.ToString("HH:mm");
+        return new TaskLine($"{now} {rawTitle}");
     }
 }

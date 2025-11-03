@@ -104,7 +104,7 @@ public class FileStorageTests
         SetupLines();
 
         // Act
-        var activities = _storage.GetActivities();
+        var activities = _storage.GetTasks();
 
         // Assert
         activities.Should().BeEmpty();
@@ -124,7 +124,7 @@ public class FileStorageTests
         SetupLines(_today, existingLine);
 
         // Act
-        var activities = _storage.GetActivities();
+        var activities = _storage.GetTasks();
 
         // Assert
         activities.Should().HaveCount(1);
@@ -142,7 +142,7 @@ public class FileStorageTests
         SetupLines(_today, "11:11 test +feature .123", "11:20 test +feature .123");
 
         // Act
-        var activities = _storage.GetActivities();
+        var activities = _storage.GetTasks();
 
         // Assert
         activities.Should().HaveCount(1);
@@ -157,7 +157,7 @@ public class FileStorageTests
         _mocker.GetMock<ITimeProvider>().Setup(x => x.Now).Returns(_baseTime.AddMinutes(2));
 
         // Act
-        var activities = _storage.GetActivities();
+        var activities = _storage.GetTasks();
 
         // Assert
         activities.Should().HaveCount(1);
@@ -176,7 +176,7 @@ public class FileStorageTests
         SetupLines(_today, "11:12 test1 +feature .123", "11:15 test2 +feature .456");
 
         // Act
-        var activities = _storage.GetActivities();
+        var activities = _storage.GetTasks();
 
         // Assert
         activities.Should().HaveCount(2);
@@ -193,7 +193,7 @@ public class FileStorageTests
         _mocker.GetMock<ITimeProvider>().Setup(x => x.Now).Returns(_baseTime.AddMinutes(5));
 
         // Act
-        var activities = _storage.GetActivities();
+        var activities = _storage.GetTasks();
 
         // Assert
         activities.Should().HaveCount(1);
@@ -211,7 +211,7 @@ public class FileStorageTests
         _mocker.GetMock<ITimeProvider>().Setup(x => x.Now).Returns(_baseTime.AddMinutes(5));
 
         // Act
-        var activities = _storage.GetActivities();
+        var activities = _storage.GetTasks();
 
         // Assert
         activities.Should().HaveCount(1);
@@ -231,7 +231,7 @@ public class FileStorageTests
         SetupLines(_today, "11:11 test with .dot");
 
         // Act
-        var activities = _storage.GetActivities();
+        var activities = _storage.GetTasks();
 
         // Assert
         activities.Should().HaveCount(1);
@@ -245,7 +245,7 @@ public class FileStorageTests
         SetupLines(_today, "xx:1x test with invalid hour");
 
         // Act
-        var activities = _storage.GetActivities();
+        var activities = _storage.GetTasks();
 
         // Assert
         activities[0].Records.Should().HaveCount(1);
@@ -260,7 +260,7 @@ public class FileStorageTests
         SetupLines("11:00 test");
 
         // Act
-        var activities = _storage.GetActivities();
+        var activities = _storage.GetTasks();
 
         // Assert
         activities.Should().HaveCount(1);

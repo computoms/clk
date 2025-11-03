@@ -2,7 +2,7 @@
   "profiles": {
     "clk": {
       "commandName": "Project",
-      "commandLineArgs": "show --last 1"
+      "commandLineArgs": "list --path"
     }
   }
 }

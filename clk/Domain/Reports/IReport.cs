@@ -3,6 +3,6 @@
 public interface IReport
 {
     string Name { get; }
-    void Print(IEnumerable<Activity> activities);
+    void Print(IEnumerable<TaskLine> tasks);
 }
 

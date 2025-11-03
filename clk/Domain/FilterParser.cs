@@ -5,7 +5,7 @@ namespace clk.Domain;
 
 public class FilterParser(ProgramArguments pArgs, IRecordRepository recordRepository, ITimeProvider timeProvider)
 {
-    public IEnumerable<Activity> Filter()
+    public IEnumerable<TaskLine> Filter()
     {
         RepositoryQuery query = new RepositoryQuery();
         if (pArgs.HasOption(Args.All))

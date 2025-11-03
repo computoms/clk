@@ -9,13 +9,15 @@ public class ListCommand(IRecordRepository recordRepository, IDisplay display, P
 
     public void Execute()
     {
-        var activities = recordRepository.GetAll();
+        var tasks = recordRepository.GetAll();
         if (pArgs.HasOption(Args.Path))
         {
-            var paths = activities.Select(x => GetPath(x.Task)).Order().Distinct();
+            var paths = tasks.Select(x => GetPath(x)).Order().Distinct();
             display.Print(
                 paths.Select(x => x.AsLine()).ToList()
                 );
+
+            // TODO display tree structure
             //display.Print(" ---- ".AsLine());
     
             //var resultToDisplay = new List<FormattedLine>();
@@ -37,27 +39,27 @@ public class ListCommand(IRecordRepository recordRepository, IDisplay display, P
             return;
         }
 
-        display.Print(activities
-                .Select(x => x.Task.Raw.AsLine()).ToList());
+        display.Print(tasks
+                .Select(x => x.Line.AsLine()).Distinct().ToList());
     }
 
-    private string GetPath(Task t) => t.Path.Aggregate((r, t) => $"{r}/{t}");
+    private string GetPath(TaskLine t) => t.Path.Aggregate("", (r, t) => $"{r}/{t}");
 
-    private int FindLevel(string path, string previousPath)
-    {
-        var pathEntries = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        var previousPathEntries = previousPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+    // private int FindLevel(string path, string previousPath)
+    // {
+    //     var pathEntries = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+    //     var previousPathEntries = previousPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
-        var level = 0;
-        for (; level < pathEntries.Length && level < previousPathEntries.Length; level++)
-        {
-            if (pathEntries[level] != previousPathEntries[level])
-                return level;
-        }
+    //     var level = 0;
+    //     for (; level < pathEntries.Length && level < previousPathEntries.Length; level++)
+    //     {
+    //         if (pathEntries[level] != previousPathEntries[level])
+    //             return level;
+    //     }
 
-        return level;
-    }
+    //     return level;
+    // }
 
-    private string RemoveFirstLevels(string path, int level) => path.Split('/', StringSplitOptions.RemoveEmptyEntries)
-        .Skip(level).Aggregate((r, t) => $"{r}/{t}");
+    // private string RemoveFirstLevels(string path, int level) => path.Split('/', StringSplitOptions.RemoveEmptyEntries)
+    //     .Skip(level).Aggregate((r, t) => $"{r}/{t}");
 }

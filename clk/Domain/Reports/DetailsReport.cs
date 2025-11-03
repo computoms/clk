@@ -6,9 +6,9 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
 {
     public string Name { get; } = Args.Details;
 
-    public void Print(IEnumerable<Activity> activities)
+    public void Print(IEnumerable<TaskLine> activities)
     {
-        var current = recordRepository.GetCurrent();
+        var current = recordRepository.GetLast();
 
         if (pArgs.HasOption(Args.GroupBy))
         {
@@ -19,16 +19,14 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
         PrintDetails(activities, current);
     }
 
-    private void PrintByPath(IEnumerable<Activity> activities, Activity? current)
+    private void PrintByPath(IEnumerable<TaskLine> tasks, TaskLine? current)
     {
-        var groups = ReportUtils.GroupByPath(activities, pArgs.GetValue(Args.GroupBy));
+        var groups = ReportUtils.GroupByPath(tasks, pArgs.GetValue(Args.GroupBy));
         display.Print(
             groups
             .Select(g => new PathInfo(
                 g.Key,
-                g.OrderBy(a => a.Records.Min(r => r.StartTime))
-                    .FirstOrDefault()?.Records
-                    .FirstOrDefault()?.StartTime.Date ?? DateTime.MinValue,
+                g.Min(t => t.StartTime).Date,
                 g.Aggregate(TimeSpan.Zero, (t, a) => t + a.Duration))
             )
             .GroupBy(e => e.Date)
@@ -39,23 +37,10 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
             .Append(ReportUtils.Current(current, timeProvider)));
     }
 
-    private void PrintDetails(IEnumerable<Activity> activities, Activity? current)
+    private void PrintDetails(IEnumerable<TaskLine> tasks, TaskLine? current)
     {
-        display.Print(
-            activities
-                .Select(a => new { Date = a.Records.OrderBy(r => r.StartTime.Date).FirstOrDefault()?.StartTime.Date, Activity = a })
-                .GroupBy(x => x.Date)
-                .SelectMany(g => LayoutActivitiesOfTheDay(g.Key, g.Select(x => x.Activity)))
-                .Append(" ".AsLine())
-                .Append(ReportUtils.TotalTime(activities))
-                .Append(" ".AsLine())
-                .Append(ReportUtils.Current(current, timeProvider)));
-    }
-
-    private IEnumerable<FormattedLine> LayoutActivitiesOfTheDay(DateTime? date, IEnumerable<Activity> activities)
-    {
-        return activities.OrderBy(a => a.Records.FirstOrDefault()?.StartTime ?? DateTime.Now)
-            .SelectMany(LayoutActivity).Prepend((date?.ToString("yyyy-MM-dd") ?? "").AsLine());
+        throw new NotImplementedException();
+        // TODO group by similar tasks using a dictionary and IsSameAs method?
     }
 
     private IEnumerable<FormattedLine> LayoutTagInfo(PathInfo info)
@@ -68,37 +53,6 @@ public class DetailsReport(IDisplay display, IRecordRepository recordRepository,
         };
 
         return new List<FormattedLine> { display.Layout(line, 1) };
-    }
-
-    private IEnumerable<FormattedLine> LayoutActivity(Activity activity)
-    {
-        var duration = Utilities.PrintDuration(activity.Duration);
-        var path = (activity.Task.Path.Length > 0 ? "/" : "") + string.Join('/', activity.Task.Path);
-        var tags = string.Join(' ', activity.Task.Tags.Select(x => $"+{x}"));
-        var id = string.IsNullOrWhiteSpace(activity.Task.Id) ? "" : $".{activity.Task.Id}";
-
-        var line = new List<FormattedText>
-        {
-            $"{duration}".FormatChunk(ConsoleColor.DarkGreen),
-            activity.Task.Title.PrependSpaceIfNotNull().FormatChunk(),
-            path.PrependSpaceIfNotNull().FormatChunk(ConsoleColor.DarkBlue),
-            tags.PrependSpaceIfNotNull().FormatChunk(ConsoleColor.DarkGreen),
-            id.PrependSpaceIfNotNull().FormatChunk(ConsoleColor.DarkYellow)
-        };
-
-        return activity.Records.Select(LayoutRecords).Prepend(display.Layout(line, 1));
-    }
-
-    private FormattedLine LayoutRecords(Record record)
-    {
-        var recordDuration = Utilities.PrintDuration(record.Duration);
-        var recordStart = record.StartTime.ToString("HH:mm");
-        var recordEnd = record.EndTime?.ToString("HH:mm");
-        var formattedRecords = new List<FormattedText> {
-            $"{recordDuration}".FormatChunk(ConsoleColor.DarkCyan),
-            $" ({recordStart} -> {recordEnd})".FormatChunk(ConsoleColor.DarkGray)
-        };
-        return display.Layout(formattedRecords, 2);
     }
 
     private record PathInfo(string? Name, DateTime Date, TimeSpan Duration);

@@ -11,7 +11,8 @@ public interface IStream
 
 public interface IStorage
 {
+    void AddLine(TaskLine line);
     void AddEntry(Domain.Task activity, Record record);
-    List<Activity> GetActivities();
+    IEnumerable<TaskLine> GetTasks();
 }
 

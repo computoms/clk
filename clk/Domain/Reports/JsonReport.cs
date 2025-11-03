@@ -6,26 +6,24 @@ internal class JsonReport(IDisplay display) : IReport
 {
     public string Name { get; } = Args.Json;
 
-    public void Print(IEnumerable<Activity> activities)
+    public void Print(IEnumerable<TaskLine> tasks)
     {
-        var records = activities.SelectMany(a => a.Records.Select(r => new SingleRecord(r, a)))
-            .OrderBy(r => r.Record.StartTime);
-
+        var records = tasks.OrderBy(t => t.StartTime);
         display.Print(records.Select(LayoutSingleRecord));
     }
 
 
-    private FormattedLine LayoutSingleRecord(SingleRecord record)
+    private FormattedLine LayoutSingleRecord(TaskLine task)
     {
-        var paths = string.Join(",", record.Activity.Task.Path.Select(p => $"\"{p}\""));
-        var tags = string.Join(",", record.Activity.Task.Tags.Select(t => $"\"{t}\""));
+        var paths = string.Join(",", task.Path.Select(p => $"\"{p}\""));
+        var tags = string.Join(",", task.Tags.Select(t => $"\"{t}\""));
         var line = new List<FormattedText>(){
             "{ ".FormatChunk(),
-            $"\"Title\": \"{record.Activity.Task.Title}\", ".FormatChunk(),
-            $"\"Date\": \"{record.Record.StartTime.Date:yyyy-MM-dd}\", ".FormatChunk(),
-            $"\"Start\": \"{record.Record.StartTime:HH:mm:ss}\", ".FormatChunk(),
-            $"\"End\": \"{record.Record.EndTime:HH:mm:ss}\", ".FormatChunk(),
-            $"\"Id\": \"{record.Activity.Task.Id}\", ".FormatChunk(),
+            $"\"Title\": \"{task.Title}\", ".FormatChunk(),
+            $"\"Date\": \"{task.StartTime.Date:yyyy-MM-dd}\", ".FormatChunk(),
+            $"\"Start\": \"{task.StartTime:HH:mm:ss}\", ".FormatChunk(),
+            $"\"End\": \"{task.EndTime:HH:mm:ss}\", ".FormatChunk(),
+            $"\"Id\": \"{task.Id}\", ".FormatChunk(),
             $"\"Paths\": [{paths}], ".FormatChunk(),
             $"\"Tags\": [{tags}] ".FormatChunk(),
             "}".FormatChunk(),

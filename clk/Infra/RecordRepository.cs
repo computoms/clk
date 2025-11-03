@@ -16,11 +16,11 @@ public class RecordRepository : IRecordRepository
         this.display = new ConsoleDisplay(true);
     }
 
-    public void AddRecord(Domain.Task activity, Record record)
+    public void AddTask(TaskLine line)
     {
         try
         {
-            storage.AddEntry(activity, record);
+            storage.AddLine(line);
         }
         catch (Exception e)
         {
@@ -28,69 +28,43 @@ public class RecordRepository : IRecordRepository
         }
     }
 
-    public IEnumerable<Activity> GetAll() => storage.GetActivities();
+    public IEnumerable<TaskLine> GetAll() => storage.GetTasks().Where(t => !t.IsStopTask());
 
-    public Activity? GetCurrent()
+    public TaskLine? GetLast() => GetAll().OrderBy(t => t.StartTime).LastOrDefault();
+
+    public IEnumerable<TaskLine> FilterByQuery(RepositoryQuery query)
     {
-        var currentActivity = FilterByDate(timeProvider.Now.Date)
-            .OrderBy(a => a.Records.MaxBy(r => r.StartTime)?.StartTime ?? DateTime.MinValue)
-            .LastOrDefault();
-
-        if (currentActivity == null || currentActivity.IsStopped(timeProvider))
-            return null;
-
-        return currentActivity;
-    }
-
-    public IEnumerable<Activity> FilterByQuery(RepositoryQuery query)
-    {
-        var activities = GetAll();
+        var tasks = GetAll();
         if (query.From != null && query.To != null)
         {
-            activities = FilterByDate((DateTime)query.From, (DateTime)query.To);
+            tasks = FilterByDate(tasks, (DateTime)query.From, (DateTime)query.To);
         }
         if (query.Path != null)
         {
-            activities = activities
-                .Where(x => query.Path.Count <= x.Task.Path.Length)
-                .Where(x => Enumerable.Range(0, query.Path.Count).All(i => query.Path[i] == x.Task.Path[i]));
+            tasks = tasks
+                .Where(x => query.Path.Count <= x.Path.Count)
+                .Where(x => Enumerable.Range(0, query.Path.Count).All(i => query.Path[i] == x.Path[i]));
         }
         if (query.Tags != null)
         {
-            activities = activities.Where(x => query.Tags.All(y => x.Task.Tags.Contains(y)));
+            tasks = tasks.Where(x => query.Tags.All(y => x.Tags.Contains(y)));
         }
         if (query.Id != null)
         {
-            activities = activities.Where(x => x.Task.Id == query.Id);
+            tasks = tasks.Where(x => x.Id == query.Id);
         }
         if (query.Last != null)
         {
-            activities = TakeLast(activities, (int)query.Last);
+            tasks = tasks.OrderBy(x => x.StartTime).TakeLast((int)query.Last);
         }
-        return activities;
+        return tasks;
     }
 
-    private IEnumerable<Activity> FilterByDate(DateTime date) => FilterByDate(date, date);
+    public static IEnumerable<TaskLine> FilterByDate(IEnumerable<TaskLine> tasks, DateTime startDate, DateTime endDate)
+        => tasks.Where(t => IsMatchingDate(t, startDate, endDate));
 
-    public IEnumerable<Activity> FilterByDate(DateTime startDate, DateTime endDate)
-        => storage.GetActivities()
-            .Select(x => new Activity(x.Task, x.Records.Where(y => IsMatchingDate(y, startDate, endDate))))
-            .Where(x => x.Records.Any());
+    private static bool IsMatchingDate(TaskLine task, DateTime startDate, DateTime endDate)
+        => task.StartTime.Date.CompareTo(startDate.Date) >= 0 && task.StartTime.Date.CompareTo(endDate.Date) <= 0;
 
-    private bool IsMatchingDate(Record record, DateTime startDate, DateTime endDate)
-        => record.StartTime.Date.CompareTo(startDate.Date) >= 0 && record.StartTime.Date.CompareTo(endDate.Date) <= 0;
-
-    private static IEnumerable<Activity> TakeLast(IEnumerable<Activity> activities, int last)
-    {
-        var records = activities.SelectMany(a => a.Records.Select(r => new { Activity = a, Record = r }))
-            .OrderBy(e => e.Record.StartTime)
-            .TakeLast(last)
-            .GroupBy(e => e.Activity);
-
-        foreach (var group in records)
-        {
-            yield return new Activity(group.Key.Task, group.Select(e => e.Record));
-        }
-    }
 }
 

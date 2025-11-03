@@ -4,10 +4,11 @@ public record RepositoryQuery(DateTime? From = null, DateTime? To = null, List<s
 
 public interface IRecordRepository
 {
-    void AddRecord(Task activity, Record record);
-    IEnumerable<Activity> GetAll();
-    Activity? GetCurrent();
+    void AddTask(TaskLine line);
+    IEnumerable<TaskLine> GetAll();
 
-    IEnumerable<Activity> FilterByQuery(RepositoryQuery query);
+    TaskLine? GetLast();
+
+    IEnumerable<TaskLine> FilterByQuery(RepositoryQuery query);
 }
 

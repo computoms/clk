@@ -15,37 +15,35 @@ public class WorktimeReport : IReport
 
     public string Name { get; } = Args.Timesheet;
 
-    public void Print(IEnumerable<Activity> activities)
+    public void Print(IEnumerable<TaskLine> tasks)
     {
-        var lines = activities
-            .SelectMany(x => x.Records)
+        var lines = tasks
             .GroupBy(x => x.StartTime.Date)
             .Select(x => PrintDay(x.Key, x))
             .Append(" ".AsLine())
-            .Append(TotalTime(activities))
+            .Append(TotalTime(tasks))
             .Prepend("Daily Worktime Report".AsLine());
 
         if (!perDay)
         {
-            lines = activities
-                .SelectMany(x => x.Records)
+            lines = tasks
                 .GroupBy(x => Utilities.GetWeekNumber(x.StartTime))
                 .Select(x => PrintWeek(x.Key, x.ToList()))
                 .Append(" ".AsLine())
-                .Append(TotalTime(activities))
+                .Append(TotalTime(tasks))
                 .Prepend("Weekly Report".AsLine());
         }
 
         display.Print(lines);
     }
 
-    private FormattedLine TotalTime(IEnumerable<Activity> activities) =>
-        $"{activities.Duration()}".AsLine(ConsoleColor.DarkBlue).Append(new FormattedLine(" Total"));
+    private FormattedLine TotalTime(IEnumerable<TaskLine> tasks) =>
+        $"{tasks.Duration()}".AsLine(ConsoleColor.DarkBlue).Append(new FormattedLine(" Total"));
 
-    private FormattedLine PrintWeek(int weekNumber, IEnumerable<Record> records) =>
-        $"{records.Duration()}".AsLine(ConsoleColor.DarkGreen).Append(new FormattedLine($" Week {weekNumber}"));
+    private FormattedLine PrintWeek(int weekNumber, IEnumerable<TaskLine> tasks) =>
+        $"{tasks.Duration()}".AsLine(ConsoleColor.DarkGreen).Append(new FormattedLine($" Week {weekNumber}"));
 
-    private FormattedLine PrintDay(DateTime day, IEnumerable<Record> records) =>
+    private FormattedLine PrintDay(DateTime day, IEnumerable<TaskLine> records) =>
         $"{records.Duration()}".AsLine(ConsoleColor.DarkGreen).Append(new FormattedLine($" {day:yyyy-MM-dd}"));
 }
 

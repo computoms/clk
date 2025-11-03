@@ -8,8 +8,8 @@ public class CurrentTaskCommand(IRecordRepository recordRepository, IDisplay dis
 
     public void Execute()
     {
-        var activity = recordRepository.GetCurrent();
-        var taskName = activity?.Task.Raw ?? "None";
+        var task = recordRepository.FilterByQuery(new RepositoryQuery(DateTime.Today, null, null, null, null, 1)).FirstOrDefault();
+        var taskName = task?.Raw ?? "None";
         display.Print(taskName.AsLine());
     }
 }

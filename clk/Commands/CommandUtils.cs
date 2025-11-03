@@ -4,21 +4,34 @@ namespace clk.Commands;
 
 public class CommandUtils(IRecordRepository repository, IDisplay display)
 {
-    public Domain.Task FindPartiallyMatchingTask(Domain.Task task)
+    public TaskLine FindPartiallyMatchingTask(TaskLine task)
     {
-        var defaultTask = new Domain.Task(task.Title, task.Path, task.Tags, task.Id);
         if (string.IsNullOrWhiteSpace(task.Id))
-            return defaultTask;
+            return task;
 
-        var correspondingActivity = repository.GetAll().FirstOrDefault(x => x.Task.Id == task.Id);
-        if (correspondingActivity == null)
-            return defaultTask;
+        var correspondingTask = repository.GetAll().FirstOrDefault(x => x.Id == task.Id);
+        if (correspondingTask == null)
+            return task;
 
-        if (!string.IsNullOrWhiteSpace(task.Title) && task.Title != correspondingActivity.Task.Title)
+        if (!string.IsNullOrWhiteSpace(task.Title) && task.Title != correspondingTask.Title)
             throw new InvalidDataException($"Id {task.Id} already exists");
 
-        return correspondingActivity.Task;
+        return correspondingTask.Duplicate(task.StartTime);
     }
+
+    public void DisplayTask(TaskLine line)
+    {
+        display.Print([
+            display.Layout(
+            [
+                (line.StartTime.ToString("HH:mm") + " ").FormatChunk(ConsoleColor.DarkGreen),
+                line.Title.FormatChunk(),
+                line.Tags.Aggregate("", (t1, t2) => t1 + " +" + t2).FormatChunk(ConsoleColor.DarkBlue),
+                line.Id != string.Empty ? $" .{line.Id}".FormatChunk(ConsoleColor.DarkYellow) : string.Empty.FormatChunk()
+            ])
+        ]);
+    }
+
 
     public void DisplayResult(InputTask activity)
     {

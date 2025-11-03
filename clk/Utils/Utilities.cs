@@ -16,9 +16,9 @@ public static class Utilities
         return dt.AddDays(-1 * diff).Date;
     }
 
-    public static string Duration(this IEnumerable<Record> records)
+    public static string Duration(this IEnumerable<TaskLine> tasks)
     {
-        var duration = records.Aggregate<Record, TimeSpan>(TimeSpan.Zero, (aggr, rec) => aggr + rec.Duration);
+        var duration = tasks.Aggregate(TimeSpan.Zero, (aggr, rec) => aggr + rec.Duration);
         return PrintDuration(duration);
     }
 
