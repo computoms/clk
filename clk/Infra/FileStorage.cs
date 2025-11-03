@@ -34,9 +34,11 @@ public class FileStorage : IStorage
 
         var startTime = record.StartTime.ToString("HH:mm");
         var tags = string.Join(" ", task.Tags.Select(x => $"+{x}"));
+        var path = string.Join("", task.Path.Select(x => $"/{x}"));
         var id = string.IsNullOrWhiteSpace(task.Id) ? "" : $".{task.Id}";
         var line = $"{startTime}"
             + task.Title.PrependSpaceIfNotNull()
+            + path.PrependSpaceIfNotNull()
             + tags.PrependSpaceIfNotNull()
             + id.PrependSpaceIfNotNull();
         stream.AddLine(line);

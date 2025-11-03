@@ -17,7 +17,7 @@ public class ShowCommand(ProgramArguments pArgs,
 
     private IReport? GetReport()
     {
-        var reportName = pArgs.HasOption(Args.Report) ? pArgs.GetValue(Args.Report) : Args.Details;
+        var reportName = pArgs.HasOption(Args.Report) ? pArgs.GetValue(Args.Report) : Args.Chrono;
         if (pArgs.HasOption(Args.BarGraphs))
         {
             reportName = pArgs.HasOption(Args.GroupBy) || pArgs.HasOption(Args.GroupByPath)
@@ -26,6 +26,9 @@ public class ShowCommand(ProgramArguments pArgs,
         }
         else if (pArgs.HasOption(Args.Timesheet))
             reportName = Args.Timesheet;
+        else if (pArgs.HasOption(Args.Details))
+            reportName = Args.Details;
+
         return reports.FirstOrDefault(r => r.Name == reportName);
     }
 }
