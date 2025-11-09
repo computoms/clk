@@ -18,7 +18,7 @@ public class ListCommand(IRecordRepository recordRepository, IDisplay display, P
 
             // TODO display tree structure
             //display.Print(" ---- ".AsLine());
-    
+
             //var resultToDisplay = new List<FormattedLine>();
             //var currentPath = paths.FirstOrDefault();
             //resultToDisplay.Add(currentPath.AsLine());
@@ -38,8 +38,8 @@ public class ListCommand(IRecordRepository recordRepository, IDisplay display, P
             return;
         }
 
-        display.Print(tasks
-                .Select(x => x.Line.AsLine()).Distinct().ToList());
+        var distinctTasks = tasks.Select(x => x.Line).Distinct();
+        display.Print(distinctTasks.Select(x => x.AsLine()).ToList());
     }
 
     private string GetPath(TaskLine t) => t.Path.Aggregate("", (r, t) => $"{r}/{t}");

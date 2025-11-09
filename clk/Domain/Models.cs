@@ -15,10 +15,10 @@ public class TaskLine
     }
 
     public string Raw { get; init; }
-    public string Title { get; private set; }
-    public List<string> Path { get; private set; }
-    public List<string> Tags { get; private set; }
-    public string Id { get; private set; }
+    public string Title { get; private set; } = string.Empty;
+    public List<string> Path { get; private set; } = [];
+    public List<string> Tags { get; private set; } = [];
+    public string Id { get; private set; } = string.Empty;
 
     public DateTime StartTime { get; private set; }
     public DateTime? EndTime { get; set; } = null;
@@ -40,9 +40,11 @@ public class TaskLine
 
     public string Line =>
         Title 
-        + Path.Aggregate(" ", (s, p) => $"{s}/{p}") 
+        + (Path.Count > 0 ? " " : "")
+        + Path.Aggregate("", (s, p) => $"{s}/{p}") 
+        + (Tags.Count > 0 ? " " : "")
         + string.Join(" ", Tags.Select(t => $"#{t}")) 
-        + (string.IsNullOrEmpty(Id) ? "" : Id);
+        + (string.IsNullOrEmpty(Id) ? "" : $" .{Id}");
 
     public bool IsStopped(ITimeProvider timeProvider)
     {

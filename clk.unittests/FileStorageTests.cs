@@ -42,7 +42,7 @@ public class FileStorageTests
 
         // Assert
         _stream.Verify(x => x.AddLine("[2022-10-10]"), shouldAddToday ? Times.Once : Times.Never);
-        _stream.Verify(x => x.AddLine("11:12 Test +feature .123"), Times.Once);
+        _stream.Verify(x => x.AddLine("11:12 Test #feature .123"), Times.Once);
     }
 
     [Fact]
@@ -69,6 +69,32 @@ public class FileStorageTests
 
         // Assert
         act.Should().NotThrow<InvalidDataException>();
+    }
+
+    [Fact]
+    public void WithMultipleLines_WhenReadingAll_ThenCorrectlyCalculatesTaskDurations()
+    {
+        // Arrange
+        SetupLines(
+            _yesterday,
+            "09:00 Activity1 .001",
+            "10:00 Activity2 .002",
+            "11:00 Activity1 .001",
+            "12:00 [Stop]",
+            _today,
+            "13:00 Activity2 .002",
+            "15:30 [Stop]"
+        );
+
+        // Act
+        var tasks = _storage.GetTasks().ToList();
+
+        // Assert
+        tasks.Count.Should().Be(6);
+        tasks[0].EndTime?.Hour.Should().Be(10);
+        tasks[0].Duration.Should().Be(TimeSpan.FromHours(1));
+        tasks[2].Duration.Should().Be(TimeSpan.FromHours(1));
+        tasks[4].Duration.Should().Be(TimeSpan.FromHours(2.5));
     }
 
     #endregion AddEntry

@@ -18,7 +18,7 @@ public class AddCommand(ProgramArguments pArgs, Settings settings, IRecordReposi
     private TaskLine ParseInput()
     {
         var rawTitle = string.IsNullOrWhiteSpace(pArgs.Title) ? settings.Data.DefaultTask : pArgs.Title;
-        var now = timeProvider.Now.ToString("HH:mm");
+        var now = pArgs.Time.ToString("HH:mm");
         return new TaskLine($"{now} {rawTitle}");
     }
 }

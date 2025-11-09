@@ -25,34 +25,30 @@ public class WorktimeReportTests
         var activities = new List<TaskLine>()
         {
             // Day 1: 5:30
-            new TaskLine("09:00 Activity1 #tag .001", new DateTime(2022, 1, 1)),
-            new TaskLine("10:00 Activity2 #tag .002", new DateTime(2022, 1, 1)),
-            new TaskLine("11:00 Activity1 #tag .001", new DateTime(2022, 1, 1)),
-            new TaskLine("12:00 [Stop]", new DateTime(2022, 1, 1)),
-            new TaskLine("13:00 Activity2 #tag .002", new DateTime(2022, 1, 1)),
-            new TaskLine("15:30 [Stop]", new DateTime(2022, 1, 1)),
-            // Day2: 5:32
-            new TaskLine("10:00 Activity1 #tag .001", new DateTime(2022, 1, 2)),
-            new TaskLine("11:00 Activity2 #tag .002", new DateTime(2022, 1, 2)),
-            new TaskLine("12:00 [Stop]", new DateTime(2022, 1, 2)),
-            new TaskLine("13:00 Activity1 #tag .001", new DateTime(2022, 1, 2)),
-            new TaskLine("15:30 Activity2 #tag .002", new DateTime(2022, 1, 2)),
-            new TaskLine("15:32 [Stop]", new DateTime(2022, 1, 2)),
+            new TaskLine("09:00 Activity1 #tag .001", new DateTime(2022, 1, 1)) { EndTime = Date(10, 0, 1) },
+            new TaskLine("10:00 Activity2 #tag .002", new DateTime(2022, 1, 1)) { EndTime = Date(11, 0, 1) },
+            new TaskLine("11:00 Activity1 #tag .001", new DateTime(2022, 1, 1)) { EndTime = Date(12, 0, 1) },
+            new TaskLine("13:00 Activity2 #tag .002", new DateTime(2022, 1, 1)) { EndTime = Date(15, 30, 1) },
+            // Day2: 4:02
+            new TaskLine("10:00 Activity1 #tag .001", new DateTime(2022, 1, 2)) { EndTime = Date(11, 0, 2) },
+            new TaskLine("11:00 Activity2 #tag .002", new DateTime(2022, 1, 2)) { EndTime = Date(12, 30, 2) },
+            new TaskLine("13:00 Activity1 #tag .001", new DateTime(2022, 1, 2)) { EndTime = Date(14, 0, 2) },
+            new TaskLine("15:30 Activity2 #tag .002", new DateTime(2022, 1, 2)) { EndTime = Date(16, 2, 2) },
         };
         var expectedOutputPerDay = new List<string>()
         {
             "Daily Worktime Report",
             "05:30 2022-01-01",
-            "05:32 2022-01-02",
+            "04:02 2022-01-02",
             " ",
-            "11:02 Total",
+            "09:32 Total",
         };
         var expectedOutputTotal = new List<string>()
         {
             "Weekly Report",
-            "11:02 Week 52",
+            "09:32 Week 52",
             " ",
-            "11:02 Total",
+            "09:32 Total",
         };
         var calledStrings = new List<FormattedLine>();
         _display.Setup(x => x.Print(It.IsAny<IEnumerable<FormattedLine>>()))

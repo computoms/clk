@@ -18,165 +18,123 @@ public class RecordRepositoryTests
         _storage = _mocker.GetMock<IStorage>();
     }
 
-    // [Theory]
-    // [InlineData("New Entry", "123")]
-    // [InlineData(" ", "123")]
-    // public void WhenAddingRawEntry_ThenEntryIsAddedToStorage(string title, string id)
-    // {
-    //     // Arrange
-    //     var task = new Domain.Task(title, [], [], id);
-    //     var record = new Domain.Record(DateTime.Now);
+    [Fact]
+    public void WithTwoTasks_WithStopTask_WhenGetAll_ThenReturnsOnlyNonStopTasks()
+    {
+        // Arrange
+        var task1 = new TaskLine("09:00 Task1 .123");
+        var task2 = new TaskLine("10:00 Task2 .124");
+        var stopTask = new TaskLine("11:00 [Stop]");
+        _storage.Setup(x => x.GetTasks()).Returns(new List<TaskLine>() { task1, stopTask, task2 });
 
-    //     // Act
-    //     _repository.AddRecord(task, record);
+        // Act
+        var result = _repository.GetAll();
 
-    //     // Assert
-    //     _storage.Verify(x => x.AddEntry(task, record), Times.Once);
-    // }
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(task1);
+        result.Should().Contain(task2);
+        result.Should().NotContain(stopTask);
+    }
 
-    // [Fact]
-    // public void WithThrowingStorage_WhenAddingEntry_ThenDoesNotThrow()
-    // {
-    //     // Arrange
-    //     _storage.Setup(x => x.AddEntry(It.IsAny<Domain.Task>(), It.IsAny<Domain.Record>())).Throws<InvalidDataException>();
+    [Fact]
+    public void WhenAddingTask_ThenTaskIsAddedToStorage()
+    {
+        // Arrange
+        var task = new TaskLine("09:00 Task1 .123");
 
-    //     // Act
-    //     var act = () => _repository.AddRecord(new Domain.Task("Test", [], [], ""), new Domain.Record(DateTime.Now, null));
+        // Act
+        _repository.AddTask(task);
 
-    //     // Assert
-    //     act.Should().NotThrow();
-    // }
+        // Assert
+        _storage.Verify(x => x.AddLine(task), Times.Once);
+    }
 
-    // [Fact]
-    // public void WhenAddingEntry_ThenEntryIsAddedToStorage()
-    // {
-    //     // Arrange
-    //     var activity = new Domain.Task("Test", [], [], "");
-    //     var record = new Domain.Record(DateTime.Now, null);
+    [Fact]
+    public void WithThrowingStorage_WhenAddingEntry_ThenDoesNotThrow()
+    {
+        // Arrange
+        _storage.Setup(x => x.AddLine(It.IsAny<TaskLine>())).Throws<Exception>();
 
-    //     // Act
-    //     _repository.AddRecord(activity, record);
+        // Act
+        var act = () => _repository.AddTask(new TaskLine("09:00 Task1 .123"));
 
-    //     // Assert
-    //     _storage.Verify(x => x.AddEntry(activity, record), Times.Once);
-    // }
+        // Assert
+        act.Should().NotThrow();
+    }
 
-    // [Fact]
-    // public void WithOneEntryWithOneTag_WhenFilterByTag_ThenReturnsEntry()
-    // {
-    //     // Arrange
-    //     _storage.Setup(x => x.GetTasks()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", [], ["tag"], "123")) });
+    [Fact]
+    public void WithOneTaskWithOneTag_WhenFilterByTag_ThenReturnsEntry()
+    {
+        // Arrange
+        _storage.Setup(x => x.GetTasks()).Returns(new List<TaskLine>() { new TaskLine("10:00 Entry #tag .123"), new TaskLine("11:00 Entry .123") });
 
-    //     // Act
-    //     var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string>{"tag"}, null));
+        // Act
+        var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string>{"tag"}, null));
 
-    //     // Assert
-    //     result.Should().HaveCount(1);
-    //     result.First().Task.Title.Should().Be("Entry");
-    //     result.First().Task.Id.Should().Be("123");
-    // }
+        // Assert
+        result.Should().HaveCount(1);
+        result.First().Title.Should().Be("Entry");
+        result.First().Id.Should().Be("123");
+    }
 
-    // [Fact]
-    // public void WithOneEntryWithTwoTags_WhenFilterByTag_ThenReturnsEntry()
-    // {
-    //     // Arrange
-    //     _storage.Setup(x => x.GetTasks()).Returns(new List<Activity>() { new Activity(new Domain.Task("Entry", [], ["tag1", "tag2"], "123")) });
+    [Fact]
+    public void WithTwoEntries_WithTwoTags_WhenFilterByTag_ThenReturnsCorrectEntry()
+    {
+        // Arrange
+        _storage.Setup(x => x.GetTasks()).Returns(new List<TaskLine>()
+        {
+            new TaskLine("10:00 Entry1 #tag1 #tag2 .123"),
+            new TaskLine("11:00 Entry2 #tag1 #tag3 .345"),
+        });
 
-    //     // Act
-    //     var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string>{"tag1"}, null));
+        // Act
+        var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string> { "tag1", "tag2" }, null));
 
-    //     // Assert
-    //     result.Should().HaveCount(1);
-    //     result.First().Task.Title.Should().Be("Entry");
-    //     result.First().Task.Id.Should().Be("123");
-    // }
+        // Assert
+        result.Should().HaveCount(1);
+        result.First().Title.Should().Be("Entry1");
+        result.First().Id.Should().Be("123");
+    }
 
-    // [Fact]
-    // public void WithTwoEntries_WithTwoTags_WhenFilterByTag_ThenReturnsCorrectEntry()
-    // {
-    //     // Arrange
-    //     _storage.Setup(x => x.GetTasks()).Returns(
-	//     new List<Activity>() 
-	//     { 
-	//         new Activity(new Domain.Task("Entry1", [], ["tag1", "tag2"], "123")),
-	//         new Activity(new Domain.Task("Entry2", [], ["tag1", "tag3"], "345")),
-	//     });
+    [Fact]
+    public void WhenFilterByDate_ThenReturnsCorrectTasks()
+    {
+        // Arrange
+        _storage.Setup(x => x.GetTasks())
+            .Returns(new List<TaskLine>()
+            {
+                new TaskLine("10:00 Entry1 #tag1 .123", new DateTime(2022, 10, 10)),
+                new TaskLine("11:00 Entry2 #tag2 .345", new DateTime(2022, 10, 11)),
+                new TaskLine("12:00 Entry3 #tag3 .567", new DateTime(2022, 10, 12)),
+            });
 
-    //     // Act
-    //     var result = _repository.FilterByQuery(new RepositoryQuery(null, null, null, new List<string> { "tag1", "tag2" }, null));
+        // Act
+        var result = _repository.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 11), new DateTime(2022, 10, 12), null, null, null));
 
-    //     // Assert
-    //     result.Should().HaveCount(1);
-    //     result.First().Task.Title.Should().Be("Entry1");
-    //     result.First().Task.Id.Should().Be("123");
-    // }
+        // Assert
+        result.Should().HaveCount(2);
+        result.First().Title.Should().Be("Entry2");
+        result.Last().Title.Should().Be("Entry3");
+    }
 
-    // [Fact]
-    // public void WithOneActivity_WithTwoRecords_WhenFilterByDate_ThenReturnsCorrectRecords()
-    // {
-    //     // Arrange
-    //     var activity = new Activity(new Domain.Task("Entry1", [], [], ""));
-    //     var startTime = new DateTime(2022, 10, 10, 10, 0, 0);
-    //     activity.AddRecord(new Domain.Record(startTime, new DateTime(2022, 10, 10, 11, 0, 0)));
-    //     activity.AddRecord(new Domain.Record(new DateTime(2022, 10, 11, 10, 0, 0), new DateTime(2022, 10, 11, 11, 0, 0)));
-    //     _storage.Setup(x => x.GetTasks())
-    //         .Returns(
-    //             new List<Activity>()
-    //             {
-    //                 activity
-    //             });
+    [Fact]
+    public void WhenFilterByPath_ThenReturnsCorrectTasks()
+    {
+        // Arrange
+        _storage.Setup(x => x.GetTasks())
+            .Returns(new List<TaskLine>()
+            {
+                new TaskLine("10:00 Entry1 #tag1 /project/task .123"),
+                new TaskLine("11:00 Entry2 #tag2 /project .345"),
+                new TaskLine("12:00 Entry3 #tag3 /otherproject/task .567"),
+            });
 
-    //     // Act
-    //     var result = _repository.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10), null, null, null));
+        // Act
+        var result = _repository.FilterByQuery(new RepositoryQuery(null, null, new List<string> { "project", "task" }, null, null));
 
-    //     // Assert
-    //     result.First().Records.Should().HaveCount(1);
-    //     result.First().Records.First().StartTime.Should().Be(startTime);
-    // }
-
-    // [Fact]
-    // public void WithTwoActivities_WhenFilter_ThenActivityNotConainingRecordsAreNotReturned()
-    // {
-    //     // Arrange
-    //     _storage.Setup(x => x.GetTasks())
-    //         .Returns(new List<Activity>()
-    //         {
-    //             new Activity(new Domain.Task("Activtiy1", [], [], ""), new List<Domain.Record>(){new Domain.Record(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10))}),
-    //             new Activity(new Domain.Task("Activtiy2", [], [], ""), new List<Domain.Record>(){new Domain.Record(new DateTime(2022, 10, 11), new DateTime(2022, 10, 11))}),
-    //         });
-
-    //     // Act
-    //     var result = _repository.FilterByQuery(new RepositoryQuery(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10), null, null, null));
-
-    //     // Assert
-    //     result.Should().HaveCount(1);
-    // }
-
-    // [Theory]
-    // [InlineData(new string[1] { "project" }, 2)]
-    // [InlineData(new string[2] { "project", "task" }, 1)]
-    // public void WithTwoActivities_WhenFilterByPath_ThenReturnsMatchingActivities(string[] paths, int expectedCount)
-    // {
-    //     // Arrange
-    //     _storage.Setup(x => x.GetTasks())
-    //         .Returns(
-    //         [
-    //             new Activity(new Domain.Task("Activtiy1", ["project", "task"], [], ""), [new(new DateTime(2022, 10, 10), new DateTime(2022, 10, 10))]),
-    //             new Activity(new Domain.Task("Activtiy2", ["project"], [], ""), [new(new DateTime(2022, 10, 11), new DateTime(2022, 10, 11))]),
-    //         ]);
-
-    //     // Act
-    //     var result = _repository.FilterByQuery(new RepositoryQuery(null, null, [.. paths], null, null));
-
-    //     // Assert
-    //     result.Should().HaveCount(expectedCount);
-    // }
-
-    // [Fact]
-    // public void DisplayDuration()
-    // {
-    //     TimeSpan ts = new TimeSpan(10, 11, 0);
-    //     var str = ts.ToString(@"hh\:mm");
-    //     str.Should().Be("10:11");
-    // }
+        // Assert
+        result.Should().HaveCount(1);
+        result.First().Title.Should().Be("Entry1");
+    }
 }
